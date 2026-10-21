@@ -16,4 +16,5 @@ preferred_target = "wasm-gc"
 
 import {
   "moonbitlang/parser@0.4.5",
+  "moonbitlang/async@0.22.5",
 }

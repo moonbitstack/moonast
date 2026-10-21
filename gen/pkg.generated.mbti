@@ -1,0 +1,65 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonast/gen"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/list",
+  "moonbitlang/parser/attribute",
+  "moonbitlang/parser/syntax",
+  "moonbitstack/moonast/quote",
+}
+
+// Values
+pub fn read(String, String) -> Array[Decl] raise Refused
+
+pub fn render(&Generator, Array[(String, String)]) -> String raise
+
+// Errors
+pub(all) suberror Refused {
+  Syntax(file~ : String, line~ : Int32, column~ : Int32, msg~ : String)
+} derive(@debug.Debug)
+pub fn Refused::output(Self, &Logger) -> Unit
+pub fn Refused::to_repr(Self) -> @debug.Repr
+pub fn Refused::to_string(Self) -> String
+pub impl Show for Refused
+
+// Types and methods
+pub(all) enum Decl {
+  Struct(name~ : String, fields~ : Array[Field], attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)
+  Enum(name~ : String, constructors~ : Array[String], attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)
+  Func(owner~ : String?, name~ : String, params~ : Array[Param], returns~ : String?, is_async~ : Bool, attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)
+  Other(file~ : String, raw~ : @syntax.Impl)
+}
+pub fn Decl::attrs(Self) -> @list.List[@attribute.Attribute]
+pub fn Decl::raw(Self) -> @syntax.Impl
+
+pub(all) struct Field {
+  name : String
+  ty : String
+  mutable : Bool
+  attrs : @list.List[@attribute.Attribute]
+}
+
+pub(all) struct Param {
+  name : String?
+  ty : String?
+  pass : Pass
+}
+
+pub(all) enum Pass {
+  Positional
+  Labelled
+  Optional
+  Defaulted
+} derive(Eq, @debug.Debug)
+pub fn Pass::equal(Self, Self) -> Bool
+pub fn Pass::not_equal(Self, Self) -> Bool
+pub fn Pass::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits
+pub(open) trait Generator {
+  fn name(Self) -> String
+  fn generate(Self, Array[Decl]) -> @quote.Code raise
+}

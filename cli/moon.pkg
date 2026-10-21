@@ -1,0 +1,15 @@
+// The command line of a generator binary: `<inputs...> -o <output> [--check]`.
+// It reads the inputs, has `moonast/gen` render them, and writes the output or
+// reports that it is stale. moonbitlang/async does the file access, so this runs
+// on native and on wasm, which is what `moonx` runs.
+supported_targets = "+native+wasm"
+
+import {
+  "moonbitstack/moonast/gen",
+  "moonbitlang/async/fs",
+}
+
+import {
+  "moonbitstack/moonast/quote",
+  "moonbitlang/async",
+} for "test"

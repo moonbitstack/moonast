@@ -1,0 +1,16 @@
+// A whole generator: `#demo.describe` on a struct gives it `describe`. Run it the
+// way a dev_build rule would:
+//
+//     moon run examples/describe --target native -- examples/describe/models.txt -o describe.g.mbt
+supported_targets = "+native+wasm"
+
+pkgtype(kind: "executable")
+
+import {
+  "moonbitstack/moonast/quote",
+  "moonbitstack/moonast/attr",
+  "moonbitstack/moonast/gen",
+  "moonbitstack/moonast/cli",
+  "moonbitlang/async",
+  "moonbitlang/core/env",
+}

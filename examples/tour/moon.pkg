@@ -1,6 +1,9 @@
-// The whole surface in one run: a template filled and printed.
+// The whole surface in one run: a declaration read, its annotation bound, and
+// code generated from both.
 pkgtype(kind: "executable")
 
 import {
   "moonbitstack/moonast/quote",
+  "moonbitstack/moonast/attr",
+  "moonbitstack/moonast/gen",
 }

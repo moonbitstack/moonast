@@ -1,0 +1,14 @@
+// What a dev_build generator needs besides its own rule: declarations read from
+// source into plain views, and the output a generator renders, with its header.
+// No file access here; `moonast/cli` reads and writes for a generator's `main`.
+import {
+  "moonbitstack/moonast/quote",
+  "moonbitlang/parser",
+  "moonbitlang/parser/syntax",
+  "moonbitlang/parser/attribute",
+  "moonbitlang/core/list",
+}
+
+import {
+  "moonbitstack/moonast/attr",
+} for "test"
