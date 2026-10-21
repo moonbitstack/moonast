@@ -1,6 +1,6 @@
-// Everything this repository does, in one run: `moon run examples/tour`.
+// The whole surface in one run: a template filled and printed.
 pkgtype(kind: "executable")
 
 import {
-  "moonbitstack/CHANGE-ME/lib",
+  "moonbitstack/moonast/quote",
 }

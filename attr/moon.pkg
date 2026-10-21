@@ -1,0 +1,7 @@
+// Annotations as typed arguments: find `#lib.name(...)` on a declaration and
+// bind its parameters against a spec, with the source position in every refusal.
+import {
+  "moonbitlang/parser",
+  "moonbitlang/parser/attribute",
+  "moonbitlang/core/list",
+}

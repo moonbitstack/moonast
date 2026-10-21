@@ -1,15 +1,19 @@
-name = "moonbitstack/CHANGE-ME"
+name = "moonbitstack/moonast"
 
 version = "0.1.0"
 
 readme = "README.md"
 
-repository = "https://github.com/moonbitstack/CHANGE-ME"
+repository = "https://github.com/moonbitstack/moonast"
 
 license = "Apache-2.0"
 
-keywords = [ "moonbit" ]
+keywords = [ "moonbit", "codegen", "ast", "macro", "derive", "attribute" ]
 
-description = "One sentence saying what this is and what it is not."
+description = "Generate MoonBit code from annotated declarations: templates over the official syntax tree, typed attribute arguments, and the scaffolding a dev_build generator needs. Built on moonbitlang/parser; not a parser itself."
 
 preferred_target = "wasm-gc"
+
+import {
+  "moonbitlang/parser@0.4.5",
+}

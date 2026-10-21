@@ -1,0 +1,59 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonast/quote"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/list",
+  "moonbitlang/parser/syntax",
+}
+
+// Values
+pub fn bool(Bool) -> Code
+
+pub fn expr(StringView) -> Template
+
+pub fn ident(StringView) -> Code raise Refused
+
+pub fn int(Int32) -> Code
+
+pub fn items(StringView) -> Template
+
+pub fn join(Array[Code]) -> Code raise Refused
+
+pub fn string(StringView) -> Code
+
+pub fn ty(StringView) -> Template
+
+// Errors
+pub(all) suberror Refused {
+  Template(msg~ : String, line~ : Int32, column~ : Int32)
+  Unfilled(hole~ : String)
+  Unused(hole~ : String)
+  Misfit(hole~ : String, expected~ : String)
+  Name(name~ : String)
+  Kind(expected~ : String)
+} derive(@debug.Debug)
+pub fn Refused::output(Self, &Logger) -> Unit
+pub fn Refused::to_repr(Self) -> @debug.Repr
+pub fn Refused::to_string(Self) -> String
+pub impl Show for Refused
+
+// Types and methods
+pub struct Code {
+  // private fields
+}
+pub fn Code::items(Self) -> @list.List[@syntax.Impl]?
+pub fn Code::output(Self, &Logger) -> Unit
+pub fn Code::to_string(Self) -> String
+pub impl Show for Code
+
+pub struct Template {
+  // private fields
+}
+pub fn Template::render(Self) -> Code raise Refused
+pub fn Template::set(Self, String, Code) -> Self
+pub fn Template::splice(Self, String, Array[Code]) -> Self
+
+// Type aliases
+
+// Traits

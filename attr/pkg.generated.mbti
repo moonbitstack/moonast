@@ -1,0 +1,77 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonast/attr"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/list",
+  "moonbitlang/parser/attribute",
+}
+
+// Values
+pub fn all(@list.List[@attribute.Attribute], StringView) -> Array[@attribute.Attribute]
+
+pub fn find(@list.List[@attribute.Attribute], StringView) -> @attribute.Attribute?
+
+pub fn name_of(@attribute.Attribute) -> String?
+
+pub fn under(@list.List[@attribute.Attribute], StringView) -> Array[@attribute.Attribute]
+
+// Errors
+pub(all) suberror Refused {
+  Malformed(raw~ : String, line~ : Int32, column~ : Int32)
+  Missing(key~ : String, line~ : Int32, column~ : Int32)
+  Unknown(key~ : String, line~ : Int32, column~ : Int32)
+  Mistyped(key~ : String, expected~ : String, line~ : Int32, column~ : Int32)
+  Repeated(key~ : String, line~ : Int32, column~ : Int32)
+} derive(@debug.Debug)
+pub fn Refused::output(Self, &Logger) -> Unit
+pub fn Refused::to_repr(Self) -> @debug.Repr
+pub fn Refused::to_string(Self) -> String
+pub impl Show for Refused
+
+// Types and methods
+pub struct Args {
+  name : String
+  line : Int32
+  column : Int32
+  // private fields
+}
+pub fn Args::bool(Self, StringView) -> Bool?
+pub fn Args::get(Self, StringView) -> Array[Value]
+pub fn Args::has(Self, StringView) -> Bool
+pub fn Args::str(Self, StringView) -> String?
+pub fn Args::strs(Self, StringView) -> Array[String]
+
+pub(all) enum Kind {
+  Str
+  Bool
+  Ident
+  Type
+} derive(Eq, @debug.Debug)
+pub fn Kind::equal(Self, Self) -> Bool
+pub fn Kind::not_equal(Self, Self) -> Bool
+pub fn Kind::to_repr(Self) -> @debug.Repr
+
+pub struct Spec {
+  // private fields
+}
+pub fn Spec::bind(Self, @attribute.Attribute) -> Args raise Refused
+pub fn Spec::many(Self, String, Kind) -> Self
+pub fn Spec::new(StringView) -> Self
+pub fn Spec::optional(Self, String, Kind) -> Self
+pub fn Spec::positional(Self, String, Kind) -> Self
+pub fn Spec::required(Self, String, Kind) -> Self
+
+pub(all) enum Value {
+  Str(String)
+  Bool(Bool)
+  Ident(String)
+  Type(String)
+} derive(Eq, @debug.Debug)
+pub fn Value::equal(Self, Self) -> Bool
+pub fn Value::not_equal(Self, Self) -> Bool
+pub fn Value::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

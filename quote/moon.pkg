@@ -1,0 +1,9 @@
+// Code as templates: real MoonBit with `$holes`, parsed by moonbitlang/parser,
+// filled by replacing nodes, and printed back by its formatter, so quoting,
+// escaping and layout are the official ones.
+import {
+  "moonbitlang/parser",
+  "moonbitlang/parser/syntax",
+  "moonbitlang/parser/fmt",
+  "moonbitlang/core/list",
+}

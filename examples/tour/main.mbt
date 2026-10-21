@@ -1,12 +1,15 @@
-// Copyright 2026 Leo Cheng
-// SPDX-License-Identifier: Apache-2.0
-
 ///|
-/// The whole surface in one run, so a reader can see what this is for before
-/// reading any of it.
-///
-///     moon run examples/tour
-#coverage.skip
 fn main {
-  println(@lib.greet("moonbit"))
+  let source =
+    #|fn $name() -> $T {
+    #|  $value
+    #|}
+  let code = @quote.items(source)
+    .set("name", @quote.ident("answer"))
+    .set("T", @quote.ident("Int"))
+    .set("value", @quote.int(42))
+    .render() catch {
+      e => abort("the tour's template renders: \{e}")
+    }
+  println(code)
 }
