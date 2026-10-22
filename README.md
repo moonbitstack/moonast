@@ -22,7 +22,7 @@ println(code) // fn answer() -> Int { 42 }, laid out the way `moon fmt` lays it 
 | `moonast/quote` | Templates: real MoonBit with `$holes`, parsed by moonbitlang/parser, filled by replacing nodes, and printed by its formatter, so quoting, escaping and layout are the official ones |
 | `moonast/attr` | Annotations as typed arguments: find `#lib.name(...)` on a declaration and bind its arguments against a spec, with the source position in every refusal |
 | `moonast/gen` | Declarations read into plain views (`Struct`, `Enum`, `Func`, with types as written), the `Generator` trait, and `render`, which gives the file a generator writes |
-| `moonast/cli` | `run`, the whole `main` of a generator binary: `<inputs...> -o <output> [--check]`; native and wasm |
+| `moonast/cli` | `run`, the whole `main` of a generator binary: `[-C <dir>] <inputs...> -o <output> [--check]`; native and wasm |
 
 `quote`, `attr` and `gen` build for every target; `cli` touches files and builds for native and wasm, which is what `moonx` runs. `moon run examples/tour` shows the first three together, and `examples/describe` is a complete generator.
 
@@ -53,7 +53,7 @@ async fn main {
 Publish it as a module whose root package is that executable, and its users wire it into their build. In `moon.mod`:
 
 ```
-rule(name: "describe", command: "moonx <module>@<version> $input -o $output")
+rule(name: "describe", command: "moonx <module>@<version> -C \"$mod_dir\" \"$input\" -o \"$output\"")
 ```
 
 and in the `moon.pkg` of the package whose declarations it reads:
@@ -63,7 +63,7 @@ dev_build(rule: "describe", input: "models.mbt", output: "describe.g.mbt")
 formatter(ignore: [ "describe.g.mbt" ])
 ```
 
-`moon check`, `moon build` and `moon run` then regenerate the file whenever `models.mbt` changes. A project that prefers to commit generated files runs the generator with `--check` in CI, which fails when the output is stale.
+`moon check`, `moon build` and `moon run` then regenerate the file whenever `models.mbt` changes. `-C` makes the paths moon passes relative to the module directory, which matters because the rule does not run there. A project that prefers to commit generated files runs the generator with `--check` in CI, which fails when the output is stale.
 
 ## Licence
 

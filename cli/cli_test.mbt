@@ -74,3 +74,12 @@ async test "a malformed command line is refused before anything is read" {
     }
   }
 }
+
+///|
+async test "relative paths resolve against -C, the way a dev_build rule passes them" {
+  let dir = @fs.tmpdir(prefix="moonast-cli-dir")
+  defer @fs.rmdir(dir, recursive=true)
+  @fs.write_file(dir + "/models.mbt", "struct A {\n  x : Int\n}\n")
+  @cli.run(Names::{ }, ["-C", dir, "models.mbt", "-o", "out.g.mbt"])
+  assert_true(@fs.read_file(dir + "/out.g.mbt").text().contains("[\"A\"]"))
+}
