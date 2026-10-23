@@ -15,6 +15,6 @@ description = "Generate MoonBit code from annotated declarations: templates over
 preferred_target = "wasm-gc"
 
 import {
-  "moonbitlang/parser@0.4.5",
+  "moonbitlang/parser@0.4.6",
   "moonbitlang/async@0.22.5",
 }
