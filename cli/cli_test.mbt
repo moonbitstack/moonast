@@ -55,6 +55,19 @@ async test "a run writes the output, a check passes, and a changed input is stal
 }
 
 ///|
+async test "a check reads through a checkout that turned line feeds into CRLF" {
+  let dir = @fs.tmpdir(prefix="moonast-cli-crlf")
+  defer @fs.rmdir(dir, recursive=true)
+  let input = dir + "/models.mbt"
+  let output = dir + "/names.g.mbt"
+  @fs.write_file(input, "struct A {\r\n  x : Int\r\n}\r\n")
+  @cli.run(Names::{ }, [input, "-o", output])
+  let crlf = @fs.read_file(output).text().replace_all(old="\n", new="\r\n")
+  @fs.write_file(output, crlf)
+  @cli.run(Names::{ }, [input, "-o", output, "--check"])
+}
+
+///|
 async test "a malformed command line is refused before anything is read" {
   for
     args in [

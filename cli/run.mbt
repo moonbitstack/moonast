@@ -103,7 +103,9 @@ pub async fn run(generator : &@gen.Generator, args : ArrayView[String]) -> Unit 
     } else {
       ""
     }
-    guard current == rendered else { raise Stale(output=plan.output) }
+    // A checkout that turned line feeds into CRLF has not changed the code.
+    let lf = (s : String) => s.replace_all(old="\r\n", new="\n")
+    guard lf(current) == lf(rendered) else { raise Stale(output=plan.output) }
   } else {
     @fs.write_file(plan.output, rendered)
   }
