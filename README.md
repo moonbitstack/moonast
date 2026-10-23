@@ -32,6 +32,7 @@ println(code) // fn answer() -> Int { 42 }, laid out the way `moon fmt` lays it 
 |:--:|:--|:--|
 | `$T` (upper case) | a type or a constructor | `fn f(x : $T)` |
 | `$name` (lower case) | a value, an expression, or a name | `self.$name`, `$value + 1` |
+| `@pkg.$name` | a name inside a package | `app : @web.$T` |
 | `$name*` | a list, spliced among statements, array elements or positional arguments | `[$items*]` |
 | `$name` inside a string literal | a name or a string, as text | `"field $key"` |
 | `$$` | a literal `$` | `"$$5"` |

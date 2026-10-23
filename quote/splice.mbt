@@ -56,6 +56,18 @@ fn Splicer::expand(
 
 ///|
 impl @syntax.MapVisitor for Splicer with fn visit_Expr_Ident(self, id~, loc~) {
+  // A list hole that is a block's only statement: the parser gives the block as
+  // that one expression, so no sequence is there to expand it into.
+  if id.name is Ident(name~) && self.manys.contains(name) {
+    let all = self
+      .expand(@list.singleton(@syntax.Expr::Ident(id~, loc~)))
+      .to_array()
+    return match all.pop() {
+      None => Unit(loc~, faked=false)
+      Some(last) if all.is_empty() => last
+      Some(last) => Sequence(exprs=@list.List(all), last_expr=last, loc~)
+    }
+  }
   if id.name is Ident(name~) && self.ones.get(name) is Some((hole, body)) {
     match body {
       Expr(w) => return expr_of(w)
@@ -154,6 +166,19 @@ impl @syntax.MapVisitor for Splicer with fn visit_LongIdent_Ident(self, name~) {
       Ident(name~)
     }
     None => Ident(name~)
+  }
+}
+
+///|
+/// `@pkg.$name`: the hole is the name inside a package.
+impl @syntax.MapVisitor for Splicer with fn visit_LongIdent_Dot(self, pkg~, id~) {
+  match self.ones.get(id) {
+    Some((_, Name(n))) if !n.has_prefix("@") => Dot(pkg~, id=n)
+    Some((hole, _)) => {
+      self.misfit(hole, "a plain name after a package")
+      Dot(pkg~, id~)
+    }
+    None => Dot(pkg~, id~)
   }
 }
 

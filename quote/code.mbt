@@ -88,6 +88,7 @@ pub extend Code with Show::{to_string, output}
 ///|
 fn print(body : Body) -> String {
   match body {
+    Items(@list.Empty) => ""
     Items(impls) => @fmt.format(@fmt.impls_to_string(impls))
     Expr(w) => unwrap_body(@fmt.impls_to_string(@list.singleton(w)))
     Type(w) => unwrap_type(@fmt.impls_to_string(@list.singleton(w)))

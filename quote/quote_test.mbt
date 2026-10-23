@@ -136,6 +136,82 @@ test "an empty list leaves the statements around it" {
 }
 
 ///|
+test "a list hole that is a block's only statement expands into the block" {
+  let source =
+    #|fn register(app : App) -> Unit {
+    #|  $lines*
+    #|}
+  let lines = ["a", "b"].map(name => {
+    @quote.expr("app.add($name)").set("name", @quote.ident(name)).render()
+  })
+  inspect(
+    @quote.items(source).splice("lines", lines).render(),
+    content=(
+      #|///|
+      #|fn register(app : App) -> Unit {
+      #|  app.add(a)
+      #|  app.add(b)
+      #|}
+      #|
+    ),
+  )
+  inspect(
+    @quote.items(source).splice("lines", [lines[0]]).render(),
+    content=(
+      #|///|
+      #|fn register(app : App) -> Unit {
+      #|  app.add(a)
+      #|}
+      #|
+    ),
+  )
+  inspect(
+    @quote.items(source).splice("lines", []).render(),
+    content=(
+      #|///|
+      #|fn register(app : App) -> Unit {
+      #|  ()
+      #|}
+      #|
+    ),
+  )
+}
+
+///|
+test "a hole after a package names something inside it" {
+  let code = @quote.items("fn handle(app : @web.$T) -> Unit { @web.$run(app) }")
+    .set("T", @quote.ident("App"))
+    .set("run", @quote.ident("serve"))
+    .render()
+  inspect(
+    code,
+    content=(
+      #|///|
+      #|fn handle(app : @web.App) -> Unit {
+      #|  @web.serve(app)
+      #|}
+      #|
+    ),
+  )
+  let wrong = try {
+    ignore(
+      @quote.items("fn f(x : @web.$T) -> Unit { () }")
+      .set("T", @quote.ident("@other.App"))
+      .render(),
+    )
+    false
+  } catch {
+    _ => true
+  }
+  assert_eq(wrong, true)
+}
+
+///|
+test "joining nothing is empty" {
+  inspect(@quote.join([]), content="")
+}
+
+///|
 test "a qualified name fills a type" {
   let code = @quote.items("fn handle(app : $App) -> Unit { () }")
     .set("App", @quote.ident("@moonapi.App"))
