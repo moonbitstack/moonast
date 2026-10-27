@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonast/cli"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitstack/moonast/gen",
+}
+
+// Values
+pub async fn run(&@gen.Generator, ArrayView[String]) -> Unit
+
+// Errors
+pub(all) suberror Refused {
+  Usage(msg~ : String)
+  Stale(output~ : String)
+} derive(@debug.Debug)
+pub fn Refused::output(Self, &Logger) -> Unit
+pub fn Refused::to_repr(Self) -> @debug.Repr
+pub fn Refused::to_string(Self) -> String
+pub impl Show for Refused
+
+// Types and methods
+
+// Type aliases
+
+// Traits

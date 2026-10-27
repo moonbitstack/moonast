@@ -24,7 +24,7 @@ println(code) // fn answer() -> Int { 42 }, laid out the way `moon fmt` lays it 
 | `moonast/gen` | Declarations read into plain views (`Struct`, `Enum`, `Func`, with types as written), the `Generator` trait, and `render`, which gives the file a generator writes |
 | `moonast/cli` | `run`, the whole `main` of a generator binary: `[-C <dir>] <inputs...> -o <output> [--check]`; native and wasm |
 
-`quote`, `attr` and `gen` build for every target; `cli` touches files and builds for native and wasm, which is what `moonx` runs. `moon run examples/tour` shows the first three together, and `examples/describe` is a complete generator.
+`quote`, `attr` and `gen` build for every target; `cli` touches files and builds for native and wasm, which is what `moonx` runs. `moon run src/examples/tour` shows the first three together, and `src/examples/describe` is a complete generator.
 
 ## Holes
 

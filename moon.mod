@@ -16,3 +16,5 @@ import {
   "moonbitlang/parser@0.4.6",
   "moonbitlang/async@0.22.5",
 }
+
+source = "src"

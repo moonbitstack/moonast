@@ -31,6 +31,13 @@ impl @gen.Generator for Describe with fn generate(_, decls) {
 }
 
 ///|
+/// With no arguments it reads the bundled declarations, so the example runs as is.
 async fn main {
-  @cli.run(Describe::{ }, @env.args()[1:])
+  let args = @env.args()[1:]
+  let args = if args.is_empty() {
+    ["src/examples/describe/models.txt", "-o", "_build/describe.g.mbt"][:]
+  } else {
+    args
+  }
+  @cli.run(Describe::{ }, args)
 }
