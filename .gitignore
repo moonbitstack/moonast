@@ -3,3 +3,6 @@
 !.moonignore
 _*
 target/
+
+# Built by the docs workflow, never committed.
+docs/play.js

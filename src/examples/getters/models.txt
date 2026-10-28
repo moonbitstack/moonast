@@ -1,0 +1,6 @@
+#demo.getters(skip=token)
+pub struct User {
+  id : Int
+  name : String
+  token : String
+}

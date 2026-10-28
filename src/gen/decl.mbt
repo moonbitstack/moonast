@@ -67,6 +67,16 @@ pub(all) enum Decl {
 
 ///|
 /// The annotations on a declaration; none for `Other`.
+///
+/// ```mbt check
+/// test {
+///   let source = "#demo.describe\npub struct Point {\n  x : Int\n}"
+///   guard @gen.read("models.mbt", source) is [decl] else {
+///     abort("one declaration")
+///   }
+///   inspect(@attr.find(decl.attrs(), "demo.describe") is Some(_), content="true")
+/// }
+/// ```
 pub fn Decl::attrs(self : Decl) -> @list.List[@attribute.Attribute] {
   match self {
     Struct(attrs~, ..) | Enum(attrs~, ..) | Func(attrs~, ..) => attrs
@@ -176,6 +186,17 @@ fn param(source : String, p : @syntax.Parameter) -> Param {
 ///|
 /// The declarations of one file, in source order. Refused when the file is not
 /// MoonBit, with the first problem's position.
+///
+/// ```mbt check
+/// test {
+///   let source = "pub struct Point {\n  x : Int\n  y : Int\n}"
+///   guard @gen.read("models.mbt", source) is [Struct(name~, fields~, ..)] else {
+///     abort("a struct")
+///   }
+///   inspect(name, content="Point")
+///   inspect(fields.map(f => f.name).join(", "), content="x, y")
+/// }
+/// ```
 pub fn read(file : String, source : String) -> Array[Decl] raise Refused {
   let (impls, reports) = @parser.parse_string(source, name=file)
   if reports.get(0) is Some(r) {

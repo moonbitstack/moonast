@@ -78,6 +78,24 @@ pub fn Spec::many(self : Spec, key : String, kind : Kind) -> Spec {
 
 ///|
 /// The annotation's arguments, checked against the spec.
+///
+/// ```mbt check
+/// test {
+///   let source = "#app.get(\"/users\", tag=\"users\")\nfn list_users() -> Unit {}"
+///   let impls = @parser.parse_string(source).0
+///   guard impls is @list.More(impl_, tail=@list.Empty) else {
+///     abort("one declaration")
+///   }
+///   guard impl_ is @syntax.TopFuncDef(fun_decl={ attrs, .. }, ..) else {
+///     abort("a function")
+///   }
+///   guard @attr.find(attrs, "app.get") is Some(a) else { abort("annotated") }
+///   let spec = @attr.Spec::new("app.get").positional("path", Str).many("tag", Str)
+///   let args = spec.bind(a)
+///   inspect(args.str("path").unwrap_or(""), content="/users")
+///   inspect(args.strs("tag").join(", "), content="users")
+/// }
+/// ```
 pub fn Spec::bind(
   self : Spec,
   attr : @attribute.Attribute,

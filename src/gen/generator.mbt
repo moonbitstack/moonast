@@ -5,6 +5,7 @@
 pub(open) trait Generator {
   /// Short and stable: it goes in the header of every file it writes.
   fn name(Self) -> String
+  /// Every declaration of the inputs, in one call: the code to write for all of them.
   fn generate(Self, Array[Decl]) -> @quote.Code raise
 }
 

@@ -18,6 +18,13 @@ priv enum Body {
 ///|
 /// A name: a value, a function, a field, a type or a constructor, optionally
 /// qualified as `@pkg.name`. Refused unless it is a well-formed identifier.
+///
+/// ```mbt check
+/// test {
+///   inspect(@quote.ident("answer").to_string(), content="answer")
+///   inspect(@quote.ident("@web.App").to_string(), content="@web.App")
+/// }
+/// ```
 pub fn ident(name : StringView) -> Code raise Refused {
   let (pkg, id) = match name.find(".") {
     Some(i) if name.has_prefix("@") => (Some(name[1:i]), name[i + 1:])
@@ -32,12 +39,24 @@ pub fn ident(name : StringView) -> Code raise Refused {
 
 ///|
 /// A string literal holding `text`; quoting and escaping happen when it is printed.
+///
+/// ```mbt check
+/// test {
+///   inspect(@quote.string("坐标").to_string(), content="\"坐标\"")
+/// }
+/// ```
 pub fn string(text : StringView) -> Code {
   { body: Text(text.to_owned()), }
 }
 
 ///|
 /// An integer literal.
+///
+/// ```mbt check
+/// test {
+///   inspect(@quote.int(42).to_string(), content="42")
+/// }
+/// ```
 pub fn int(value : Int32) -> Code {
   { body: Expr(parse_expr(value.to_string())), } catch {
     _ => abort("an integer literal always parses")
@@ -46,6 +65,12 @@ pub fn int(value : Int32) -> Code {
 
 ///|
 /// A boolean literal.
+///
+/// ```mbt check
+/// test {
+///   inspect(@quote.bool(true).to_string(), content="true")
+/// }
+/// ```
 pub fn bool(value : Bool) -> Code {
   { body: Expr(parse_expr(if value { "true" } else { "false" })), } catch {
     _ => abort("a boolean literal always parses")
@@ -54,6 +79,17 @@ pub fn bool(value : Bool) -> Code {
 
 ///|
 /// Several codes of top-level declarations as one, in order.
+///
+/// ```mbt check
+/// test {
+///   let a = @quote.items("fn a() -> Unit { () }").render()
+///   let b = @quote.items("fn b() -> Unit { () }").render()
+///   inspect(
+///     @quote.join([a, b]).to_string(),
+///     content="///|\nfn a() -> Unit {\n  ()\n}\n\n///|\nfn b() -> Unit {\n  ()\n}\n",
+///   )
+/// }
+/// ```
 pub fn join(codes : Array[Code]) -> Code raise Refused {
   let out = []
   for code in codes {
@@ -68,6 +104,13 @@ pub fn join(codes : Array[Code]) -> Code raise Refused {
 ///|
 /// The official syntax tree behind a code of declarations, for work this package
 /// does not cover.
+///
+/// ```mbt check
+/// test {
+///   let code = @quote.items("fn a() -> Unit { () }").render()
+///   inspect(code.items() is Some(_), content="true")
+/// }
+/// ```
 pub fn Code::items(self : Code) -> @list.List[@syntax.Impl]? {
   match self.body {
     Items(impls) => Some(impls)
@@ -76,7 +119,7 @@ pub fn Code::items(self : Code) -> @list.List[@syntax.Impl]? {
 }
 
 ///|
-/// Source text through moonbitlang/parser's printer and formatter: the same layout
+/// Source text through the official printer and formatter: the same layout
 /// `moon fmt` gives.
 pub impl Show for Code with fn output(self, logger) {
   logger.write_string(print(self.body))

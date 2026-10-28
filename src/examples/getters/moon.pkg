@@ -1,0 +1,17 @@
+// A generator whose annotation carries arguments: `#demo.getters(skip=token)`
+// gives every field of a struct a getter but the ones named by `skip`. Run it
+// the way a dev_build rule would:
+//
+//     moon run src/examples/getters --target native -- src/examples/getters/models.txt -o getters.g.mbt
+supported_targets = "+native+wasm"
+
+pkgtype(kind: "executable")
+
+import {
+  "moonbitstack/moonast/quote",
+  "moonbitstack/moonast/attr",
+  "moonbitstack/moonast/gen",
+  "moonbitstack/moonast/cli",
+  "moonbitlang/async",
+  "moonbitlang/core/env",
+}

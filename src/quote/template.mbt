@@ -21,24 +21,65 @@ priv enum Kind {
 
 ///|
 /// A template of top-level declarations.
+///
+/// ```mbt check
+/// test {
+///   let code = @quote.items("fn $name() -> $T {\n  $value\n}")
+///     .set("name", @quote.ident("answer"))
+///     .set("T", @quote.ident("Int"))
+///     .set("value", @quote.int(42))
+///     .render()
+///   inspect(code.to_string(), content="///|\nfn answer() -> Int {\n  42\n}\n")
+/// }
+/// ```
 pub fn items(source : StringView) -> Template {
   { kind: Items, source: source.to_owned(), ones: Map([]), manys: Map([]), }
 }
 
 ///|
 /// A template of one expression.
+///
+/// ```mbt check
+/// test {
+///   let code = @quote.expr("$a + $b")
+///     .set("a", @quote.int(1))
+///     .set("b", @quote.int(2))
+///     .render()
+///   inspect(code.to_string(), content="1 + 2")
+/// }
+/// ```
 pub fn expr(source : StringView) -> Template {
   { kind: Expr, source: source.to_owned(), ones: Map([]), manys: Map([]), }
 }
 
 ///|
 /// A template of one type.
+///
+/// ```mbt check
+/// test {
+///   let code = @quote.ty("Array[$T]").set("T", @quote.ident("User")).render()
+///   inspect(code.to_string(), content="Array[User]")
+/// }
+/// ```
 pub fn ty(source : StringView) -> Template {
   { kind: Type, source: source.to_owned(), ones: Map([]), manys: Map([]), }
 }
 
 ///|
 /// Fill `$hole` with `code`.
+///
+/// ```mbt check
+/// test {
+///   let t = @quote.items("fn $name() -> Unit { () }").set(
+///     "name",
+///     @quote.ident("answer"),
+///   )
+///   inspect(
+///     t.render().to_string(),
+///     content="///|\nfn answer() -> Unit {\n  ()\n}\n",
+///   )
+/// }
+/// ```
 pub fn Template::set(self : Template, hole : String, code : Code) -> Template {
   let ones = self.ones.copy()
   ones[hole] = code.body
@@ -47,6 +88,15 @@ pub fn Template::set(self : Template, hole : String, code : Code) -> Template {
 
 ///|
 /// Fill `$hole*` with `codes`, in order.
+///
+/// ```mbt check
+/// test {
+///   let code = @quote.expr("[$items*]")
+///     .splice("items", [@quote.int(1), @quote.int(2), @quote.int(3)])
+///     .render()
+///   inspect(code.to_string(), content="[1, 2, 3]")
+/// }
+/// ```
 pub fn Template::splice(
   self : Template,
   hole : String,
@@ -62,6 +112,15 @@ pub fn Template::splice(
 /// where its placeholder stands, and give back the result. Refused when a hole
 /// is left empty, a fill names no hole, a fill does not fit where it stands, or
 /// the template is not MoonBit.
+///
+/// ```mbt check
+/// test {
+///   let text = @quote.items("fn $name() -> Unit { () }").render().to_string() catch {
+///       e => e.to_string()
+///     }
+///   inspect(text, content="hole $name was given nothing")
+/// }
+/// ```
 pub fn Template::render(self : Template) -> Code raise Refused {
   let (text, holes) = scan(self.source)
   let ones = Map([])

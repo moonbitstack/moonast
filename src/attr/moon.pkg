@@ -5,3 +5,7 @@ import {
   "moonbitlang/parser/attribute",
   "moonbitlang/core/list",
 }
+
+import {
+  "moonbitlang/parser/syntax",
+} for "test"

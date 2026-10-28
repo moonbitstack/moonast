@@ -1,70 +1,190 @@
+<div align="center">
+
 # moonast
 
-Generate MoonBit code from annotated declarations. Built on the official parser, [`moonbitlang/parser`](https://github.com/moonbitlang/parser); moonast does not parse MoonBit itself.
+Generate MoonBit from annotated declarations.
+
+<code>#demo.describe</code> on a struct, a file of methods out.
+
+<p>
+  <a href="https://moonbitstack.github.io/moonast/"><b>Home</b></a> ·
+  <a href="https://moonbitstack.github.io/moonast/guide.html"><b>Guide</b></a> ·
+  <a href="https://moonbitstack.github.io/moonast/api.html"><b>API</b></a> ·
+  <a href="https://mooncakes.io/docs/moonbitstack/moonast"><b>mooncakes</b></a>
+</p>
+
+</div>
+
+---
+
+## What it does
+
+A generator reads declarations you have already written, finds the annotations on
+them, and writes the code those annotations ask for. moonast is the three pieces
+that make it up, one package each:
+
+| Layer | Package | What it does |
+|:--|:--|:--|
+| Read | `moonast/gen` | Parses a file and gives every declaration as a plain view: `Struct`, `Enum`, `Func`. Types are kept as the source text that wrote them. |
+| Write | `moonast/quote` | A template is real MoonBit with `$holes`. It is parsed, the holes are filled by replacing nodes, and the result is printed by the official formatter. |
+| Generate | `moonast/gen`, `moonast/cli` | `render` puts a header above the code; `run` is the whole `main` of a generator binary. |
+
+Between them, `moonast/attr` turns an annotation's payload into typed arguments.
+
+## A complete derive
+
+Two files. The first is what you write; the second is what the generator writes.
 
 ```moonbit
-let source =
-  #|fn $name() -> $T {
-  #|  $value
-  #|}
-let code = @quote.items(source)
-  .set("name", @quote.ident("answer"))
-  .set("T", @quote.ident("Int"))
-  .set("value", @quote.int(42))
-  .render()
-println(code) // fn answer() -> Int { 42 }, laid out the way `moon fmt` lays it out
-```
+// models.mbt
+#demo.describe
+pub struct Point { x : Int; y : Int }
 
-## Packages
+// main.mbt — give every annotated struct a `describe` method
+struct Describe {}
+impl @gen.Generator for Describe with fn name(_) { "describe" }
+impl @gen.Generator for Describe with fn generate(_, decls) {
+  let out = []
+  for decl in decls {
+    guard decl is Struct(name~, fields~, attrs~, ..) &&
+      @attr.find(attrs, "demo.describe") is Some(_) else { continue }
+    let text = name + "(" + fields.map(f => f.name).join(", ") + ")"
+    let source =
+      #|fn $T::describe(self : $T) -> String {
+      #|  ignore(self)
+      #|  $text
+      #|}
+    let code = @quote.items(source)
+      .set("T", @quote.ident(name))
+      .set("text", @quote.string(text))
+      .render()
+    out.push(code)
+  }
+  @quote.join(out)
+}
 
-|  Package  | What it holds |
-|:--:|:--|
-| `moonast/quote` | Templates: real MoonBit with `$holes`, parsed by moonbitlang/parser, filled by replacing nodes, and printed by its formatter, so quoting, escaping and layout are the official ones |
-| `moonast/attr` | Annotations as typed arguments: find `#lib.name(...)` on a declaration and bind its arguments against a spec, with the source position in every refusal |
-| `moonast/gen` | Declarations read into plain views (`Struct`, `Enum`, `Func`, with types as written), the `Generator` trait, and `render`, which gives the file a generator writes |
-| `moonast/cli` | `run`, the whole `main` of a generator binary: `[-C <dir>] <inputs...> -o <output> [--check]`; native and wasm |
-
-`quote`, `attr` and `gen` build for every target; `cli` touches files and builds for native and wasm, which is what `moonx` runs. `moon run src/examples/tour` shows the first three together, and `src/examples/describe` is a complete generator.
-
-## Holes
-
-| Hole | Takes | Example |
-|:--:|:--|:--|
-| `$T` (upper case) | a type or a constructor | `fn f(x : $T)` |
-| `$name` (lower case) | a value, an expression, or a name | `self.$name`, `$value + 1` |
-| `@pkg.$name` | a name inside a package | `app : @web.$T` |
-| `$name*` | a list, spliced among statements, array elements or positional arguments | `[$items*]` |
-| `$name` inside a string literal | a name or a string, as text | `"field $key"` |
-| `$$` | a literal `$` | `"$$5"` |
-
-## Annotation arguments
-
-moonbitlang/parser reads strings, `true`/`false`, names and nested calls as annotation arguments. There are no arrays or numbers, a generic or qualified type has to be written as a string, and a keyword (`method`, `type`) cannot be a label. A list is written as a repeated key, `tags="a", tags="b"`, which `Spec::many` accepts.
-
-## Writing a generator
-
-A generator implements `Generator`: given every declaration of its inputs, the code to write. Its `main` is one line:
-
-```moonbit
 async fn main {
   @cli.run(Describe::{}, @env.args()[1:])
 }
 ```
 
-Publish it as a module whose root package is that executable, and its users wire it into their build. In `moon.mod`:
+`moon run . -- models.mbt -o describe.g.mbt` writes:
 
-```
-rule(name: "describe", command: "moonx <module>@<version> -C \"$mod_dir\" \"$input\" -o \"$output\"")
+```moonbit
+// Generated by describe from models.mbt. Edit those files, not this one.
+
+///|
+fn Point::describe(self : Point) -> String {
+  ignore(self)
+  "Point(x, y)"
+}
 ```
 
-and in the `moon.pkg` of the package whose declarations it reads:
+Add the rule to `moon.mod` and the one line to the package's `moon.pkg`, and
+`moon build` keeps the file up to date from then on.
 
-```
-dev_build(rule: "describe", input: "models.mbt", output: "describe.g.mbt")
-formatter(ignore: [ "describe.g.mbt" ])
-```
+## Interface
 
-`moon check`, `moon build` and `moon run` then regenerate the file whenever `models.mbt` changes. `-C` makes the paths moon passes relative to the module directory, which matters because the rule does not run there. A project that prefers to commit generated files runs the generator with `--check` in CI, which fails when the output is stale.
+### `moonast/quote`
+
+| Item | Takes | Gives |
+|:--|:--|:--|
+| `items(source)` | MoonBit declarations with holes | a `Template` |
+| `expr(source)` | one expression with holes | a `Template` |
+| `ty(source)` | one type with holes | a `Template` |
+| `Template::set(hole, code)` | a hole's name, a `Code` | the template, filled |
+| `Template::splice(hole, codes)` | a list hole's name, codes | the template, spliced |
+| `Template::render()` | — | a `Code`, or `Refused` |
+| `ident(name)` | a name, or `@pkg.name` | a `Code`, or `Refused` |
+| `string(text)` | any text | a `Code` |
+| `int(value)`, `bool(value)` | a literal | a `Code` |
+| `join(codes)` | declaration codes | one `Code`, or `Refused` |
+| `Code::items()` | — | the official syntax tree, when it is declarations |
+| `Code::to_string()` | — | the source text |
+
+### `moonast/attr`
+
+| Item | Takes | Gives |
+|:--|:--|:--|
+| `name_of(attr)` | an annotation | its full name, `lib.name` |
+| `find(attrs, name)` | annotations, a name | the first one called that |
+| `all(attrs, name)` | annotations, a name | every one called that |
+| `under(attrs, lib)` | annotations, a prefix | every one under `lib.` |
+| `Spec::new(name)` | an annotation's name | a spec with no parameters |
+| `Spec::positional(key, kind)` | required, by position or name | the spec |
+| `Spec::required(key, kind)` | required, by name | the spec |
+| `Spec::optional(key, kind)` | may be left out | the spec |
+| `Spec::many(key, kind)` | may be given again | the spec |
+| `Spec::bind(attr)` | an annotation | its arguments, or `Refused` |
+| `Args::get(key)`, `::str(key)`, `::strs(key)`, `::bool(key)`, `::has(key)` | a parameter's key | what was given for it |
+
+`Kind` is `Str`, `Bool`, `Ident` or `Type`; each `Args` reader answers in the
+kind its spec asked for.
+
+### `moonast/gen`
+
+| Item | Takes | Gives |
+|:--|:--|:--|
+| `read(file, source)` | a file name and its source | its declarations, or `Refused` |
+| `render(generator, inputs)` | a generator and its inputs | the file to write |
+| `Generator::name()` | — | the name in the header |
+| `Generator::generate(decls)` | every declaration | the code to write |
+| `Decl` | — | `Struct`, `Enum`, `Func` or `Other` |
+| `Decl::attrs()` | — | the annotations on it |
+| `Decl::raw()` | — | the official syntax tree |
+| `Field`, `Param`, `Pass` | — | a struct field, a parameter, how it is passed |
+
+### `moonast/cli`
+
+| Item | Takes | Gives |
+|:--|:--|:--|
+| `run(generator, args)` | a generator, `[-C <dir>] <inputs...> -o <output> [--check]` | writes the file, or refuses when it is stale |
+
+## Holes
+
+| Hole | Takes | Written as | Gives |
+|:--|:--|:--|:--|
+| `$T` | a type or a constructor | `fn f(x : $T)` | `fn f(x : Int)` |
+| `$name` | a value, an expression, or a name | `$value + 1` | `41 + 1` |
+| `@pkg.$name` | a name inside a package | `app : @web.$T` | `app : @web.App` |
+| `$name*` | a list of them | `[$items*]` | `[1, 2, 3]` |
+| `$name` in a string | a name or a string, as text | `"field $key"` | `"field first name"` |
+| `$$` | a literal dollar sign | `"$$5"` | `"$5"` |
+
+A hole's case is part of the grammar: upper case where a type or constructor
+goes, lower case where a value or a binder goes. A list hole expands among
+statements, array elements, and the arguments of a function application.
+
+## Annotation arguments
+
+The parser reads strings, `true`/`false`, names and nested calls as annotation
+arguments. There are no arrays and no numbers, a generic or qualified type has
+to be written as a string, and a keyword cannot be a label. A list is written as
+a repeated key, `tags="a", tags="b"`, which `Spec::many` accepts.
+
+When a payload is outside that grammar, the annotation has no name as far as
+moonast is concerned, so `find` does not see it.
+
+## Refusals
+
+Every fallible call gives a `Refused` with a message, and with a position where
+there is one to give:
+
+| From | Refused when |
+|:--|:--|
+| `quote` | the template is not MoonBit, a hole is left empty, a fill names no hole, or a fill does not fit where it stands |
+| `attr` | the payload cannot be read, a required parameter is missing, one is unknown, mistyped, or given twice |
+| `gen` | an input file is not MoonBit |
+| `cli` | the command line is wrong, or `--check` found the output out of date |
+
+## Examples
+
+| Directory | What it is |
+|:--|:--|
+| `src/examples/tour` | The whole surface in one run: read, bind, generate. |
+| `src/examples/describe` | A minimal `derive` generator: `#demo.describe` gives a struct `describe`. |
+| `src/examples/getters` | A generator whose annotation takes arguments: `#demo.getters(skip=token)`. |
+| `src/examples/play` | The same three packages compiled to JavaScript, which is what the site's playground runs. |
 
 ## Licence
 

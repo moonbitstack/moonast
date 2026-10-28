@@ -1,0 +1,13 @@
+// The playground of the site: the same three packages, compiled to JavaScript,
+// so the pages can run them in the browser instead of showing recorded output.
+// `main` only hands the two entry points to the page; `fn main` is how the
+// JavaScript backend gives a file you can load.
+supported_targets = "js"
+
+pkgtype(kind: "executable")
+
+import {
+  "moonbitstack/moonast/quote",
+  "moonbitstack/moonast/attr",
+  "moonbitstack/moonast/gen",
+}

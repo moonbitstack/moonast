@@ -2,9 +2,8 @@
 /// Why an annotation's arguments were not accepted, with where the annotation
 /// stands in its file.
 pub(all) suberror Refused {
-  /// moonbitlang/parser could not read the payload: arrays, numbers, a qualified
-  /// or generic type, and a keyword used as a label (`method`, `type`) are outside
-  /// the annotation grammar.
+  /// The payload is outside the annotation grammar: arrays, numbers, a qualified
+  /// or generic type cannot be written, and a keyword cannot be a label.
   Malformed(raw~ : String, line~ : Int32, column~ : Int32)
   /// A required parameter was not given.
   Missing(key~ : String, line~ : Int32, column~ : Int32)

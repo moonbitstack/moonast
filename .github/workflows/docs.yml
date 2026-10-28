@@ -1,0 +1,67 @@
+name: Deploy docs
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: install moonbit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: post install
+        run: |
+          moon version --all
+          moon update
+
+      - name: regenerate the API reference
+        run: python3 scripts/gen_api.py
+
+      - name: the generated page is committed as generated
+        run: git diff --exit-code -- docs/api.html
+
+      - name: compile the playground engine to JavaScript
+        run: moon build src/examples/play --target js --release
+
+      - name: place the engine next to the pages
+        run: cp _build/js/release/build/examples/play/play.js docs/play.js
+
+      - name: configure pages
+        uses: actions/configure-pages@v6
+        with:
+          enablement: true
+
+      - name: upload pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-26.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: deploy to pages
+        id: deployment
+        uses: actions/deploy-pages@v5
