@@ -18,18 +18,18 @@ OUT = os.path.join(ROOT, "docs", "api.html")
 PACKAGES = ["quote", "attr", "gen", "cli"]
 
 ABOUT = {
-    "quote": "Templates: real MoonBit with <code>$holes</code>. A template is parsed with "
-             "its holes standing as placeholders, each fill is put where its placeholder "
-             "stands, and the result is printed by the official formatter.",
+    "quote": "Templates: real MoonBit with <code>$holes</code>. A template is parsed with its "
+             "holes standing as placeholders, each fill is put where its placeholder stands, "
+             "and the result is printed by the official formatter.",
     "attr": "Annotations as typed arguments. Find <code>#lib.name(...)</code> on a "
-            "declaration and bind its arguments against a spec; every refusal carries "
-            "the position of the annotation.",
+            "declaration and bind its payload against a spec; every refusal carries the "
+            "position of the annotation.",
     "gen": "Declarations read from source into plain views, the <code>Generator</code> "
-           "trait, and <code>render</code>, which gives the file a generator writes. No "
-           "file access here.",
+           "trait, and <code>render</code>, which gives the file a generator writes. No file "
+           "access here.",
     "cli": "The command line of a generator binary: it reads the inputs, has "
-           "<code>moonast/gen</code> render them, and writes the output or reports that "
-           "it is stale.",
+           "<code>moonast/gen</code> render them, and writes the output or reports that it "
+           "is stale.",
 }
 
 TITLES = {
@@ -37,6 +37,13 @@ TITLES = {
     "attr": "attr",
     "gen": "gen",
     "cli": "cli",
+}
+
+PLATES = {
+    "quote": "Plate I",
+    "attr": "Plate II",
+    "gen": "Plate III",
+    "cli": "Plate IV",
 }
 
 
@@ -320,7 +327,7 @@ def render_doc(lines):
                     '<pre data-lang="moonbit"><code>' + html.escape(code.strip("\n")) + "</code></pre>"
                 )
             else:
-                out.append("<pre data-raw=\"1\"><code>" + html.escape(code) + "</code></pre>")
+                out.append('<pre data-raw="1"><code>' + html.escape(code) + "</code></pre>")
     return "\n".join(out)
 
 
@@ -337,7 +344,12 @@ def entry_html(pkg, item, docs, level=3):
     doc_lines = docs.get(key) or docs.get(key.split("::")[-1]) or []
     if not doc_lines and "::" in key:
         doc_lines = [FALLBACK.get(key.split("::")[-1], "")]
-    sig = esc(item.sig)
+    shown = item.sig
+    # A struct whose fields are all private is introduced by `{` in the
+    # interface file and by nothing on the page; the brace reads as a typo.
+    if item.kind == "struct" and not item.fields and shown.endswith("{"):
+        shown = shown[:-1].rstrip()
+    sig = esc(shown)
     cls = {
         "value": "kind-value",
         "struct": "kind-type",
@@ -347,17 +359,20 @@ def entry_html(pkg, item, docs, level=3):
     }[item.kind]
 
     parts = ['<div class="entry %s" id="%s.%s">' % (cls, pkg, anchor(item.name))]
-    parts.append('<div class="sig">%s <a class="anchor" href="#%s.%s">#</a></div>' % (sig, pkg, anchor(item.name)))
+    parts.append(
+        '<div class="sig">%s <a class="anchor" href="#%s.%s" aria-label="Link to %s">#</a></div>'
+        % (sig, pkg, anchor(item.name), esc(item.name))
+    )
 
     if item.derive:
-        parts.append('<div class="doc"><p>Derives %s.</p></div>' % esc(item.derive))
+        parts.append('<div class="desc"><p>Derives %s.</p></div>' % esc(item.derive))
 
     doc = render_doc(doc_lines)
     if doc:
-        parts.append('<div class="doc">%s</div>' % doc)
+        parts.append('<div class="desc">%s</div>' % doc)
 
     if item.fields:
-        parts.append("<ul class=\"params\">")
+        parts.append('<ul class="params">')
         for f in item.fields:
             if f.startswith("//"):
                 continue
@@ -397,12 +412,12 @@ def entry_html(pkg, item, docs, level=3):
                 % (pkg, anchor(mth.name))
             )
             parts.append(
-                '<div class="sig">%s <a class="anchor" href="#%s.%s">#</a></div>'
-                % (esc(mth.sig), pkg, anchor(mth.name))
+                '<div class="sig">%s <a class="anchor" href="#%s.%s" aria-label="Link to %s">#</a></div>'
+                % (esc(mth.sig), pkg, anchor(mth.name), esc(mth.name))
             )
             md = render_doc(mdoc)
             if md:
-                parts.append('<div class="doc">%s</div>' % md)
+                parts.append('<div class="desc">%s</div>' % md)
             parts.append("</div>")
 
     parts.append("</div>")
@@ -412,7 +427,7 @@ def entry_html(pkg, item, docs, level=3):
 def group_html(pkg, title, items, docs):
     if not items:
         return ""
-    out = ['<h3 id="%s-%s">%s</h3>' % (pkg, title.lower().replace(" ", "-"), title)]
+    out = ['<h3 class="group-head" id="%s-%s">%s</h3>' % (pkg, title.lower().replace(" ", "-"), title)]
     for item in sorted(items, key=lambda i: i.name):
         out.append(entry_html(pkg, item, docs))
     return "\n".join(out)
@@ -432,6 +447,10 @@ def build():
         docs = docs_for(os.path.join(SRC, pkg))
 
         nav.append('<div class="group"><h4>%s</h4>' % esc(TITLES[pkg]))
+        nav.append(
+            '<a href="#pkg-%s" style="font-family:var(--font-mono);font-size:.74rem">%s</a>'
+            % (pkg, esc(PLATES[pkg]))
+        )
         for v in sorted(values, key=lambda i: i.name):
             nav.append('<a class="sub" href="#%s.%s">%s</a>' % (pkg, anchor(v.name), esc(v.name)))
         for t in sorted(types, key=lambda i: i.name):
@@ -443,7 +462,13 @@ def build():
         nav.append("</div>")
 
         body.append('<section class="pkg" id="pkg-%s">' % pkg)
-        body.append('<h2>%s<span class="path">moonbitstack/moonast/%s</span></h2>' % (esc(TITLES[pkg]), pkg))
+        body.append(
+            '<span class="num-index">%s</span>' % esc(PLATES[pkg].upper())
+        )
+        body.append(
+            '<h2>%s<span class="path">moonbitstack/moonast/%s</span></h2>'
+            % (esc(TITLES[pkg]), pkg)
+        )
         body.append('<p class="about">%s</p>' % ABOUT[pkg])
         body.append(group_html(pkg, "Values", values, docs))
         body.append(group_html(pkg, "Types", types, docs))
@@ -461,10 +486,10 @@ TEMPLATE = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>API reference — moonast</title>
 <meta name="description" content="Every public type, function, method, trait and error of moonast, grouped by package.">
-<link rel="icon" href="data:image/svg+xml,%%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%%3E%%3Crect width='32' height='32' rx='7' fill='%%23272121'/%%3E%%3Ctext x='16' y='24' font-family='monospace' font-size='21' fill='%%23e16428' text-anchor='middle'%%3E%%24%%3C/text%%3E%%3C/svg%%3E">
+<link rel="icon" href="data:image/svg+xml,%%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%%3E%%3Cpath d='M0 0h24l8 8v24H8l-8-8z' fill='%%2315151a'/%%3E%%3Cpath d='M0 0h24l8 8' fill='none' stroke='%%23d8b154' stroke-width='1.4'/%%3E%%3Ctext x='16' y='23' font-family='monospace' font-size='18' font-weight='700' fill='%%23f3dfa0' text-anchor='middle'%%3E%%23%%3C/text%%3E%%3C/svg%%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site.css">
 </head>
 <body>
@@ -472,17 +497,18 @@ TEMPLATE = """<!doctype html>
 
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="index.html"><span class="glyph">$<b>#</b></span>moonast</a>
+    <a class="mark" href="index.html"><span class="glyph">#</span>moonast</a>
     <nav class="nav">
-      <a href="index.html">Home</a>
-      <a href="guide.html">Guide</a>
+      <a class="home" href="index.html">Home</a>
+      <a class="guide" href="guide.html">Guide</a>
+      <a href="chain.html">Chain</a>
       <a href="api.html" aria-current="page">API</a>
-      <a href="play.html">Playground</a>
-      <a class="icon" data-theme-toggle href="#" title="Switch theme" aria-label="Switch theme">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/></svg>
+      <a href="play.html">Play</a>
+      <a class="icon" data-theme-toggle href="#" aria-label="Switch theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3.2v1.9M12 18.9v1.9M3.2 12h1.9M18.9 12h1.9M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M18.2 5.8l-1.4 1.4M7.2 16.8l-1.4 1.4"/></svg>
       </a>
       <a class="icon" href="https://github.com/moonbitstack/moonast" title="moonast on GitHub" aria-label="moonast on GitHub">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
       </a>
     </nav>
   </div>
@@ -495,10 +521,11 @@ __NAV__
     </aside>
 
     <div class="prose" id="main">
-      <section style="margin-bottom:34px">
-        <h2 style="border-bottom:0;padding-bottom:0">API reference</h2>
-        <p>Every public type, function, method, trait and error, grouped by package and
-          listed alphabetically within each group. Import one package at a time:
+      <section style="margin-bottom:44px">
+        <span class="num-index">THE CATALOGUE</span>
+        <h2 style="margin-top:8px">API reference</h2>
+        <p>Every public type, function, method, trait and error, one plate per package and
+          alphabetical within each group. Import one package at a time:
           <code>moonbitstack/moonast/quote</code>, <code>/attr</code>, <code>/gen</code>,
           <code>/cli</code>.</p>
       </section>
@@ -513,10 +540,11 @@ __BODY__
     <div class="r">
       <a href="index.html">Home</a>
       <a href="guide.html">Guide</a>
+      <a href="chain.html">Chain</a>
       <a href="api.html">API</a>
-      <a href="play.html">Playground</a>
+      <a href="play.html">Play</a>
       <a class="icon" href="https://github.com/moonbitstack/moonast" title="moonast on GitHub" aria-label="moonast on GitHub">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
       </a>
     </div>
   </div>

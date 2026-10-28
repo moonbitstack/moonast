@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Playground — moonast</title>
 <meta name="description" content="Edit an annotated declaration and watch moonast generate the file, or fill a template's holes and see what it renders. Runs the real library, compiled to JavaScript.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23272121'/%3E%3Ctext x='16' y='24' font-family='monospace' font-size='21' fill='%23e16428' text-anchor='middle'%3E%24%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M0 0h24l8 8v24H8l-8-8z' fill='%2315151a'/%3E%3Cpath d='M0 0h24l8 8' fill='none' stroke='%23d8b154' stroke-width='1.4'/%3E%3Ctext x='16' y='23' font-family='monospace' font-size='18' font-weight='700' fill='%23f3dfa0' text-anchor='middle'%3E%23%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site.css">
 </head>
 <body>
@@ -16,46 +16,45 @@
 
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="index.html"><span class="glyph">$<b>#</b></span>moonast</a>
+    <a class="mark" href="index.html"><span class="glyph">#</span>moonast</a>
     <nav class="nav">
-      <a href="index.html">Home</a>
-      <a href="guide.html">Guide</a>
+      <a class="home" href="index.html">Home</a>
+      <a class="guide" href="guide.html">Guide</a>
+      <a href="chain.html">Chain</a>
       <a href="api.html">API</a>
-      <a href="play.html" aria-current="page">Playground</a>
-      <a class="icon" data-theme-toggle href="#" title="Switch theme" aria-label="Switch theme">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/></svg>
+      <a href="play.html" aria-current="page">Play</a>
+      <a class="icon" data-theme-toggle href="#" aria-label="Switch theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3.2v1.9M12 18.9v1.9M3.2 12h1.9M18.9 12h1.9M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M18.2 5.8l-1.4 1.4M7.2 16.8l-1.4 1.4"/></svg>
       </a>
       <a class="icon" href="https://github.com/moonbitstack/moonast" title="moonast on GitHub" aria-label="moonast on GitHub">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
       </a>
     </nav>
   </div>
 </header>
 
-<div class="wrap" id="main" style="padding-top:34px;padding-bottom:56px">
+<main class="wrap" id="main" style="padding:44px 0 60px">
 
   <div class="band-head">
-    <div class="kicker">Playground</div>
-    <h2>Change the declaration, watch the file change</h2>
-    <p>
-      This page is not a recording. moonast — <code>quote</code>, <code>attr</code> and
-      <code>gen</code> — is compiled to JavaScript and loaded here, so what you see on the right
-      is what the library produced from what you typed on the left.
-    </p>
+    <div class="label gold">Playground</div>
+    <h2>Change the declaration. Watch the file change.</h2>
+    <p>This page is not a recording. <code>quote</code>, <code>attr</code> and
+      <code>gen</code> are compiled to JavaScript and loaded here, so the right-hand plate is
+      what the library produced from what you typed on the left.</p>
   </div>
 
-  <div class="chips" role="tablist" style="border:1px solid var(--line);border-radius:var(--radius);margin-bottom:18px">
-    <button class="chip" id="tab-derive" role="tab" aria-pressed="true">Derive</button>
-    <button class="chip" id="tab-template" role="tab" aria-pressed="false">Template</button>
+  <div class="chips" role="tablist" aria-label="What to run">
+    <button class="chip" id="tab-derive" role="tab" aria-pressed="true">A generator</button>
+    <button class="chip" id="tab-template" role="tab" aria-pressed="false">A template</button>
   </div>
 
-  <!-- ------------------------------------------------------------ derive -->
+  <!-- ------------------------------------------------------------- derive -->
 
   <div id="pane-derive">
-    <div class="chips" style="border:0;padding:0 0 12px;background:none">
-      <button class="chip g" data-gen="describe" aria-pressed="true">describe</button>
-      <button class="chip g" data-gen="getters" aria-pressed="false">getters</button>
-      <button class="chip g" data-gen="route" aria-pressed="false">route</button>
+    <div class="chips">
+      <button class="chip" data-gen="describe" aria-pressed="true">#demo.describe</button>
+      <button class="chip" data-gen="getters" aria-pressed="false">#demo.getters</button>
+      <button class="chip" data-gen="route" aria-pressed="false">#app.route</button>
     </div>
 
     <div class="play">
@@ -94,13 +93,13 @@ fn Point::describe(self : Point) -&gt; String {
     </div>
   </div>
 
-  <!-- ---------------------------------------------------------- template -->
+  <!-- ----------------------------------------------------------- template -->
 
   <div id="pane-template" hidden>
-    <div class="chips" style="border:0;padding:0 0 12px;background:none">
-      <button class="chip k" data-kind="items" aria-pressed="true">items</button>
-      <button class="chip k" data-kind="expr" aria-pressed="false">expr</button>
-      <button class="chip k" data-kind="ty" aria-pressed="false">ty</button>
+    <div class="chips">
+      <button class="chip" data-kind="items" aria-pressed="true">items</button>
+      <button class="chip" data-kind="expr" aria-pressed="false">expr</button>
+      <button class="chip" data-kind="ty" aria-pressed="false">ty</button>
     </div>
 
     <div class="play">
@@ -128,22 +127,25 @@ fn answer() -&gt; Int {
     </div>
   </div>
 
-  <p style="margin-top:20px;color:var(--ink-faint);font-size:14px">
-    The engine is the release build of <code>src/examples/play</code>, about 11 MB of JavaScript
-    before compression. It is loaded once and then reused, so typing stays instant.
+  <p class="small" style="margin-top:22px;max-width:70ch">
+    The engine is <code>src/examples/play</code> compiled to JavaScript. It is loaded once and
+    reused, so typing stays instant. A hole whose name ends in <code>*</code> is spliced: give
+    it one value per line.
   </p>
-</div>
 
-<footer class="site slab">
+</main>
+
+<footer class="site">
   <div class="wrap">
     <p>moonast — Apache-2.0</p>
     <div class="r">
       <a href="index.html">Home</a>
       <a href="guide.html">Guide</a>
+      <a href="chain.html">Chain</a>
       <a href="api.html">API</a>
-      <a href="play.html">Playground</a>
+      <a href="play.html">Play</a>
       <a class="icon" href="https://github.com/moonbitstack/moonast" title="moonast on GitHub" aria-label="moonast on GitHub">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
       </a>
     </div>
   </div>
@@ -154,7 +156,7 @@ fn answer() -&gt; Int {
 (() => {
   const US = "\u001F", RS = "\u001E";
 
-  /* ------------------------------------------------------------- tabs */
+  /* ---------------------------------------------------------------- tabs */
 
   const tabs = [
     { btn: document.getElementById("tab-derive"), pane: document.getElementById("pane-derive") },
@@ -169,7 +171,7 @@ fn answer() -&gt; Int {
   };
   tabs.forEach((t, i) => t.btn.addEventListener("click", () => showTab(i)));
 
-  /* ----------------------------------------------------------- derive */
+  /* -------------------------------------------------------------- derive */
 
   const EXAMPLES = {
     describe: `#demo.describe
@@ -203,7 +205,11 @@ pub fn create_user(name : String) -> Unit {
 `,
   };
 
-  const FILES = { describe: ["models.mbt", "describe.g.mbt"], getters: ["models.mbt", "getters.g.mbt"], route: ["routes.mbt", "routes.g.mbt"] };
+  const FILES = {
+    describe: ["models.mbt", "describe.g.mbt"],
+    getters: ["models.mbt", "getters.g.mbt"],
+    route: ["routes.mbt", "routes.g.mbt"],
+  };
 
   const dSrc = document.getElementById("derive-src");
   const dOut = document.getElementById("derive-out").querySelector("code");
@@ -227,15 +233,16 @@ pub fn create_user(name : String) -> Unit {
     dBytes.textContent = text.length + " bytes";
   };
 
-  document.querySelectorAll(".chip.g").forEach((b) =>
+  document.querySelectorAll(".chip[data-gen]").forEach((b) =>
     b.addEventListener("click", () => {
       gen = b.dataset.gen;
-      document.querySelectorAll(".chip.g").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+      document.querySelectorAll(".chip[data-gen]").forEach((o) =>
+        o.setAttribute("aria-pressed", String(o === b))
+      );
       document.getElementById("derive-file").textContent = FILES[gen][0];
       document.getElementById("derive-out-name").textContent = FILES[gen][1];
       dSrc.value = EXAMPLES[gen];
-      const api = window.moonast;
-      if (api) runDerive(api);
+      if (window.moonast) runDerive(window.moonast);
     })
   );
 
@@ -243,7 +250,7 @@ pub fn create_user(name : String) -> Unit {
     if (window.moonast) runDerive(window.moonast);
   });
 
-  /* --------------------------------------------------------- template */
+  /* ------------------------------------------------------------ template */
 
   const tSrc = document.getElementById("tpl-src");
   const tOut = document.getElementById("tpl-out").querySelector("code");
@@ -252,20 +259,22 @@ pub fn create_user(name : String) -> Unit {
   const tFills = document.getElementById("tpl-fills");
 
   let kind = "items";
-  const state = new Map(); // hole -> { kind, value }
+  const state = new Map();
   const DEFAULT_KIND = { name: "ident", T: "ident", value: "expr", items: "expr", field: "ident", Ty: "ty", text: "string" };
   const DEFAULT_VALUE = { name: "answer", T: "Int", value: "42", items: "1, 2, 3", field: "id", Ty: "Int", text: "坐标" };
 
-  document.querySelectorAll(".chip.k").forEach((b) =>
+  document.querySelectorAll(".chip[data-kind]").forEach((b) =>
     b.addEventListener("click", () => {
       kind = b.dataset.kind;
-      document.querySelectorAll(".chip.k").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+      document.querySelectorAll(".chip[data-kind]").forEach((o) =>
+        o.setAttribute("aria-pressed", String(o === b))
+      );
       buildFills();
       runTemplate();
     })
   );
 
-  // Same rule as the library's scanner: $name, $name*, and $$ is a literal $.
+  // The same rule as the library's scanner: $name, $name*, and $$ is a literal $.
   function holesOf(src) {
     const found = [];
     const re = /\$(\$|[A-Za-z_][A-Za-z0-9_]*)(\*?)/g;
@@ -300,7 +309,8 @@ pub fn create_user(name : String) -> Unit {
       sel.setAttribute("aria-label", "kind for $" + h);
       [["ident", "ident"], ["string", "string"], ["expr", "expr"], ["ty", "ty"]].forEach(([v, l]) => {
         const o = document.createElement("option");
-        o.value = v; o.textContent = l;
+        o.value = v;
+        o.textContent = l;
         if (v === st.kind) o.selected = true;
         sel.appendChild(o);
       });
@@ -340,25 +350,21 @@ pub fn create_user(name : String) -> Unit {
     const text = api.template(kind, tSrc.value, fills);
     tOut.textContent = text.replace(/\n+$/, "");
     window.moonastSite.render(tOut);
-    const bad = /was given nothing|has no hole|takes |is not an identifier|expected |is not MoonBit/.test(text);
+    const bad = /was given nothing|has no hole|takes |is not an identifier|expected |is not MoonBit|cannot read/.test(text);
     tSay(bad ? "bad" : "ready", bad ? "refused" : "rendered in your browser");
     tBytes.textContent = text.length + " bytes";
   }
 
   tSrc.addEventListener("input", () => { buildFills(); runTemplate(); });
 
-  /* -------------------------------------------------------------- boot */
+  /* ---------------------------------------------------------------- boot */
 
   buildFills();
 
   window.moonastSite.loadEngine().then((api) => {
     runDerive(api);
     runTemplate();
-    const n = Object.keys(api).length;
-    document.querySelectorAll(".status").forEach((s) => {
-      if (s.id === "derive-status" || s.id === "tpl-status") return;
-    });
-  }).catch((e) => {
+  }).catch(() => {
     dSay("", "could not load the engine — showing recorded output");
     tSay("", "could not load the engine — showing recorded output");
   });

@@ -1,4 +1,8 @@
-/* moonast site: syntax painting, theme, and the loader for the compiled engine. */
+/* moonast site: syntax painting, the theme, the foil that follows the pointer,
+   and the loader for the compiled engine.
+
+   The painting is deliberately small: a token scanner for MoonBit as this
+   library's pages write it, and an alignment pass for trailing comments. */
 
 (() => {
   "use strict";
@@ -16,13 +20,14 @@
 
   /* A grapheme that is not ASCII is wrapped so it occupies a whole number of
      character cells; otherwise padding a trailing comment with spaces drifts. */
-  const WIDE = /[\u1100-\u115F\u2E80-\uA4CF\uA960-\uA97F\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6\u{1F000}-\u{1FAFF}\u{20000}-\u{3FFFF}]/u;
+  const WIDE =
+    /[\u1100-\u115F\u2E80-\uA4CF\uA960-\uA97F\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6\u{1F000}-\u{1FAFF}\u{20000}-\u{3FFFF}]/u;
 
   function wrap(text) {
     let out = "";
     for (const ch of text) {
       const cp = ch.codePointAt(0);
-      if (cp < 0x80) out += ch === " " ? " " : ch;
+      if (cp < 0x80) out += ch;
       else out += '<span class="' + (WIDE.test(ch) ? "w2" : "w1") + '">' + esc(ch) + "</span>";
     }
     return out;
@@ -49,7 +54,6 @@
         return out;
       }
       if (two === "#|") {
-        // multi-line string literal: the whole rest of the line is text
         out += '<span class="tk-str">' + wrap(line.slice(i)) + "</span>";
         return out;
       }
@@ -62,7 +66,6 @@
         continue;
       }
       if (c === "#" && /[A-Za-z_]/.test(line[i + 1] || "")) {
-        // #lib.name( ... )
         let j = i + 1;
         while (j < n && /[A-Za-z0-9_.]/.test(line[j])) j += 1;
         out += '<span class="tk-attr">' + esc(line.slice(i, j)) + "</span>";
@@ -88,11 +91,7 @@
         let j = i;
         while (j < n && /[A-Za-z0-9_]/.test(line[j])) j += 1;
         const word = line.slice(i, j);
-        const cls = KEYWORDS.has(word)
-          ? "tk-key"
-          : /^[A-Z]/.test(word)
-            ? "tk-ty"
-            : "";
+        const cls = KEYWORDS.has(word) ? "tk-key" : /^[A-Z]/.test(word) ? "tk-ty" : "";
         out += cls ? '<span class="' + cls + '">' + esc(word) + "</span>" : esc(word);
         i = j;
         continue;
@@ -119,7 +118,6 @@
 
   function align(lines) {
     const parts = lines.map((ln) => {
-      // find "//" that is not inside a string
       let inStr = false;
       for (let i = 0; i < ln.length; i++) {
         if (ln[i] === '"' && ln[i - 1] !== "\\") inStr = !inStr;
@@ -147,7 +145,12 @@
     const lines = align(raw.split("\n"));
     el.innerHTML = lines
       .map((ln) => {
-        const at = ln.indexOf("//");
+        let at = -1;
+        let inStr = false;
+        for (let i = 0; i < ln.length; i++) {
+          if (ln[i] === '"' && ln[i - 1] !== "\\") inStr = !inStr;
+          else if (!inStr && ln[i] === "/" && ln[i + 1] === "/") { at = i; break; }
+        }
         if (at === -1) return paint(ln);
         return paint(ln.slice(0, at)) + '<span class="tk-com">' + wrap(ln.slice(at)) + "</span>";
       })
@@ -155,30 +158,92 @@
   }
 
   function paintAll(root) {
-    root.querySelectorAll("pre[data-lang='moonbit'] code, pre.code[data-lang='moonbit']").forEach(render);
+    root
+      .querySelectorAll("pre[data-lang='moonbit'] > code, pre.code[data-lang='moonbit'] > code")
+      .forEach(render);
     root.querySelectorAll("pre:not([data-lang]) > code").forEach((c) => {
       const p = c.parentElement;
-      if (!p.dataset.lang && p.dataset.raw !== "1") render(c);
+      if (p.dataset.raw !== "1") render(c);
     });
-    // plain <pre class="term"> keeps its text as-is
   }
 
   /* -------------------------------------------------------------- theme */
 
   const root = document.documentElement;
   const stored = localStorage.getItem("moonast-theme");
-  if (stored) root.dataset.theme = stored;
+  if (stored === "light" || stored === "dark") root.dataset.theme = stored;
 
-  const toggle = (btn) => {
-    const dark =
-      root.dataset.theme === "dark" ||
-      (!root.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
-    root.dataset.theme = dark ? "light" : "dark";
-    localStorage.setItem("moonast-theme", root.dataset.theme);
-    if (btn) btn.setAttribute("aria-label", dark ? "Switch to dark" : "Switch to light");
+  const label = (btn) => {
+    const dark = root.dataset.theme
+      ? root.dataset.theme === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
+    btn.setAttribute("aria-label", dark ? "Switch to light" : "Switch to dark");
+    btn.setAttribute("title", dark ? "Switch to light" : "Switch to dark");
   };
 
-  /* --------------------------------------------- the compiled engine ---- */
+  const toggle = (btn) => {
+    const dark = root.dataset.theme
+      ? root.dataset.theme === "dark"
+      : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    localStorage.setItem("moonast-theme", root.dataset.theme);
+    label(btn);
+  };
+
+  /* ------------------------------------------------- the foil on a plate */
+
+  function sheen() {
+    document.querySelectorAll(".plate.lit").forEach((plate) => {
+      plate.addEventListener("pointermove", (e) => {
+        const r = plate.getBoundingClientRect();
+        plate.style.setProperty("--mx", ((e.clientX - r.left) / r.width) * 100 + "%");
+        plate.style.setProperty("--my", ((e.clientY - r.top) / r.height) * 100 + "%");
+      });
+    });
+  }
+
+  /* ------------------------------------------- mark the section in view */
+
+  function sections() {
+    const links = [...document.querySelectorAll(".side a[href^='#']")];
+    if (!links.length) return;
+    const map = new Map();
+    links.forEach((a) => {
+      const el = document.getElementById(a.getAttribute("href").slice(1));
+      if (el) map.set(el, a);
+    });
+    if (!map.size || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          const a = map.get(e.target);
+          if (!a) return;
+          links.forEach((l) => l.classList.remove("on"));
+          a.classList.add("on");
+        });
+      },
+      { rootMargin: "-90px 0px -68% 0px" }
+    );
+    map.forEach((_, el) => io.observe(el));
+  }
+
+  /* ------------------------------------------------------ editor height */
+
+  document.addEventListener("DOMContentLoaded", () => {
+    paintAll(document);
+    sheen();
+    sections();
+    document.querySelectorAll("[data-theme-toggle]").forEach((b) => {
+      label(b);
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        toggle(b);
+      });
+    });
+  });
+
+  /* ----------------------------------------------- the compiled engine */
 
   const ENGINE = "play.js";
   let loading = null;
@@ -198,20 +263,5 @@
     return loading;
   }
 
-  const US = "\u001F";
-  const RS = "\u001E";
-
-  /* ------------------------------------------------------------- export */
-
-  document.addEventListener("DOMContentLoaded", () => {
-    paintAll(document);
-    document.querySelectorAll("[data-theme-toggle]").forEach((b) =>
-      b.addEventListener("click", () => toggle(b))
-    );
-    // highlight anything injected later
-    window.moonastSite = { render, paintAll, loadEngine, US, RS, esc };
-    document.dispatchEvent(new CustomEvent("site:ready"));
-  });
-
-  window.moonastSite = { render, paintAll, loadEngine, US, RS, esc };
+  window.moonastSite = { render, paintAll, loadEngine, esc, US: "\u001F", RS: "\u001E" };
 })();

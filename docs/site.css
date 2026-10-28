@@ -1,50 +1,108 @@
 /* moonast — the site's only stylesheet.
-   Warm ink on bone paper; one chroma, the orange that marks an annotation.
-   Every colour is a token, and every token is light-dark(), so the whole
-   page flips from `color-scheme` alone. */
 
-/* ------------------------------------------------------------- tokens */
+   One idea: the library's subject is the annotation, so the site is struck like
+   a specimen sheet from a press. Every surface is a plate of steel, every rule
+   is a hairline of gold leaf, every corner is cut rather than rounded. Colour
+   comes from metal, not from paint: brass, gold leaf, silver, gunmetal.
+
+   Every colour is a token, and every token is light-dark(), so the page flips
+   from `color-scheme` alone. Plates stay dark in both themes, the way a struck
+   die stays metal on paper or under a lamp. */
+
+/* ---------------------------------------------------------------- tokens */
 
 :root {
   color-scheme: light;
 
-  --paper:       light-dark(#f6e9e9, #181313);
-  --paper-deep:  light-dark(#eed9d9, #131010);
-  --surface:     light-dark(#fdf6f5, #211b1b);
-  --surface-2:   light-dark(#f1e1e0, #2d2525);
+  --ground:      light-dark(#efece4, #0a0a0b);
+  --ground-2:    light-dark(#e8e4d9, #0f0f11);
+  --surface:     light-dark(#f8f6f0, #121215);
 
-  --ink:         light-dark(#272121, #f7ecea);
-  --ink-soft:    light-dark(#4b4241, #d3c1be);
-  --ink-faint:   light-dark(#6f6260, #a4918e);
+  --ink:         light-dark(#15130f, #f5f1e6);
+  --ink-soft:    light-dark(#453f34, #d2c9b7);
+  --ink-faint:   light-dark(#6e6656, #928975);
 
   --line:        color-mix(in oklab, var(--ink) 20%, transparent);
   --line-soft:   color-mix(in oklab, var(--ink) 9%, transparent);
 
-  --accent:      light-dark(#e16428, #f0803f);
-  --accent-text: light-dark(#b04a16, #f6a878);
-  --accent-wash: light-dark(#f8ddcd, #42281a);
-  --warn:        light-dark(#9d3a2e, #ef8f80);
-  /* The filled control: stone on paper, bone on ink. */
-  --solid:       light-dark(#363333, #f7ecea);
-  --on-solid:    light-dark(#f6e9e9, #181313);
+  /* Gold leaf, from the shadowed edge to the burnish. */
+  --gold-0: #5d4210;
+  --gold-1: #8a6520;
+  --gold-2: #b8912f;
+  --gold-3: #d8b154;
+  --gold-4: #f3dfa0;
+  --gold-5: #fdf6d8;
 
-  --grid:        light-dark(rgba(225, 100, 40, 0.26), rgba(240, 128, 63, 0.2));
-  /* A tint that sits behind display type: warmer on paper, quieter on ink. */
-  --mark: light-dark(
-    color-mix(in oklab, #e16428 22%, transparent),
-    color-mix(in oklab, #f0803f 15%, transparent)
+  /* Silver, used for the layer that reads annotations. */
+  --silver-1: #8d97a3;
+  --silver-2: #c3ccd6;
+  --silver-3: #eef3f8;
+
+  --gilt: linear-gradient(
+    104deg,
+    var(--gold-1) 0%,
+    var(--gold-3) 16%,
+    var(--gold-5) 30%,
+    var(--gold-2) 46%,
+    var(--gold-0) 58%,
+    var(--gold-4) 74%,
+    var(--gold-3) 86%,
+    var(--gold-1) 100%
+  );
+  --gilt-edge: linear-gradient(
+    135deg,
+    var(--gold-4) 0%,
+    var(--gold-1) 22%,
+    var(--gold-3) 44%,
+    var(--gold-0) 62%,
+    var(--gold-4) 84%,
+    var(--gold-2) 100%
+  );
+  --argent: linear-gradient(
+    104deg,
+    var(--silver-1) 0%,
+    var(--silver-3) 34%,
+    #a9b3be 55%,
+    var(--silver-3) 78%,
+    var(--silver-1) 100%
   );
 
-  --display: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
-  --serif: "Instrument Serif", "Iowan Old Style", Georgia, "Times New Roman", serif;
-  --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  /* Gold that may be used as text on the page ground. */
+  --gold-text:  light-dark(#7c5c15, #e9cd85);
+  --gold-wash:  light-dark(#f2e8c9, #2b2415);
 
-  --radius: 3px;
-  --bar: 3px;
-  --maxw: 1180px;
+  /* A struck steel plate: dark in either theme. */
+  --steel:          light-dark(#15151a, #131318);
+  --steel-2:        light-dark(#1d1d24, #1c1c23);
+  --steel-line:     #33323a;
+  --on-steel:       #eee9dd;
+  --on-steel-dim:   #a49c8c;
+  --on-steel-faint: #7c7566;
 
-  --shadow: 0 1px 0 color-mix(in oklab, var(--ink) 6%, transparent);
+  --font-display: "Bodoni Moda", "Didot", "Times New Roman", serif;
+  --font-body: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* Two corners cut, two left square: a plate sheared off the die. */
+  --cut: polygon(
+    0 0,
+    calc(100% - 16px) 0,
+    100% 16px,
+    100% 100%,
+    16px 100%,
+    0 calc(100% - 16px)
+  );
+  --cut-sm: polygon(
+    0 0,
+    calc(100% - 6px) 0,
+    100% 6px,
+    100% 100%,
+    6px 100%,
+    0 calc(100% - 6px)
+  );
+
+  --maxw: 1200px;
+  --hair: 1px;
 }
 
 /* An explicit choice beats the OS; without one, follow it. */
@@ -52,1169 +110,1387 @@
 :root[data-theme="light"] { color-scheme: light; }
 :root[data-theme="dark"] { color-scheme: dark; }
 
-/* The dark plate. Inside it the same tokens resolve to their dark side, so
-   every component below works unchanged on both a bone and an ink page. */
-.slab {
-  color-scheme: dark;
-  --paper: #1d1818;
-  --paper-deep: #171212;
-  --surface: #241e1e;
-  --surface-2: #2e2726;
-  --ink: #f8eeec;
-  --ink-soft: #d5c3c0;
-  --ink-faint: #b3a19b;
-  --line: #453a38;
-  --line-soft: #382f2e;
-  --accent: #f0803f;
-  --accent-text: #f8b184;
-  --accent-wash: #4a2c1a;
-  --warn: #f5978a;
-  --solid: #f7ecea;
-  --on-solid: #1d1818;
-  --grid: rgba(240, 128, 63, 0.22);
-  --mark: color-mix(in oklab, #f0803f 15%, transparent);
-  --shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
-}
+/* --------------------------------------------------------------- ground */
 
-/* --------------------------------------------------------------- base */
+*,
+*::before,
+*::after { box-sizing: border-box; }
 
-/* No ligatures: what the reader sees is what they type. */
-html, button, input, textarea, select {
+html {
+  -webkit-text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+  /* Code is shown as characters, not as glyphs to be admired: `>=` stays two
+     characters. Form controls do not inherit. */
   font-variant-ligatures: no-contextual;
 }
 
-* { box-sizing: border-box; }
-
-html {
-  background: var(--paper);
-  scroll-behavior: smooth;
-  scrollbar-gutter: stable;
-  -webkit-text-size-adjust: 100%;
-}
+html,
+body { margin: 0; }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  font-family: var(--body);
-  font-size: 16px;
-  line-height: 1.62;
-  font-feature-settings: "ss01" 0;
+  background: var(--ground);
   color: var(--ink);
-  background: var(--paper);
+  font-family: var(--font-body);
+  font-size: 16.5px;
+  line-height: 1.62;
+  font-feature-settings: "kern" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* Paper tooth. A fixed weave over everything, never in the way. */
-body::after {
+/* Carded paper: a faint graduation of light across the page, so the ground is
+   never a flat fill. */
+body::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: 90;
+  z-index: 0;
   pointer-events: none;
-  opacity: 0.42;
-  mix-blend-mode: soft-light;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
+  background:
+    radial-gradient(120% 70% at 50% -20%, color-mix(in oklab, var(--gold-4) 18%, transparent), transparent 62%),
+    radial-gradient(80% 50% at 100% 100%, color-mix(in oklab, var(--ink) 6%, transparent), transparent 70%);
+  opacity: light-dark(1, 0.5);
 }
 
+body > * { position: relative; z-index: 1; }
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  font-variant-ligatures: no-contextual;
+  color: inherit;
+}
+
+img,
+svg { max-width: 100%; }
+
+a {
+  color: var(--gold-text);
+  text-decoration-color: color-mix(in oklab, var(--gold-text) 45%, transparent);
+  text-underline-offset: 3px;
+}
+
+a:hover { text-decoration-color: var(--gold-text); }
+
 ::selection {
-  background: color-mix(in oklab, var(--accent) 30%, transparent);
+  background: color-mix(in oklab, var(--gold-3) 45%, transparent);
   color: var(--ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--gold-text);
+  outline-offset: 3px;
 }
 
 /* Chrome ignores ::-webkit-scrollbar once scrollbar-color is set, so the
-   standard properties go behind a @supports guard. */
+   standard property is kept out of its way. */
 @supports not selector(::-webkit-scrollbar) {
-  html, pre, .scroll, .tscroll {
-    scrollbar-color: var(--line) transparent;
+  * {
+    scrollbar-color: color-mix(in oklab, var(--gold-1) 60%, var(--ink)) transparent;
     scrollbar-width: thin;
   }
 }
 
 ::-webkit-scrollbar { width: 11px; height: 11px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-track { background: color-mix(in oklab, var(--ink) 5%, transparent); }
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in oklab, var(--ink-faint) 42%, transparent);
-  border: 3px solid var(--paper);
-  border-radius: 99px;
+  background: linear-gradient(180deg, var(--gold-2), var(--gold-0));
+  border: 2px solid var(--ground);
+  border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in oklab, var(--accent) 70%, var(--ink-faint));
+  background: linear-gradient(180deg, var(--gold-4), var(--gold-1));
 }
-pre::-webkit-scrollbar-thumb { border-color: var(--surface-2); }
+::-webkit-scrollbar-corner { background: transparent; }
+pre::-webkit-scrollbar-thumb { border-color: var(--steel); }
 
-.tscroll { overflow-x: auto; }
-.tscroll > table { min-width: 520px; }
-
-a {
-  color: var(--accent-text);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-  text-decoration-color: color-mix(in oklab, var(--accent) 40%, transparent);
-}
-a:hover {
-  color: color-mix(in oklab, var(--accent-text) 80%, var(--ink));
-  text-decoration-color: currentColor;
-}
+/* ------------------------------------------------------------ typography */
 
 h1, h2, h3, h4 {
-  font-family: var(--display);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.028em;
-  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.015em;
   margin: 0;
   text-wrap: balance;
 }
 
-p { margin: 0 0 1em; text-wrap: pretty; }
-p:last-child { margin-bottom: 0; }
+p { margin: 0 0 1em; }
 
-code, kbd, pre, textarea { font-family: var(--mono); }
-
-/* ------------------------------------------------------------- layout */
-
-.wrap {
-  width: 100%;
-  max-width: var(--maxw);
-  margin: 0 auto;
-  padding: 0 30px;
+.display {
+  font-size: clamp(2.6rem, 6.6vw, 5.2rem);
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  font-weight: 500;
 }
 
-.grid { display: grid; gap: 22px; grid-template-columns: minmax(0, 1fr); }
+h2 {
+  font-size: clamp(1.65rem, 3vw, 2.5rem);
+  line-height: 1.06;
+}
+
+h3 {
+  font-size: 1.22rem;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+
+h4 { font-size: 1rem; }
+
+/* A word set in gold leaf: the gradient is the foil, the shadow is the strike.
+   A clipped gradient is painted inside the element's own box, and display type
+   at a tight leading reaches past it — so the span carries its own padding. */
+.gilt {
+  display: inline-block;
+  background-image: var(--gilt);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding: 0.18em 0.06em;
+  margin: -0.18em -0.06em;
+  filter: drop-shadow(0 1px 0 color-mix(in oklab, var(--gold-0) 45%, transparent));
+}
+
+/* Struck the other way: silver foil. */
+.argent {
+  background-image: var(--argent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 1px 0 color-mix(in oklab, #000 30%, transparent));
+}
+
+/* The engraved counter-stroke, for a hairline rule of type. */
+.eyebrow,
+.label {
+  font-family: var(--font-body);
+  font-size: 0.688rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.label.gold { color: var(--gold-text); }
+
+.num-index {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.24em;
+  font-variant-numeric: lining-nums;
+  color: var(--gold-text);
+}
+
+code, kbd, samp {
+  font-family: var(--font-mono);
+  font-size: 0.895em;
+}
+
+p code,
+li code,
+td code,
+.note code,
+blockquote code {
+  background: color-mix(in oklab, var(--gold-3) 14%, transparent);
+  border: var(--hair) solid color-mix(in oklab, var(--gold-1) 26%, transparent);
+  padding: 0.1em 0.32em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- layout */
+
+.wrap {
+  width: min(100% - 44px, var(--maxw));
+  margin-inline: auto;
+}
+
+@media (width <= 860px) {
+  .wrap { width: min(100% - 26px, var(--maxw)); }
+}
+
+.band { padding: 74px 0; }
+.band + .band { border-top: var(--hair) solid var(--line-soft); }
+.band-head { max-width: 62ch; margin-bottom: 34px; }
+.band-head h2 { margin: 10px 0 12px; }
+.band-head p { color: var(--ink-soft); margin: 0; }
+
+.grid { display: grid; gap: 22px; }
+.grid > * { min-width: 0; }
 .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
-@media (width <= 860px) {
-  .grid.two, .grid.three, .grid.four { grid-template-columns: minmax(0, 1fr); }
-  .wrap { padding: 0 18px; }
+@media (width <= 1000px) {
+  .grid.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* ---------------------------------------------------------------- nav */
+@media (width <= 860px) {
+  .band { padding: 52px 0; }
+  .grid.two,
+  .grid.three,
+  .grid.four { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ------------------------------------------------------------- ornaments */
+
+/* A hairline of gold leaf, tapering at both ends, with a struck lozenge. */
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  color: var(--gold-2);
+}
+.rule::before,
+.rule::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, currentColor 18%, currentColor 82%, transparent);
+  opacity: 0.8;
+}
+.rule i {
+  width: 7px;
+  height: 7px;
+  background: var(--gilt-edge);
+  rotate: 45deg;
+  flex: none;
+}
+
+/* Engine-turned ground: interlaced rings, the way a banknote is ruled. */
+.guilloche {
+  height: 18px;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--gold-1) 35%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--gold-1) 35%, transparent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Cg fill='none' stroke='%238a6520' stroke-opacity='0.75' stroke-width='0.6'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Ccircle cx='0' cy='0' r='7'/%3E%3Ccircle cx='22' cy='0' r='7'/%3E%3Ccircle cx='0' cy='22' r='7'/%3E%3Ccircle cx='22' cy='22' r='7'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 22px 22px;
+  mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  opacity: 0.6;
+}
+
+/* A struck oval around a numeral, as on a coin. */
+.coin {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2a1f08;
+  background: radial-gradient(circle at 34% 26%, var(--gold-4), var(--gold-2) 58%, var(--gold-1));
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, #fff 55%, transparent),
+    inset 0 -1px 1px color-mix(in oklab, #000 40%, transparent),
+    0 1px 0 color-mix(in oklab, #000 22%, transparent);
+  text-shadow: 0 1px 0 color-mix(in oklab, #fff 30%, transparent);
+}
+
+/* ---------------------------------------------------------------- header */
 
 .top {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: color-mix(in oklab, var(--paper) 90%, transparent);
-  backdrop-filter: blur(14px) saturate(1.1);
-  border-bottom: 1px solid var(--line);
+  background: color-mix(in oklab, var(--ground) 88%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: var(--hair) solid var(--line-soft);
+}
+
+.top::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--gold-2) 60%, transparent) 30%, color-mix(in oklab, var(--gold-4) 85%, transparent) 50%, color-mix(in oklab, var(--gold-2) 60%, transparent) 70%, transparent);
+  opacity: 0.85;
 }
 
 .top .wrap {
   display: flex;
   align-items: center;
   gap: 18px;
-  min-height: 64px;
+  height: 62px;
 }
 
 .mark {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: 21px;
-  letter-spacing: -0.045em;
+  font-family: var(--font-display);
+  font-size: 1.24rem;
+  letter-spacing: -0.01em;
   color: var(--ink);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .mark .glyph {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 30px;
-  flex: none;
-  border-radius: 2px;
-  background: var(--accent);
-  color: #24140c;
-  font-family: var(--mono);
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: -0.06em;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #2a1f08;
+  background: var(--gilt);
+  clip-path: var(--cut-sm);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 60%, transparent);
 }
 
-.mark .glyph b { color: #f6e9e9; font-weight: 500; }
+.mark b { font-weight: 500; }
 
-.nav { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
 
 .nav a {
   position: relative;
-  padding: 8px 11px;
-  border-radius: 0;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+  padding: 7px 11px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-faint);
-  text-decoration: none;
-}
-
-.nav a:hover { color: var(--ink); background: none; }
-.nav a:hover::after {
-  content: "";
-  position: absolute;
-  left: 11px; right: 11px; bottom: 2px;
-  height: 1px;
-  background: var(--line);
-}
-.nav a[aria-current="page"] { color: var(--ink); background: none; }
-.nav a[aria-current="page"]::after {
-  content: "";
-  position: absolute;
-  left: 11px; right: 11px; bottom: 2px;
-  height: 2px;
-  background: var(--accent);
-}
-
-/* icon-only links must not inherit the text links' padding */
-.nav a.icon, .mark { padding: 0; }
-.nav a.icon {
-  display: inline-grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 2px;
   color: var(--ink-soft);
+  text-decoration: none;
+  white-space: nowrap;
 }
-.nav a.icon:hover { background: var(--surface-2); color: var(--ink); }
-.nav a.icon:hover::after { content: none; }
-.nav a.icon svg { display: block; width: 17px; height: 17px; }
 
+.nav a::after {
+  content: "";
+  position: absolute;
+  left: 11px;
+  right: 11px;
+  bottom: 2px;
+  height: 1px;
+  background: var(--gilt);
+  scale: 0 1;
+  transform-origin: left;
+  transition: scale 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.nav a:hover { color: var(--ink); }
+.nav a:hover::after { scale: 1 1; }
+
+.nav a[aria-current="page"] { color: var(--ink); }
+.nav a[aria-current="page"]::after { scale: 1 1; }
+
+/* Icon buttons keep their own padding, so the glyph is not squeezed. */
+.nav a.icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--ink-faint);
+}
+.nav a.icon::after { display: none; }
+.nav a.icon svg { width: 15px; height: 15px; display: block; }
+.nav a.icon:hover { color: var(--gold-text); }
+
+/* Narrow screens: the links tighten rather than disappear, and the header
+   takes a second line before it would push anything off the page. */
 @media (width <= 860px) {
-  .nav { gap: 0; margin-left: auto; }
-  .nav a { padding: 7px 7px; font-size: 10.5px; letter-spacing: 0.06em; }
-  .nav a.icon { width: 30px; height: 30px; }
-  .nav a[aria-current="page"]::after, .nav a:hover::after { left: 7px; right: 7px; }
-  .mark { font-size: 19px; }
-  .mark .glyph { width: 32px; height: 28px; }
+  .top .wrap { height: 56px; gap: 10px; }
+  .mark { font-size: 1.08rem; }
+  .mark .glyph { width: 23px; height: 23px; }
+  .nav { gap: 0; }
+  .nav a { padding: 6px 7px; letter-spacing: 0.1em; font-size: 0.64rem; }
+  .nav a::after { left: 7px; right: 7px; }
+  .nav a.icon { width: 28px; height: 28px; }
+  .nav a.icon svg { width: 14px; height: 14px; }
 }
 
-/* On a narrow phone the wordmark and the six links need two rows, not a squeeze. */
-@media (width <= 560px) {
-  .top .wrap { flex-wrap: wrap; gap: 6px 12px; padding-top: 10px; padding-bottom: 10px; }
-  .nav { width: 100%; margin-left: 0; justify-content: space-between; }
+@media (width <= 620px) {
+  .top .wrap {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 7px 0 8px;
+    row-gap: 2px;
+  }
+  .mark { font-size: 1rem; }
+  .nav {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+  }
+  .nav a { padding: 5px 4px; font-size: 0.6rem; letter-spacing: 0.06em; }
+  .nav a::after { left: 4px; right: 4px; }
 }
 
-/* --------------------------------------------------------------- hero */
+/* ----------------------------------------------------------------- plate */
 
-.hero {
+/* A plate is a piece of struck steel with a cut edge and a hairline of gold
+   in the cut. `::before` is the surface, so the ring shows through. */
+.plate {
   position: relative;
-  padding: 82px 0 76px;
-  overflow: hidden;
+  isolation: isolate;
+  background: var(--gilt-edge);
+  padding: 1px;
+  clip-path: var(--cut);
+  /* A plate carries its own ink: light text on steel, in either theme. */
+  color: var(--on-steel);
 }
 
-/* A dot matrix rather than a line grid: it reads as stock, not as a chart. */
-.hero::before {
+.plate h1,
+.plate h2,
+.plate h3,
+.plate h4 { color: var(--on-steel); }
+
+.plate p { color: var(--on-steel-dim); }
+.plate a { color: var(--gold-3); }
+.plate code { color: var(--gold-4); }
+
+.plate::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  clip-path: var(--cut);
+  background-color: var(--steel);
+  background-image:
+    repeating-linear-gradient(90deg, color-mix(in oklab, #fff 3%, transparent) 0 1px, transparent 1px 3px),
+    radial-gradient(140% 120% at 12% -20%, color-mix(in oklab, #fff 7%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--steel-2), var(--steel));
+}
+
+.plate.rivets::before {
+  background-image:
+    radial-gradient(circle at 13px 13px, color-mix(in oklab, var(--gold-3) 70%, transparent) 0 1.6px, transparent 2px),
+    radial-gradient(circle at calc(100% - 19px) 13px, color-mix(in oklab, var(--gold-3) 70%, transparent) 0 1.6px, transparent 2px),
+    radial-gradient(circle at 13px calc(100% - 13px), color-mix(in oklab, var(--gold-3) 70%, transparent) 0 1.6px, transparent 2px),
+    radial-gradient(circle at calc(100% - 19px) calc(100% - 13px), color-mix(in oklab, var(--gold-3) 70%, transparent) 0 1.6px, transparent 2px),
+    repeating-linear-gradient(90deg, color-mix(in oklab, #fff 3%, transparent) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, var(--steel-2), var(--steel));
+}
+
+/* Foil that follows the pointer across a plate. */
+.plate.lit { --mx: 50%; --my: 0%; }
+.plate.lit::after {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(var(--grid) 1px, transparent 1.1px);
-  background-size: 20px 20px;
-  mask-image: radial-gradient(105% 85% at 12% 0%, #000 8%, transparent 72%);
+  z-index: 0;
   pointer-events: none;
+  background: radial-gradient(
+    260px circle at var(--mx) var(--my),
+    color-mix(in oklab, var(--gold-4) 16%, transparent),
+    transparent 68%
+  );
+  mix-blend-mode: screen;
 }
 
-.hero .wrap { position: relative; }
+.plate > * { position: relative; z-index: 1; }
 
-.hero-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 54px;
-  align-items: center;
+/* Bare code and editors inside a plate sit on steel, so they take its ink
+   rather than the page's. */
+.plate pre,
+.plate textarea {
+  margin: 0;
+  color: var(--on-steel);
+  background: none;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.8rem;
+  line-height: 1.72;
+  white-space: pre;
+  tab-size: 2;
+  border: 0;
+  overflow-x: auto;
 }
 
-@media (width <= 860px) {
-  .hero { padding: 48px 0 44px; }
-  .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+.plate textarea {
+  display: block;
+  width: 100%;
+  padding: 2px 0;
+  resize: none;
+  field-sizing: content;
+  min-height: 4.6em;
+  max-height: 42vh;
+  caret-color: var(--gold-3);
 }
 
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent-text);
-  margin-bottom: 24px;
+.plate textarea:focus { outline: none; }
+
+.plate pre code {
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  white-space: inherit;
 }
 
-.eyebrow::before {
+.card { padding: 22px 24px; }
+.card h3 { margin-bottom: 8px; }
+.card p { margin: 0; color: var(--ink-soft); font-size: 0.95rem; }
+
+/* ------------------------------------------------------------- code plate */
+
+.code-block {
+  position: relative;
+  isolation: isolate;
+  background: var(--gilt-edge);
+  padding: 1px;
+  clip-path: var(--cut);
+  margin: 18px 0;
+}
+
+.code-block::before {
   content: "";
-  width: 30px;
-  height: 2px;
-  background: var(--accent);
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  clip-path: var(--cut);
+  background-color: var(--steel);
+  background-image:
+    repeating-linear-gradient(90deg, color-mix(in oklab, #fff 2.5%, transparent) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, var(--steel-2), var(--steel));
 }
 
-h1.display {
-  font-size: clamp(2.35rem, 4.6vw, 3.6rem);
-  font-weight: 800;
-  line-height: 1.02;
-  letter-spacing: -0.045em;
-  margin-bottom: 22px;
+.code-block > * { position: relative; }
+
+.code-block pre,
+pre.code {
+  margin: 0;
+  padding: 15px 18px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  /* A regular weight in a mono face reads thin against steel; the medium cut
+     keeps plain identifiers level with the bold keywords beside them. */
+  font-weight: 500;
+  font-size: 0.8125rem;
+  line-height: 1.72;
+  color: var(--on-steel);
+  tab-size: 2;
+  white-space: pre;
+  background: none;
 }
 
-h1.display .fill { color: var(--accent); }
+.code-block pre + pre { border-top: var(--hair) solid var(--steel-line); }
 
-/* The word "hole" is a hole: a tinted slot cut into the line, filled with ink.
-   Its own line-height is tightened so the tint hugs the glyphs. */
-h1.display .hole {
-  color: var(--ink);
-  background: var(--mark);
-  line-height: 0.92;
-  padding: 0 0.07em 0.02em;
-  border-radius: 2px;
-}
-
-.lede {
-  font-size: clamp(1rem, 1.25vw, 1.09rem);
-  line-height: 1.66;
-  color: var(--ink-soft);
-  max-width: 44ch;
-  margin-bottom: 30px;
-}
-
-.cta { display: flex; flex-wrap: wrap; gap: 10px; }
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 12px 20px;
-  border-radius: 2px;
-  border: 1px solid transparent;
-  font-size: 14.5px;
-  font-weight: 600;
-  font-family: var(--body);
-  letter-spacing: -0.01em;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
-}
-
-.btn.primary { background: var(--solid); border-color: var(--solid); color: var(--on-solid); }
-.btn.primary:hover { background: var(--accent); border-color: var(--accent); color: #24140c; }
-.btn.ghost { background: transparent; border-color: var(--line); color: var(--ink); }
-.btn.ghost:hover { background: var(--surface-2); border-color: var(--ink-faint); color: var(--ink); }
-.btn svg { width: 15px; height: 15px; display: block; }
-
-/* ---------------------------------------------------------------- card */
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-
-/* The hero's plate sits above the page rather than in it. */
-.card.slab {
-  box-shadow: 14px 14px 0 -1px color-mix(in oklab, var(--accent) 16%, transparent);
+.code-block pre code,
+pre.code code {
+  font-size: 1em;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  white-space: inherit;
 }
 
 .card-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 11px 15px;
-  border-bottom: 1px solid var(--line-soft);
-  background: var(--surface-2);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  gap: 9px;
+  padding: 9px 15px;
+  border-bottom: var(--hair) solid var(--steel-line);
+  font-family: var(--font-mono);
+  font-size: 0.688rem;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--on-steel-dim);
+  background: linear-gradient(180deg, color-mix(in oklab, #fff 5%, transparent), transparent);
 }
 
-.card-head .dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--line);
-  flex: none;
-}
-.card-head .dot.hole { background: var(--ink-faint); }
-.card-head .dot.attr { background: var(--accent); }
-.card-head .dot.gen { background: var(--ink); }
+.card-head .name { color: var(--on-steel); letter-spacing: 0.05em; }
 .card-head .spacer { margin-left: auto; }
-.card-head .name { color: var(--ink-soft); letter-spacing: 0.06em; }
-
-.stack { display: grid; gap: 0; }
-.stack > .pane { border-bottom: 1px solid var(--line-soft); }
-.stack > .pane:last-child { border-bottom: 0; }
-
-/* The pipeline between panes: what carries one into the next. */
-.stack .link {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 7px 15px;
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--line-soft);
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--ink-faint);
-}
-
-.stack .link::before {
-  content: "";
-  width: 1px;
-  height: 14px;
-  background: var(--accent);
-  flex: none;
-}
-
-.stack .link .call {
-  color: var(--accent-text);
-  background: var(--accent-wash);
-  border-radius: 2px;
-  padding: 2px 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.stack .link .via {
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-size: 9.5px;
-}
-
-.pane-label {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 10px 15px 0;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.pane-label .tag {
-  padding: 2px 7px;
-  border-radius: 2px;
-  font-size: 9.5px;
-  letter-spacing: 0.1em;
-  border: 1px solid transparent;
-}
-/* Three treatments, one palette: filled, solid accent, outline. */
-.pane-label .tag.a { background: var(--ink); color: var(--paper); }
-.pane-label .tag.h { background: var(--accent); color: #24140c; }
-.pane-label .tag.g { background: transparent; color: var(--ink-soft); border-color: var(--line); }
-
-/* ------------------------------------------------------------ code area */
-
-pre, .code {
-  margin: 0;
-  padding: 15px 17px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  font-size: 12.8px;
-  line-height: 1.68;
-  tab-size: 2;
-  white-space: pre;
-  background: transparent;
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-}
-
-pre code { font: inherit; color: inherit; }
-
-.pane pre { background: transparent; }
-
-/* The plate runs one step smaller so the generator's header line fits. */
-.stack pre, .stack textarea { font-size: 11.8px; }
-
-.code-block {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-.code-block > pre { padding: 14px 16px; }
-
-.grid.three .code-block > pre,
-.grid.four .code-block > pre { font-size: 11.7px; padding: 13px 14px; }
-
-.code-block.with-head > pre { border-radius: 0; }
-
-.output {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-.output > pre { background: transparent; }
-
-/* Syntax: names carry weight, literals carry the only two warm tones. */
-.tk-com { color: var(--ink-faint); font-style: normal; }
-.tk-str { color: light-dark(#7d4630, #e0b09a); }
-.tk-key { color: var(--ink); font-weight: 700; }
-.tk-ty  { color: light-dark(#5c4a46, #cbb6b1); }
-.tk-num { color: var(--accent-text); }
-.tk-hole {
-  color: var(--ink);
-  background: color-mix(in oklab, var(--accent) 14%, transparent);
-  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--accent) 55%, transparent);
-  border-radius: 2px;
-  padding: 0 2px;
-  font-weight: 500;
-}
-.tk-attr {
-  color: var(--accent-text);
-  background: var(--accent-wash);
-  border-radius: 2px;
-  padding: 0 3px;
-  font-weight: 500;
-}
-.tk-punct { color: light-dark(#8d7a76, #8e7a75); }
-
-/* Non-ASCII graphemes get a fixed advance so trailing comments line up. */
-.w2 { display: inline-block; width: 2ch; }
-.w1 { display: inline-block; width: 1ch; }
-
-/* ---------------------------------------------------------------- band */
-
-main { counter-reset: band; }
-
-.band { padding: 68px 0; border-top: 1px solid var(--line); }
-.band.alt { background: var(--paper-deep); }
-
-.band-head { margin-bottom: 34px; max-width: 64ch; counter-increment: band; }
-
-.band-head .kicker {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--accent-text);
-  margin-bottom: 16px;
-}
-.band-head .kicker::before {
-  content: counter(band, decimal-leading-zero);
-  color: var(--accent);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-.band-head .kicker::after {
-  content: "";
-  flex: 1 1 auto;
-  height: 1px;
-  background: var(--line);
-}
-
-.band-head h2 { font-size: clamp(1.55rem, 3vw, 2.15rem); margin-bottom: 14px; }
-.band-head p { color: var(--ink-soft); font-size: 1rem; }
-
-/* ------------------------------------------------------------ features */
-
-.feature {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 22px 20px;
-  display: grid;
-  gap: 10px;
-  align-content: start;
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
-}
-
-.feature:hover {
-  transform: translate(-2px, -2px);
-  border-color: color-mix(in oklab, var(--accent) 45%, var(--line));
-  box-shadow: 5px 5px 0 color-mix(in oklab, var(--accent) 22%, transparent);
-}
-
-.feature .glyph {
-  font-family: var(--mono);
-  font-size: 15px;
-  width: 34px; height: 34px;
-  display: grid; place-items: center;
-  border-radius: 2px;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--accent-text);
-  margin-bottom: 6px;
-}
-
-.feature h3 { font-size: 1.05rem; letter-spacing: -0.02em; }
-.feature p { color: var(--ink-soft); font-size: 14.4px; margin: 0; line-height: 1.6; }
-
-/* --------------------------------------------------------------- layers */
-
-.layer {
-  border-left: 2px solid var(--ink);
-  padding: 2px 0 2px 18px;
-  display: grid;
-  gap: 8px;
-}
-
-.layer.a { border-left-color: var(--accent); }
-
-.layer .n {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--accent-text);
-}
-.layer h3 { font-size: 1.2rem; letter-spacing: -0.03em; }
-.layer p { color: var(--ink-soft); font-size: 14.6px; margin: 0; line-height: 1.6; }
-
-/* --------------------------------------------------------------- numbers */
-
-.numbers {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0;
-  background: none;
-  border: 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
-  overflow: hidden;
-}
-
-@media (width <= 860px) { .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-
-.numbers > div {
-  background: none;
-  padding: 26px 24px;
-  display: grid;
-  gap: 8px;
-  border-left: 1px solid var(--line-soft);
-}
-.numbers > div:first-child { border-left: 0; padding-left: 0; }
-
-@media (width <= 860px) {
-  .numbers > div { padding: 22px 18px; }
-  .numbers > div:nth-child(odd) { border-left: 0; padding-left: 0; }
-  .numbers > div:nth-child(3), .numbers > div:nth-child(4) { border-top: 1px solid var(--line-soft); }
-}
-
-.numbers .n {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(2.4rem, 4.4vw, 3.2rem);
-  letter-spacing: -0.05em;
-  line-height: 0.92;
-  color: var(--ink);
-  display: block;
-}
-.numbers .n::after {
-  content: "";
-  display: block;
-  width: 16px;
-  height: 2px;
-  margin-top: 12px;
-  background: var(--accent);
-}
-.numbers .l { font-size: 13px; line-height: 1.45; color: var(--ink-faint); max-width: 22ch; }
-
-/* ----------------------------------------------------------------- pipe */
-
-.pipe { display: grid; gap: 0; }
-
-.pipe-step {
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: 16px;
-  align-items: start;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--line-soft);
-}
-.pipe-step:first-child { padding-top: 0; }
-.pipe-step:last-child { border-bottom: 0; padding-bottom: 0; }
-
-.pipe-step .i {
-  display: grid;
-  place-items: center;
-  width: 30px; height: 30px;
-  border-radius: 2px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--ink-faint);
-}
-
-.pipe-step.on .i {
-  border-color: var(--accent);
-  color: var(--accent-text);
-  background: var(--accent-wash);
-}
-
-.pipe-step h4 { font-size: 0.98rem; margin-bottom: 3px; letter-spacing: -0.02em; }
-.pipe-step p { margin: 0; font-size: 14.2px; color: var(--ink-soft); line-height: 1.6; }
-
-/* --------------------------------------------------------------- tables */
-
-table.api, table.plain {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14.2px;
-}
-
-table.plain th, table.plain td {
-  text-align: left;
-  padding: 11px 14px;
-  border-bottom: 1px solid var(--line-soft);
-  vertical-align: top;
-}
-
-table.plain th {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  background: var(--surface-2);
-}
-table.plain tbody tr:last-child td { border-bottom: 0; }
-table.plain td code { font-size: 12.6px; color: var(--ink); }
-
-/* ---------------------------------------------------------------- quote */
-
-blockquote, .note {
-  margin: 0;
-  border-left: 2px solid var(--accent);
-  border-radius: 0;
-  background: none;
-  padding: 4px 0 4px 18px;
-  font-family: var(--serif);
-  font-size: 1.12rem;
-  line-height: 1.5;
-  color: var(--ink-soft);
-  letter-spacing: 0.005em;
-}
-blockquote code, .note code { font-size: 0.82em; }
-
-.note.warn {
-  border-left-color: var(--warn);
-  font-family: var(--body);
-  font-size: 14.6px;
-  background: color-mix(in oklab, var(--warn) 7%, transparent);
-  padding: 12px 16px;
-}
-
-/* ------------------------------------------------------------------ doc */
-
-.doc {
-  display: grid;
-  grid-template-columns: 236px minmax(0, 1fr);
-  gap: 44px;
-  align-items: start;
-  padding: 48px 0 76px;
-}
-
-@media (width <= 960px) {
-  .doc { grid-template-columns: minmax(0, 1fr); gap: 26px; }
-}
-
-.side {
-  position: sticky;
-  top: 88px;
-  max-height: calc(100vh - 116px);
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-@media (width <= 960px) { .side { position: static; max-height: none; } }
-
-.side h4 {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin: 0 0 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.side a {
-  display: block;
-  padding: 6px 12px;
-  margin-left: -12px;
-  border-left: 2px solid transparent;
-  border-radius: 0;
-  font-size: 14px;
-  color: var(--ink-soft);
-  text-decoration: none;
-}
-
-.side a:hover { color: var(--ink); background: var(--surface-2); }
-.side a.on {
-  border-left-color: var(--accent);
-  color: var(--ink);
-  font-weight: 600;
-  background: color-mix(in oklab, var(--accent) 7%, transparent);
-}
-.side a.sub { padding-left: 22px; font-size: 13.4px; }
-.side .group { margin-bottom: 22px; }
-
-.prose { min-width: 0; }
-
-.prose > section { margin-bottom: 56px; scroll-margin-top: 88px; }
-.prose > section > h2 {
-  font-size: clamp(1.45rem, 2.5vw, 1.9rem);
-  margin-bottom: 12px;
-  padding-bottom: 13px;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-.prose > section > h2::before {
-  content: "";
-  width: 5px;
-  height: 5px;
-  flex: none;
-  background: var(--accent);
-  transform: translateY(-0.28em) rotate(45deg);
-}
-.prose h3 { font-size: 1.13rem; margin: 28px 0 8px; letter-spacing: -0.02em; }
-.prose h4 { font-size: 1rem; margin: 22px 0 6px; }
-.prose p { color: var(--ink-soft); line-height: 1.68; }
-.prose ul { color: var(--ink-soft); padding-left: 20px; }
-.prose li { margin-bottom: 5px; }
-.prose strong { color: var(--ink); font-weight: 600; }
-
-.prose code:not(pre code) {
-  background: var(--surface-2);
-  border: 1px solid var(--line-soft);
-  border-radius: 2px;
-  padding: 0.06em 0.34em;
-  font-size: 0.87em;
-  white-space: nowrap;
-  color: var(--ink);
-}
-
-.step-n {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--accent-text);
-  display: block;
-  margin-bottom: 8px;
-}
-
-/* ------------------------------------------------------------------ api */
-
-.pkg { margin-bottom: 46px; scroll-margin-top: 88px; }
-.pkg > h2 {
-  font-size: 1.45rem;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.pkg > h2 .path { font-family: var(--mono); font-size: 0.68em; color: var(--accent-text); font-weight: 500; letter-spacing: 0; }
-.pkg > .about { color: var(--ink-soft); margin-bottom: 20px; font-size: 14.6px; }
-
-.entry {
-  border-top: 1px solid var(--line-soft);
-  padding: 17px 0;
-  scroll-margin-top: 88px;
-}
-
-.entry .sig {
-  font-family: var(--mono);
-  font-size: 13px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-left: 2px solid var(--accent);
-  border-radius: 0 var(--bar) var(--bar) 0;
-  padding: 10px 14px;
-  overflow-x: auto;
-  white-space: pre;
-  margin-bottom: 9px;
-  color: var(--ink);
-}
-
-.entry.kind-type .sig { border-left-color: var(--ink); }
-.entry.kind-error .sig { border-left-color: var(--warn); }
-
-.entry .doc {
-  display: block;
-  color: var(--ink-soft);
-  font-size: 14.4px;
-  line-height: 1.66;
-  padding: 0;
-  gap: 0;
-}
-.entry .doc p { margin: 0 0 0.5em; }
-.entry .doc p:last-child { margin-bottom: 0; }
-.entry .doc code {
-  background: var(--surface-2);
-  border: 1px solid var(--line-soft);
-  border-radius: 2px;
-  padding: 0.05em 0.3em;
-  font-size: 0.87em;
-  color: var(--ink);
-}
-.entry .doc pre { margin: 9px 0; }
-
-.entry .doc pre {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  padding: 11px 13px;
-  font-size: 12.4px;
-  overflow-x: auto;
-}
-
-/* The anchor is a reference, not part of the signature: it appears on approach. */
-.entry .anchor {
-  color: var(--ink-faint);
-  text-decoration: none;
-  font-size: 12px;
-  margin-left: 6px;
-  opacity: 0;
-  transition: opacity 120ms ease;
-}
-.entry:hover .anchor, .entry .anchor:focus-visible { opacity: 1; color: var(--accent); }
-
-.params { margin: 9px 0 0; padding: 0; list-style: none; font-size: 14px; }
-.params li { padding: 5px 0; border-top: 1px dashed var(--line-soft); color: var(--ink-soft); }
-.params li:first-child { border-top: 0; }
-.params .pname { font-family: var(--mono); font-size: 12.8px; color: var(--ink); }
-
-/* ----------------------------------------------------------------- play */
-
-.play {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 18px;
-  align-items: stretch;
-}
-
-@media (width <= 960px) { .play { grid-template-columns: minmax(0, 1fr); } }
-
-.pane-box {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.hero .pane-box textarea {
-  min-height: 116px;
-  field-sizing: content;
-}
-
-.pane-box textarea {
-  display: block;
-  width: 100%;
-  flex: 1 1 auto;
-  min-height: 320px;
-  border: 0;
-  padding: 15px 17px;
-  font-size: 12.8px;
-  line-height: 1.68;
-  color: var(--ink);
-  background: var(--surface);
-  resize: vertical;
-  white-space: pre;
-  overflow-wrap: normal;
-  overflow-x: auto;
-}
-
-.pane-box textarea:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
-
-.out-pre {
-  margin: 0;
-  padding: 15px 17px;
-  flex: 1 1 auto;
-  min-height: 320px;
-  font-size: 12.8px;
-  line-height: 1.68;
-  white-space: pre;
-  overflow: auto;
-  background: var(--surface);
-  color: var(--ink);
-}
-
-.out-pre.err { color: var(--warn); }
-
-.fills {
-  padding: 13px 15px;
-  border-top: 1px solid var(--line-soft);
-  background: var(--surface-2);
-  display: grid;
-  gap: 10px;
-}
-.fills:empty { display: none; }
-
-.fill-row {
-  display: grid;
-  grid-template-columns: minmax(0, 132px) minmax(0, 92px) minmax(0, 1fr);
-  gap: 8px;
-  align-items: center;
-}
-
-@media (width <= 620px) { .fill-row { grid-template-columns: minmax(0, 1fr); } }
-
-.fill-row .hn {
-  font-family: var(--mono);
-  font-size: 12.2px;
-  color: var(--accent-text);
-  background: var(--accent-wash);
-  border-radius: 2px;
-  padding: 3px 7px;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.fill-row input, .fill-row select {
-  width: 100%;
-  min-width: 0;
-  padding: 7px 9px;
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  background: var(--surface);
-  color: var(--ink);
-  font-size: 12.8px;
-  font-family: var(--mono);
-}
-.fill-row select { font-family: var(--body); }
-.fill-row input:focus, .fill-row select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  padding: 12px 15px;
-  border-bottom: 1px solid var(--line-soft);
-  background: var(--surface-2);
-}
-
-.chip {
-  padding: 6px 12px;
-  border-radius: 2px;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--ink-soft);
-  font-size: 12.5px;
-  font-weight: 500;
-  font-family: var(--mono);
-  letter-spacing: 0.02em;
-  cursor: pointer;
-}
-
-.chip:hover { border-color: var(--ink-faint); color: var(--ink); }
-.chip[aria-pressed="true"] {
-  background: var(--solid);
-  border-color: var(--solid);
-  color: var(--on-solid);
-}
 
 .status {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 9px 15px;
-  border-top: 1px solid var(--line-soft);
-  background: var(--surface-2);
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.09em;
+  padding: 8px 15px;
+  border-top: var(--hair) solid var(--steel-line);
+  font-family: var(--font-mono);
+  font-size: 0.688rem;
+  letter-spacing: 0.06em;
+  color: var(--on-steel-faint);
+  background: color-mix(in oklab, #000 16%, transparent);
+}
+.status .spacer { margin-left: auto; }
+
+/* Stamped marks, one per layer: silver, gold, bronze. */
+.dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  rotate: 45deg;
+  background: var(--gold-3);
+}
+.dot.attr { background: var(--silver-2); }
+.dot.hole { background: var(--gold-4); }
+.dot.gen  { background: #c98a4b; }
+.status.ready .dot { background: #9fd08a; }
+.status.bad .dot { background: #e08d7a; }
+
+/* ------------------------------------------------------------- syntax ink */
+
+.tk-com  { color: var(--on-steel-faint); }
+.tk-str  { color: #dcc091; }
+.tk-key  { color: #f3ead6; font-weight: 700; }
+.tk-ty   { color: #bcc7d4; }
+.tk-num  { color: #e2a45f; }
+.tk-punct{ color: #8b8577; }
+
+/* A hole is the thing the library is about: it is always gold. */
+.tk-hole {
+  color: #2a1f08;
+  background: var(--gilt);
+  padding: 0 2px;
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--gold-0) 60%, transparent);
+}
+
+.tk-attr {
+  color: #f6e7bb;
+  background: color-mix(in oklab, var(--gold-2) 16%, transparent);
+  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--gold-3) 55%, transparent);
+  padding: 0 2px;
+}
+
+/* Non-ASCII graphemes occupy whole character cells, so padding a trailing
+   comment with spaces lands where it should. */
+.w2 { display: inline-block; width: 2ch; }
+.w1 { display: inline-block; width: 1ch; }
+
+/* --------------------------------------------------------------- buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  background: transparent;
+  border: var(--hair) solid color-mix(in oklab, var(--gold-1) 55%, transparent);
+  clip-path: var(--cut-sm);
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btn:hover {
+  border-color: var(--gold-2);
+  background: color-mix(in oklab, var(--gold-3) 16%, transparent);
+}
+
+.btn.primary {
+  color: #231a06;
+  background: var(--gilt);
+  background-size: 200% 100%;
+  border-color: transparent;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, #fff 55%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, #000 22%, transparent);
+}
+
+.btn.primary:hover { background-position: 100% 0; }
+
+.btn svg { width: 14px; height: 14px; }
+
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* ------------------------------------------------------------------ hero */
+
+.hero {
+  position: relative;
+  padding: 68px 0 66px;
+  overflow: clip;
+}
+
+/* The specimen plate is printed on a ruled bed. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(90deg, color-mix(in oklab, var(--ink) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(180deg, color-mix(in oklab, var(--ink) 5%, transparent) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(120% 90% at 50% 0%, #000, transparent 78%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+:root[data-theme="dark"] .hero::before { opacity: 0.3; }
+
+.hero .wrap { position: relative; }
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+  gap: 46px;
+  align-items: start;
+}
+
+@media (width <= 1000px) {
+  .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 34px; }
+}
+
+.hero .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.hero .eyebrow::before {
+  content: "";
+  width: 26px;
+  height: 1px;
+  background: var(--gilt);
+}
+
+.hero .display { margin-bottom: 20px; }
+.hero .lede {
+  max-width: 46ch;
+  font-size: 1.02rem;
+  color: var(--ink-soft);
+  margin-bottom: 26px;
+}
+
+.hero .cta { margin-bottom: 26px; }
+
+/* Metal hallmark under the hero: the four packages, struck. */
+.hallmarks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  padding-top: 18px;
+  border-top: var(--hair) solid var(--line-soft);
+}
+.hallmarks span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+.hallmarks span::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  rotate: 45deg;
+  background: var(--gilt-edge);
+}
+
+/* ------------------------------------------------------------- the stack */
+
+.stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.stack > * { min-width: 0; }
+
+.pane-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 13px;
+  border-bottom: var(--hair) solid var(--steel-line);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-steel-dim);
+}
+
+.tag {
+  padding: 1px 6px;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: #15151a;
+  background: var(--gold-3);
+}
+.tag.h { background: var(--gold-4); }
+.tag.g { background: #c98a4b; }
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 4px 2px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   color: var(--ink-faint);
 }
 
-.status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-faint); flex: none; }
-.status.ready .dot { background: var(--accent); }
-.status.busy .dot { background: var(--accent-text); }
-.status.bad .dot { background: var(--warn); }
-.status .spacer { margin-left: auto; }
+.plate .link { color: var(--on-steel-faint); }
+.link::before {
+  content: "";
+  width: 1px;
+  height: 22px;
+  background: linear-gradient(180deg, transparent, var(--gold-2), transparent);
+  margin-right: 4px;
+}
+.link .call { color: var(--gold-text); }
+.plate .link .call { color: var(--gold-3); }
+.link .via { opacity: 0.7; }
 
-/* --------------------------------------------------------------- footer */
+/* ------------------------------------------------------------- stat strip */
 
-body > main,
-body > .wrap { flex: 1 0 auto; }
-
-footer.site {
-  margin-top: auto;
-  border-top: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--ink);
-  padding: 38px 0;
-  margin-top: 0;
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: var(--hair) solid var(--line-soft);
+  border-bottom: var(--hair) solid var(--line-soft);
 }
 
+.stats > div {
+  padding: 22px 18px 20px;
+  border-left: var(--hair) solid var(--line-soft);
+}
+.stats > div:first-child { border-left: 0; padding-left: 0; }
+
+.stats .n {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  font-weight: 600;
+  line-height: 1;
+  margin-bottom: 0.12em;
+  font-variant-numeric: lining-nums;
+  /* Foil, struck: a gold face with a light edge above and a shadow below. Fake
+     gradients on text clip; this does not. */
+  color: light-dark(#6f4f10, #edcf8b);
+  text-shadow:
+    0 1px 0 color-mix(in oklab, #fff 55%, transparent),
+    0 -1px 0 color-mix(in oklab, var(--gold-0) 22%, transparent);
+}
+
+.stats .l {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--ink-faint);
+}
+
+@media (width <= 700px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats > div:nth-child(3) { border-left: 0; padding-left: 0; }
+  .stats > div:nth-child(n + 3) { border-top: var(--hair) solid var(--line-soft); }
+}
+
+/* ----------------------------------------------------------- layer cards */
+
+.layer {
+  padding: 20px 0 0;
+  border-top: var(--hair) solid var(--line);
+}
+.layer .n {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--gold-text);
+}
+.layer h3 { margin: 8px 0 8px; }
+.layer p { color: var(--ink-soft); font-size: 0.94rem; margin: 0; }
+
+/* Steps of the chain, numbered on a coin. */
+.pipe { display: grid; }
+
+.pipe-step {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px 0;
+  border-top: var(--hair) solid var(--line-soft);
+}
+.pipe-step:first-child { border-top: 0; }
+.pipe-step h4 {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.pipe-step p { margin: 0; font-size: 0.9rem; color: var(--ink-soft); }
+
+/* ---------------------------------------------------------------- tables */
+
+.tscroll {
+  overflow-x: auto;
+  margin: 18px 0;
+}
+
+table.plain {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+table.plain th {
+  text-align: left;
+  padding: 9px 14px 9px 0;
+  font-family: var(--font-body);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-text);
+  border-bottom: var(--hair) solid color-mix(in oklab, var(--gold-1) 45%, transparent);
+  white-space: nowrap;
+}
+
+table.plain td {
+  padding: 11px 14px 11px 0;
+  vertical-align: top;
+  border-bottom: var(--hair) solid var(--line-soft);
+  color: var(--ink-soft);
+}
+
+table.plain tr:last-child td { border-bottom: 0; }
+table.plain td:first-child { color: var(--ink); }
+table.plain code { font-size: 0.82em; }
+
+/* ---------------------------------------------------- prose, notes, quote */
+
+.prose { min-width: 0; }
+.prose h2 { margin-bottom: 14px; }
+.prose h3 { margin: 30px 0 10px; }
+.prose > section + section {
+  margin-top: 56px;
+  padding-top: 34px;
+  border-top: var(--hair) solid var(--line-soft);
+}
+.prose p { color: var(--ink-soft); }
+.prose ul,
+.prose ol { color: var(--ink-soft); padding-left: 1.2em; margin: 0 0 1em; }
+.prose li { margin-bottom: 0.35em; }
+
+.step-n {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-text);
+  margin-bottom: 8px;
+}
+
+/* A straight gold bar on the left: no radius on that side, or it bows. */
+blockquote {
+  margin: 22px 0;
+  padding: 14px 20px;
+  border-left: 2px solid var(--gold-2);
+  border-radius: 0 4px 4px 0;
+  background: color-mix(in oklab, var(--gold-3) 9%, transparent);
+  font-family: var(--font-display);
+  font-size: 1.06rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+blockquote p { margin: 0; color: inherit; }
+
+.note {
+  margin: 22px 0;
+  padding: 14px 18px 14px 20px;
+  border-left: 2px solid var(--gold-2);
+  border-radius: 0 4px 4px 0;
+  background: color-mix(in oklab, var(--gold-3) 8%, transparent);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.note strong { color: var(--ink); }
+
+/* --------------------------------------------------------------- sidebar */
+
+.doc {
+  display: grid;
+  grid-template-columns: 214px minmax(0, 1fr);
+  gap: 46px;
+  padding: 44px 0 70px;
+  align-items: start;
+}
+
+@media (width <= 900px) {
+  .doc { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 26px; }
+}
+
+.side {
+  position: sticky;
+  top: 86px;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  border-left: var(--hair) solid var(--line-soft);
+  padding-left: 18px;
+}
+
+@media (width <= 900px) {
+  .side {
+    position: static;
+    max-height: none;
+    margin-bottom: 24px;
+    padding: 14px 0 14px 14px;
+    border-left: 0;
+    border-top: var(--hair) solid var(--line-soft);
+    border-bottom: var(--hair) solid var(--line-soft);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+  }
+  .side .group { display: contents; }
+  .side .group h4 { width: 100%; }
+}
+
+.side .group { margin-bottom: 20px; }
+
+.side h4 {
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-text);
+  margin-bottom: 8px;
+}
+
+.side a {
+  display: block;
+  margin-left: -19px;
+  padding: 4px 0 4px 10px;
+  font-size: 0.83rem;
+  color: var(--ink-faint);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.side a:hover { color: var(--ink); }
+.side a.on { color: var(--ink); border-left-color: var(--gold-2); }
+
+@media (width <= 900px) {
+  .side a {
+    display: inline-block;
+    margin-left: 0;
+    padding: 2px 7px;
+    border: var(--hair) solid var(--line-soft);
+    font-size: 0.72rem;
+  }
+  .side a.on { border-color: var(--gold-2); }
+  .side .group { margin-bottom: 10px; }
+  .side h4 { margin-bottom: 5px; }
+}
+
+.side a.sub {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+/* ------------------------------------------------------------ api entries */
+
+.pkg { margin-bottom: 56px; }
+.pkg h2 {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: var(--hair) solid color-mix(in oklab, var(--gold-1) 40%, transparent);
+}
+.pkg h2 .path {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+}
+.pkg .about { color: var(--ink-soft); max-width: 62ch; margin-top: 12px; }
+
+.prose h3.group-head {
+  margin: 34px 0 4px;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-text);
+}
+
+.entry {
+  padding: 14px 0 16px;
+  border-bottom: var(--hair) solid var(--line-soft);
+}
+
+.entry .sig {
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.entry .anchor {
+  opacity: 0;
+  margin-left: 6px;
+  color: var(--gold-text);
+  text-decoration: none;
+}
+.entry:hover .anchor,
+.entry .anchor:focus-visible { opacity: 1; }
+
+.entry .desc { margin-top: 6px; color: var(--ink-soft); font-size: 0.9rem; }
+.entry .desc p { margin: 0 0 0.6em; color: inherit; }
+.entry .desc pre {
+  margin: 10px 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+  background: var(--steel);
+  color: var(--on-steel);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.78rem;
+  line-height: 1.7;
+  border-left: 2px solid var(--gold-2);
+}
+.entry .desc pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  white-space: pre;
+}
+
+.entry .params {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+}
+.entry .params li { display: flex; gap: 8px; padding: 2px 0; }
+.entry .params .pname {
+  font-family: var(--font-mono);
+  color: var(--ink);
+  min-width: 0;
+}
+
+.entry.kind-error .sig { color: light-dark(#8a3520, #e6a08c); }
+
+/* ------------------------------------------------------------ playground */
+
+.play {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+@media (width <= 940px) {
+  .play { grid-template-columns: minmax(0, 1fr); }
+}
+
+.pane-box {
+  position: relative;
+  isolation: isolate;
+  background: var(--gilt-edge);
+  padding: 1px;
+  clip-path: var(--cut);
+  min-width: 0;
+}
+
+.pane-box::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  clip-path: var(--cut);
+  background: var(--steel);
+  background-image: linear-gradient(180deg, var(--steel-2), var(--steel));
+}
+
+.pane-box > * { position: relative; }
+
+.pane-box textarea {
+  display: block;
+  width: 100%;
+  min-height: 300px;
+  padding: 15px 18px;
+  border: 0;
+  background: transparent;
+  color: var(--on-steel);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.72;
+  resize: vertical;
+  white-space: pre;
+  overflow-x: auto;
+  tab-size: 2;
+}
+
+.pane-box textarea:focus { outline: none; }
+.pane-box:focus-within { box-shadow: 0 0 0 1px var(--gold-3); }
+
+.pane-box .out-pre {
+  min-height: 300px;
+  max-height: 460px;
+  overflow: auto;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.chip {
+  padding: 7px 13px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  background: transparent;
+  border: var(--hair) solid var(--line);
+  clip-path: var(--cut-sm);
+  cursor: pointer;
+}
+
+.chip[aria-pressed="true"] {
+  color: #231a06;
+  background: var(--gilt);
+  border-color: transparent;
+}
+
+.fills {
+  border-top: var(--hair) solid var(--steel-line);
+  padding: 10px 14px;
+  display: grid;
+  gap: 7px;
+  background: color-mix(in oklab, #000 18%, transparent);
+}
+
+.fill-row {
+  display: grid;
+  grid-template-columns: minmax(0, 84px) 84px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.fill-row .hn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--gold-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fill-row select,
+.fill-row input {
+  width: 100%;
+  min-width: 0;
+  padding: 4px 6px;
+  color: var(--on-steel);
+  background: color-mix(in oklab, #fff 7%, transparent);
+  border: var(--hair) solid var(--steel-line);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+}
+
+.fill-row select option { color: #15151a; }
+
+/* ----------------------------------------------------------------- chain */
+
+.chain-svg { display: block; width: 100%; height: auto; }
+
+.chain-stage { cursor: pointer; }
+.chain-stage rect.hit { fill: transparent; }
+.chain-stage:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 2px; }
+.chain-stage:hover rect.hit,
+.chain-stage[aria-current="true"] rect.hit {
+  fill: color-mix(in oklab, var(--gold-3) 12%, transparent);
+}
+
+.chain-figure { margin: 0; }
+.chain-figure figcaption {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+/* ----------------------------------------------------------------- footer */
+
+footer.site {
+  border-top: var(--hair) solid var(--line-soft);
+  padding: 30px 0 40px;
+  margin-top: 20px;
+}
 footer.site .wrap {
   display: flex;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
 }
-
-footer.site p { margin: 0; color: var(--ink-faint); font-size: 12.5px; font-family: var(--mono); letter-spacing: 0.06em; }
-footer.site .r { margin-left: auto; display: flex; align-items: center; gap: 16px; }
-
-footer.site a {
-  color: var(--ink-soft);
-  text-decoration: none;
-  font-size: 11.5px;
-  font-family: var(--mono);
-  letter-spacing: 0.1em;
+footer.site p {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.04em;
+}
+footer.site .r {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+footer.site .r a {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  color: var(--ink-faint);
+  text-decoration: none;
 }
-footer.site a:hover { color: var(--accent); text-decoration: none; }
-footer.site a.icon {
-  display: inline-grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
+footer.site .r a:hover { color: var(--gold-text); }
+footer.site .r a.icon { display: grid; place-items: center; width: 26px; height: 26px; }
+footer.site .r a.icon svg { width: 14px; height: 14px; display: block; }
+
+/* --------------------------------------------------------------- utility */
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: 10px 14px;
+  background: var(--gold-3);
+  color: #201705;
+  z-index: 99;
 }
-footer.site a.icon svg { display: block; width: 16px; height: 16px; }
+.skip:focus { left: 8px; top: 8px; }
 
-/* --------------------------------------------------------------- misc */
-
-.skip { position: absolute; left: -9999px; }
-.skip:focus {
-  left: 12px; top: 12px;
-  z-index: 100;
-  background: var(--ink);
-  color: var(--paper);
-  padding: 9px 15px;
-  border-radius: 2px;
+.vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-.theme-toggle { background: none; border: 0; }
-.theme-toggle:hover { background: var(--surface-2) !important; }
-
-.toc-links { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; }
+.small { font-size: 0.84rem; color: var(--ink-faint); }
+.center { text-align: center; }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

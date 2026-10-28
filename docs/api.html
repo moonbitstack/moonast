@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>API reference — moonast</title>
 <meta name="description" content="Every public type, function, method, trait and error of moonast, grouped by package.">
-<link rel="icon" href="data:image/svg+xml,%%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%%3E%%3Crect width='32' height='32' rx='7' fill='%%23272121'/%%3E%%3Ctext x='16' y='24' font-family='monospace' font-size='21' fill='%%23e16428' text-anchor='middle'%%3E%%24%%3C/text%%3E%%3C/svg%%3E">
+<link rel="icon" href="data:image/svg+xml,%%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%%3E%%3Cpath d='M0 0h24l8 8v24H8l-8-8z' fill='%%2315151a'/%%3E%%3Cpath d='M0 0h24l8 8' fill='none' stroke='%%23d8b154' stroke-width='1.4'/%%3E%%3Ctext x='16' y='23' font-family='monospace' font-size='18' font-weight='700' fill='%%23f3dfa0' text-anchor='middle'%%3E%%23%%3C/text%%3E%%3C/svg%%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site.css">
 </head>
 <body>
@@ -16,17 +16,18 @@
 
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="index.html"><span class="glyph">$<b>#</b></span>moonast</a>
+    <a class="mark" href="index.html"><span class="glyph">#</span>moonast</a>
     <nav class="nav">
-      <a href="index.html">Home</a>
-      <a href="guide.html">Guide</a>
+      <a class="home" href="index.html">Home</a>
+      <a class="guide" href="guide.html">Guide</a>
+      <a href="chain.html">Chain</a>
       <a href="api.html" aria-current="page">API</a>
-      <a href="play.html">Playground</a>
-      <a class="icon" data-theme-toggle href="#" title="Switch theme" aria-label="Switch theme">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/></svg>
+      <a href="play.html">Play</a>
+      <a class="icon" data-theme-toggle href="#" aria-label="Switch theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3.2v1.9M12 18.9v1.9M3.2 12h1.9M18.9 12h1.9M5.8 5.8l1.4 1.4M16.8 16.8l1.4 1.4M18.2 5.8l-1.4 1.4M7.2 16.8l-1.4 1.4"/></svg>
       </a>
       <a class="icon" href="https://github.com/moonbitstack/moonast" title="moonast on GitHub" aria-label="moonast on GitHub">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
       </a>
     </nav>
   </div>
@@ -36,6 +37,7 @@
   <div class="doc">
     <aside class="side">
 <div class="group"><h4>quote</h4>
+<a href="#pkg-quote" style="font-family:var(--font-mono);font-size:.74rem">Plate I</a>
 <a class="sub" href="#quote.bool">bool</a>
 <a class="sub" href="#quote.expr">expr</a>
 <a class="sub" href="#quote.ident">ident</a>
@@ -49,6 +51,7 @@
 <a class="sub" href="#quote.Refused">Refused</a>
 </div>
 <div class="group"><h4>attr</h4>
+<a href="#pkg-attr" style="font-family:var(--font-mono);font-size:.74rem">Plate II</a>
 <a class="sub" href="#attr.all">all</a>
 <a class="sub" href="#attr.find">find</a>
 <a class="sub" href="#attr.name_of">name_of</a>
@@ -60,6 +63,7 @@
 <a class="sub" href="#attr.Refused">Refused</a>
 </div>
 <div class="group"><h4>gen</h4>
+<a href="#pkg-gen" style="font-family:var(--font-mono);font-size:.74rem">Plate III</a>
 <a class="sub" href="#gen.read">read</a>
 <a class="sub" href="#gen.render">render</a>
 <a class="sub" href="#gen.Decl">Decl</a>
@@ -70,31 +74,34 @@
 <a class="sub" href="#gen.Refused">Refused</a>
 </div>
 <div class="group"><h4>cli</h4>
+<a href="#pkg-cli" style="font-family:var(--font-mono);font-size:.74rem">Plate IV</a>
 <a class="sub" href="#cli.run">run</a>
 <a class="sub" href="#cli.Refused">Refused</a>
 </div>
     </aside>
 
     <div class="prose" id="main">
-      <section style="margin-bottom:34px">
-        <h2 style="border-bottom:0;padding-bottom:0">API reference</h2>
-        <p>Every public type, function, method, trait and error, grouped by package and
-          listed alphabetically within each group. Import one package at a time:
+      <section style="margin-bottom:44px">
+        <span class="num-index">THE CATALOGUE</span>
+        <h2 style="margin-top:8px">API reference</h2>
+        <p>Every public type, function, method, trait and error, one plate per package and
+          alphabetical within each group. Import one package at a time:
           <code>moonbitstack/moonast/quote</code>, <code>/attr</code>, <code>/gen</code>,
           <code>/cli</code>.</p>
       </section>
 <section class="pkg" id="pkg-quote">
+<span class="num-index">PLATE I</span>
 <h2>quote<span class="path">moonbitstack/moonast/quote</span></h2>
 <p class="about">Templates: real MoonBit with <code>$holes</code>. A template is parsed with its holes standing as placeholders, each fill is put where its placeholder stands, and the result is printed by the official formatter.</p>
-<h3 id="quote-values">Values</h3>
+<h3 class="group-head" id="quote-values">Values</h3>
 <div class="entry kind-value" id="quote.bool">
-<div class="sig">pub fn bool(Bool) -&gt; Code <a class="anchor" href="#quote.bool">#</a></div>
-<div class="doc"><p>A boolean literal.</p>
+<div class="sig">pub fn bool(Bool) -&gt; Code <a class="anchor" href="#quote.bool" aria-label="Link to bool">#</a></div>
+<div class="desc"><p>A boolean literal.</p>
 <pre data-lang="moonbit"><code>inspect(@quote.bool(true).to_string(), content=&quot;true&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.expr">
-<div class="sig">pub fn expr(StringView) -&gt; Template <a class="anchor" href="#quote.expr">#</a></div>
-<div class="doc"><p>A template of one expression.</p>
+<div class="sig">pub fn expr(StringView) -&gt; Template <a class="anchor" href="#quote.expr" aria-label="Link to expr">#</a></div>
+<div class="desc"><p>A template of one expression.</p>
 <pre data-lang="moonbit"><code>let code = @quote.expr(&quot;$a + $b&quot;)
 .set(&quot;a&quot;, @quote.int(1))
 .set(&quot;b&quot;, @quote.int(2))
@@ -102,19 +109,19 @@
 inspect(code.to_string(), content=&quot;1 + 2&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.ident">
-<div class="sig">pub fn ident(StringView) -&gt; Code raise Refused <a class="anchor" href="#quote.ident">#</a></div>
-<div class="doc"><p>A name: a value, a function, a field, a type or a constructor, optionally qualified as <code>@pkg.name</code>. Refused unless it is a well-formed identifier.</p>
+<div class="sig">pub fn ident(StringView) -&gt; Code raise Refused <a class="anchor" href="#quote.ident" aria-label="Link to ident">#</a></div>
+<div class="desc"><p>A name: a value, a function, a field, a type or a constructor, optionally qualified as <code>@pkg.name</code>. Refused unless it is a well-formed identifier.</p>
 <pre data-lang="moonbit"><code>inspect(@quote.ident(&quot;answer&quot;).to_string(), content=&quot;answer&quot;)
 inspect(@quote.ident(&quot;@web.App&quot;).to_string(), content=&quot;@web.App&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.int">
-<div class="sig">pub fn int(Int32) -&gt; Code <a class="anchor" href="#quote.int">#</a></div>
-<div class="doc"><p>An integer literal.</p>
+<div class="sig">pub fn int(Int32) -&gt; Code <a class="anchor" href="#quote.int" aria-label="Link to int">#</a></div>
+<div class="desc"><p>An integer literal.</p>
 <pre data-lang="moonbit"><code>inspect(@quote.int(42).to_string(), content=&quot;42&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.items">
-<div class="sig">pub fn items(StringView) -&gt; Template <a class="anchor" href="#quote.items">#</a></div>
-<div class="doc"><p>A template of top-level declarations.</p>
+<div class="sig">pub fn items(StringView) -&gt; Template <a class="anchor" href="#quote.items" aria-label="Link to items">#</a></div>
+<div class="desc"><p>A template of top-level declarations.</p>
 <pre data-lang="moonbit"><code>let code = @quote.items(&quot;fn $name() -&gt; $T {\n  $value\n}&quot;)
 .set(&quot;name&quot;, @quote.ident(&quot;answer&quot;))
 .set(&quot;T&quot;, @quote.ident(&quot;Int&quot;))
@@ -123,8 +130,8 @@ inspect(@quote.ident(&quot;@web.App&quot;).to_string(), content=&quot;@web.App&q
 inspect(code.to_string(), content=&quot;///|\nfn answer() -&gt; Int {\n  42\n}\n&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.join">
-<div class="sig">pub fn join(Array[Code]) -&gt; Code raise Refused <a class="anchor" href="#quote.join">#</a></div>
-<div class="doc"><p>Several codes of top-level declarations as one, in order.</p>
+<div class="sig">pub fn join(Array[Code]) -&gt; Code raise Refused <a class="anchor" href="#quote.join" aria-label="Link to join">#</a></div>
+<div class="desc"><p>Several codes of top-level declarations as one, in order.</p>
 <pre data-lang="moonbit"><code>let a = @quote.items(&quot;fn a() -&gt; Unit { () }&quot;).render()
 let b = @quote.items(&quot;fn b() -&gt; Unit { () }&quot;).render()
 inspect(
@@ -133,50 +140,50 @@ content=&quot;///|\nfn a() -&gt; Unit {\n  ()\n}\n\n///|\nfn b() -&gt; Unit {\n 
 )</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.string">
-<div class="sig">pub fn string(StringView) -&gt; Code <a class="anchor" href="#quote.string">#</a></div>
-<div class="doc"><p>A string literal holding <code>text</code>; quoting and escaping happen when it is printed.</p>
+<div class="sig">pub fn string(StringView) -&gt; Code <a class="anchor" href="#quote.string" aria-label="Link to string">#</a></div>
+<div class="desc"><p>A string literal holding <code>text</code>; quoting and escaping happen when it is printed.</p>
 <pre data-lang="moonbit"><code>inspect(@quote.string(&quot;坐标&quot;).to_string(), content=&quot;\&quot;坐标\&quot;&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.ty">
-<div class="sig">pub fn ty(StringView) -&gt; Template <a class="anchor" href="#quote.ty">#</a></div>
-<div class="doc"><p>A template of one type.</p>
+<div class="sig">pub fn ty(StringView) -&gt; Template <a class="anchor" href="#quote.ty" aria-label="Link to ty">#</a></div>
+<div class="desc"><p>A template of one type.</p>
 <pre data-lang="moonbit"><code>let code = @quote.ty(&quot;Array[$T]&quot;).set(&quot;T&quot;, @quote.ident(&quot;User&quot;)).render()
 inspect(code.to_string(), content=&quot;Array[User]&quot;)</code></pre></div>
 </div>
-<h3 id="quote-types">Types</h3>
+<h3 class="group-head" id="quote-types">Types</h3>
 <div class="entry kind-type" id="quote.Code">
-<div class="sig">pub struct Code { <a class="anchor" href="#quote.Code">#</a></div>
-<div class="doc"><p>A piece of MoonBit: top-level declarations, an expression, a type, a name, or the text of a string literal. Codes come from rendering a template or from the literal constructors here, and fill the holes of other templates.</p></div>
+<div class="sig">pub struct Code <a class="anchor" href="#quote.Code" aria-label="Link to Code">#</a></div>
+<div class="desc"><p>A piece of MoonBit: top-level declarations, an expression, a type, a name, or the text of a string literal. Codes come from rendering a template or from the literal constructors here, and fill the holes of other templates.</p></div>
 <div class="entry kind-value" id="quote.Code.items" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Code::items(Self) -&gt; @list.List[@syntax.Impl]? <a class="anchor" href="#quote.Code.items">#</a></div>
-<div class="doc"><p>The official syntax tree behind a code of declarations, for work this package does not cover.</p>
+<div class="sig">pub fn Code::items(Self) -&gt; @list.List[@syntax.Impl]? <a class="anchor" href="#quote.Code.items" aria-label="Link to Code::items">#</a></div>
+<div class="desc"><p>The official syntax tree behind a code of declarations, for work this package does not cover.</p>
 <pre data-lang="moonbit"><code>let code = @quote.items(&quot;fn a() -&gt; Unit { () }&quot;).render()
 inspect(code.items() is Some(_), content=&quot;true&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.Code.output" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Code::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#quote.Code.output">#</a></div>
-<div class="doc"><p>Writes the value to a logger, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Code::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#quote.Code.output" aria-label="Link to Code::output">#</a></div>
+<div class="desc"><p>Writes the value to a logger, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="quote.Code.to_string" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Code::to_string(Self) -&gt; String <a class="anchor" href="#quote.Code.to_string">#</a></div>
-<div class="doc"><p>The value as a string, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Code::to_string(Self) -&gt; String <a class="anchor" href="#quote.Code.to_string" aria-label="Link to Code::to_string">#</a></div>
+<div class="desc"><p>The value as a string, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
 </div>
 </div>
 <div class="entry kind-type" id="quote.Template">
-<div class="sig">pub struct Template { <a class="anchor" href="#quote.Template">#</a></div>
-<div class="doc"><p>A piece of MoonBit with holes, waiting to be filled and rendered.</p>
+<div class="sig">pub struct Template <a class="anchor" href="#quote.Template" aria-label="Link to Template">#</a></div>
+<div class="desc"><p>A piece of MoonBit with holes, waiting to be filled and rendered.</p>
 <p>A hole is <code>$name</code>; write it in the case the position wants, <code>$T</code> where a type or constructor goes and <code>$name</code> where a value or a name goes. <code>$name*</code> takes a list and expands among statements, array elements or positional arguments. <code>$$</code> is a literal dollar sign.</p></div>
 <div class="entry kind-value" id="quote.Template.render" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Template::render(Self) -&gt; Code raise Refused <a class="anchor" href="#quote.Template.render">#</a></div>
-<div class="doc"><p>Parse the template with its holes standing as placeholders, put each fill where its placeholder stands, and give back the result. Refused when a hole is left empty, a fill names no hole, a fill does not fit where it stands, or the template is not MoonBit.</p>
+<div class="sig">pub fn Template::render(Self) -&gt; Code raise Refused <a class="anchor" href="#quote.Template.render" aria-label="Link to Template::render">#</a></div>
+<div class="desc"><p>Parse the template with its holes standing as placeholders, put each fill where its placeholder stands, and give back the result. Refused when a hole is left empty, a fill names no hole, a fill does not fit where it stands, or the template is not MoonBit.</p>
 <pre data-lang="moonbit"><code>let text = @quote.items(&quot;fn $name() -&gt; Unit { () }&quot;).render().to_string() catch {
 e =&gt; e.to_string()
 }
 inspect(text, content=&quot;hole $name was given nothing&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.Template.set" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Template::set(Self, String, Code) -&gt; Self <a class="anchor" href="#quote.Template.set">#</a></div>
-<div class="doc"><p>Fill <code>$hole</code> with <code>code</code>.</p>
+<div class="sig">pub fn Template::set(Self, String, Code) -&gt; Self <a class="anchor" href="#quote.Template.set" aria-label="Link to Template::set">#</a></div>
+<div class="desc"><p>Fill <code>$hole</code> with <code>code</code>.</p>
 <pre data-lang="moonbit"><code>let t = @quote.items(&quot;fn $name() -&gt; Unit { () }&quot;).set(
 &quot;name&quot;,
 @quote.ident(&quot;answer&quot;),
@@ -187,8 +194,8 @@ content=&quot;///|\nfn answer() -&gt; Unit {\n  ()\n}\n&quot;,
 )</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.Template.splice" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Template::splice(Self, String, Array[Code]) -&gt; Self <a class="anchor" href="#quote.Template.splice">#</a></div>
-<div class="doc"><p>Fill <code>$hole*</code> with <code>codes</code>, in order.</p>
+<div class="sig">pub fn Template::splice(Self, String, Array[Code]) -&gt; Self <a class="anchor" href="#quote.Template.splice" aria-label="Link to Template::splice">#</a></div>
+<div class="desc"><p>Fill <code>$hole*</code> with <code>codes</code>, in order.</p>
 <pre data-lang="moonbit"><code>let code = @quote.expr(&quot;[$items*]&quot;)
 .splice(&quot;items&quot;, [@quote.int(1), @quote.int(2), @quote.int(3)])
 .render()
@@ -196,10 +203,10 @@ inspect(code.to_string(), content=&quot;[1, 2, 3]&quot;)</code></pre></div>
 </div>
 </div>
 
-<h3 id="quote-errors">Errors</h3>
+<h3 class="group-head" id="quote-errors">Errors</h3>
 <div class="entry kind-error" id="quote.Refused">
-<div class="sig">pub(all) suberror Refused { <a class="anchor" href="#quote.Refused">#</a></div>
-<div class="doc"><p>Why a template or a code was not accepted. Each variant is named after the thing that was wrong.</p></div>
+<div class="sig">pub(all) suberror Refused { <a class="anchor" href="#quote.Refused" aria-label="Link to Refused">#</a></div>
+<div class="desc"><p>Why a template or a code was not accepted. Each variant is named after the thing that was wrong.</p></div>
 <ul class="params">
 <li><span class="pname">Template(msg~ : String, line~ : Int32, column~ : Int32)</span> — The template is not MoonBit once its holes are in place.</li>
 <li><span class="pname">Unfilled(hole~ : String)</span> — A hole in the template was given nothing.</li>
@@ -209,26 +216,27 @@ inspect(code.to_string(), content=&quot;[1, 2, 3]&quot;)</code></pre></div>
 <li><span class="pname">Kind(expected~ : String)</span> — <code>join</code> was given a code that is not declarations.</li>
 </ul>
 <div class="entry kind-value" id="quote.Refused.output" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#quote.Refused.output">#</a></div>
-<div class="doc"><p>Writes the value to a logger, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#quote.Refused.output" aria-label="Link to Refused::output">#</a></div>
+<div class="desc"><p>Writes the value to a logger, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="quote.Refused.to_repr" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#quote.Refused.to_repr">#</a></div>
-<div class="doc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#quote.Refused.to_repr" aria-label="Link to Refused::to_repr">#</a></div>
+<div class="desc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="quote.Refused.to_string" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::to_string(Self) -&gt; String <a class="anchor" href="#quote.Refused.to_string">#</a></div>
-<div class="doc"><p>The value as a string, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::to_string(Self) -&gt; String <a class="anchor" href="#quote.Refused.to_string" aria-label="Link to Refused::to_string">#</a></div>
+<div class="desc"><p>The value as a string, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
 </div>
 </div>
 </section>
 <section class="pkg" id="pkg-attr">
+<span class="num-index">PLATE II</span>
 <h2>attr<span class="path">moonbitstack/moonast/attr</span></h2>
-<p class="about">Annotations as typed arguments. Find <code>#lib.name(...)</code> on a declaration and bind its arguments against a spec; every refusal carries the position of the annotation.</p>
-<h3 id="attr-values">Values</h3>
+<p class="about">Annotations as typed arguments. Find <code>#lib.name(...)</code> on a declaration and bind its payload against a spec; every refusal carries the position of the annotation.</p>
+<h3 class="group-head" id="attr-values">Values</h3>
 <div class="entry kind-value" id="attr.all">
-<div class="sig">pub fn all(@list.List[@attribute.Attribute], StringView) -&gt; Array[@attribute.Attribute] <a class="anchor" href="#attr.all">#</a></div>
-<div class="doc"><p>Every annotation called <code>name</code>, in source order.</p>
+<div class="sig">pub fn all(@list.List[@attribute.Attribute], StringView) -&gt; Array[@attribute.Attribute] <a class="anchor" href="#attr.all" aria-label="Link to all">#</a></div>
+<div class="desc"><p>Every annotation called <code>name</code>, in source order.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#app.get(\&quot;/users\&quot;, tag=\&quot;users\&quot;)\nfn list_users() -&gt; Unit {}&quot;
 let impls = @parser.parse_string(source).0
 guard impls is @list.More(impl_, tail=@list.Empty) else {
@@ -240,8 +248,8 @@ abort(&quot;a function&quot;)
 inspect(@attr.all(attrs, &quot;app.get&quot;).length(), content=&quot;1&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="attr.find">
-<div class="sig">pub fn find(@list.List[@attribute.Attribute], StringView) -&gt; @attribute.Attribute? <a class="anchor" href="#attr.find">#</a></div>
-<div class="doc"><p>The first annotation called <code>name</code>.</p>
+<div class="sig">pub fn find(@list.List[@attribute.Attribute], StringView) -&gt; @attribute.Attribute? <a class="anchor" href="#attr.find" aria-label="Link to find">#</a></div>
+<div class="desc"><p>The first annotation called <code>name</code>.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#app.get(\&quot;/users\&quot;, tag=\&quot;users\&quot;)\nfn list_users() -&gt; Unit {}&quot;
 let impls = @parser.parse_string(source).0
 guard impls is @list.More(impl_, tail=@list.Empty) else {
@@ -253,8 +261,8 @@ abort(&quot;a function&quot;)
 inspect(@attr.find(attrs, &quot;app.get&quot;) is Some(_), content=&quot;true&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="attr.name_of">
-<div class="sig">pub fn name_of(@attribute.Attribute) -&gt; String? <a class="anchor" href="#attr.name_of">#</a></div>
-<div class="doc"><p>The full name of an annotation, <code>lib.name</code> for <code>#lib.name(...)</code>; <code>None</code> when the parser could not read its payload.</p>
+<div class="sig">pub fn name_of(@attribute.Attribute) -&gt; String? <a class="anchor" href="#attr.name_of" aria-label="Link to name_of">#</a></div>
+<div class="desc"><p>The full name of an annotation, <code>lib.name</code> for <code>#lib.name(...)</code>; <code>None</code> when the parser could not read its payload.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#app.get(\&quot;/users\&quot;, tag=\&quot;users\&quot;)\nfn list_users() -&gt; Unit {}&quot;
 let impls = @parser.parse_string(source).0
 guard impls is @list.More(impl_, tail=@list.Empty) else {
@@ -267,8 +275,8 @@ guard @attr.find(attrs, &quot;app.get&quot;) is Some(a) else { abort(&quot;annot
 inspect(@attr.name_of(a).unwrap_or(&quot;&quot;), content=&quot;app.get&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="attr.under">
-<div class="sig">pub fn under(@list.List[@attribute.Attribute], StringView) -&gt; Array[@attribute.Attribute] <a class="anchor" href="#attr.under">#</a></div>
-<div class="doc"><p>Every annotation whose name starts with <code>lib.</code>, in source order: a generator for <code>#app.get</code>, <code>#app.post</code> and the rest asks once for <code>app</code>.</p>
+<div class="sig">pub fn under(@list.List[@attribute.Attribute], StringView) -&gt; Array[@attribute.Attribute] <a class="anchor" href="#attr.under" aria-label="Link to under">#</a></div>
+<div class="desc"><p>Every annotation whose name starts with <code>lib.</code>, in source order: a generator for <code>#app.get</code>, <code>#app.post</code> and the rest asks once for <code>app</code>.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#app.get(\&quot;/users\&quot;, tag=\&quot;users\&quot;)\nfn list_users() -&gt; Unit {}&quot;
 let impls = @parser.parse_string(source).0
 guard impls is @list.More(impl_, tail=@list.Empty) else {
@@ -279,26 +287,26 @@ abort(&quot;a function&quot;)
 }
 inspect(@attr.under(attrs, &quot;app&quot;).length(), content=&quot;1&quot;)</code></pre></div>
 </div>
-<h3 id="attr-types">Types</h3>
+<h3 class="group-head" id="attr-types">Types</h3>
 <div class="entry kind-type" id="attr.Args">
-<div class="sig">pub struct Args { <a class="anchor" href="#attr.Args">#</a></div>
-<div class="doc"><p>An annotation&#x27;s arguments after <code>Spec::bind</code>: every required one is here and every one has the kind its spec gives.</p></div>
+<div class="sig">pub struct Args { <a class="anchor" href="#attr.Args" aria-label="Link to Args">#</a></div>
+<div class="desc"><p>An annotation&#x27;s arguments after <code>Spec::bind</code>: every required one is here and every one has the kind its spec gives.</p></div>
 <ul class="params">
 <li><span class="pname">name</span> : String</li>
 <li><span class="pname">line</span> : Int32</li>
 <li><span class="pname">column</span> : Int32</li>
 </ul>
 <div class="entry kind-value" id="attr.Args.bool" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Args::bool(Self, StringView) -&gt; Bool? <a class="anchor" href="#attr.Args.bool">#</a></div>
-<div class="doc"><p>The boolean given for <code>key</code>.</p></div>
+<div class="sig">pub fn Args::bool(Self, StringView) -&gt; Bool? <a class="anchor" href="#attr.Args.bool" aria-label="Link to Args::bool">#</a></div>
+<div class="desc"><p>The boolean given for <code>key</code>.</p></div>
 </div>
 <div class="entry kind-value" id="attr.Args.get" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Args::get(Self, StringView) -&gt; Array[Value] <a class="anchor" href="#attr.Args.get">#</a></div>
-<div class="doc"><p>The values given for <code>key</code>, in order; empty when it was not given.</p></div>
+<div class="sig">pub fn Args::get(Self, StringView) -&gt; Array[Value] <a class="anchor" href="#attr.Args.get" aria-label="Link to Args::get">#</a></div>
+<div class="desc"><p>The values given for <code>key</code>, in order; empty when it was not given.</p></div>
 </div>
 <div class="entry kind-value" id="attr.Args.has" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Args::has(Self, StringView) -&gt; Bool <a class="anchor" href="#attr.Args.has">#</a></div>
-<div class="doc"><p>Whether <code>key</code> was given.</p>
+<div class="sig">pub fn Args::has(Self, StringView) -&gt; Bool <a class="anchor" href="#attr.Args.has" aria-label="Link to Args::has">#</a></div>
+<div class="desc"><p>Whether <code>key</code> was given.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#app.get(\&quot;/users\&quot;, tag=\&quot;users\&quot;)\nfn list_users() -&gt; Unit {}&quot;
 let impls = @parser.parse_string(source).0
 guard impls is @list.More(impl_, tail=@list.Empty) else {
@@ -316,8 +324,8 @@ inspect(args.has(&quot;tag&quot;), content=&quot;true&quot;)
 inspect(args.has(&quot;page&quot;), content=&quot;false&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="attr.Args.str" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Args::str(Self, StringView) -&gt; String? <a class="anchor" href="#attr.Args.str">#</a></div>
-<div class="doc"><p>The string given for <code>key</code>.</p>
+<div class="sig">pub fn Args::str(Self, StringView) -&gt; String? <a class="anchor" href="#attr.Args.str" aria-label="Link to Args::str">#</a></div>
+<div class="desc"><p>The string given for <code>key</code>.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#app.get(\&quot;/users\&quot;, tag=\&quot;users\&quot;)\nfn list_users() -&gt; Unit {}&quot;
 let impls = @parser.parse_string(source).0
 guard impls is @list.More(impl_, tail=@list.Empty) else {
@@ -334,8 +342,8 @@ let args = @attr.Spec::new(&quot;app.get&quot;)
 inspect(args.str(&quot;path&quot;).unwrap_or(&quot;&quot;), content=&quot;/users&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="attr.Args.strs" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Args::strs(Self, StringView) -&gt; Array[String] <a class="anchor" href="#attr.Args.strs">#</a></div>
-<div class="doc"><p>Every string given for a repeated <code>key</code>.</p>
+<div class="sig">pub fn Args::strs(Self, StringView) -&gt; Array[String] <a class="anchor" href="#attr.Args.strs" aria-label="Link to Args::strs">#</a></div>
+<div class="desc"><p>Every string given for a repeated <code>key</code>.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#app.get(\&quot;/users\&quot;, tag=\&quot;users\&quot;)\nfn list_users() -&gt; Unit {}&quot;
 let impls = @parser.parse_string(source).0
 guard impls is @list.More(impl_, tail=@list.Empty) else {
@@ -353,8 +361,8 @@ inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quo
 </div>
 </div>
 <div class="entry kind-type" id="attr.Kind">
-<div class="sig">pub(all) enum Kind { <a class="anchor" href="#attr.Kind">#</a></div>
-<div class="doc"><p>What a parameter accepts.</p></div>
+<div class="sig">pub(all) enum Kind { <a class="anchor" href="#attr.Kind" aria-label="Link to Kind">#</a></div>
+<div class="desc"><p>What a parameter accepts.</p></div>
 <ul class="params">
 <li><span class="pname">Str</span></li>
 <li><span class="pname">Bool</span></li>
@@ -362,25 +370,25 @@ inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quo
 <li><span class="pname">Type</span></li>
 </ul>
 <div class="entry kind-value" id="attr.Kind.equal" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Kind::equal(Self, Self) -&gt; Bool <a class="anchor" href="#attr.Kind.equal">#</a></div>
-<div class="doc"><p>Whether two values are equal, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Kind::equal(Self, Self) -&gt; Bool <a class="anchor" href="#attr.Kind.equal" aria-label="Link to Kind::equal">#</a></div>
+<div class="desc"><p>Whether two values are equal, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="attr.Kind.not_equal" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Kind::not_equal(Self, Self) -&gt; Bool <a class="anchor" href="#attr.Kind.not_equal">#</a></div>
-<div class="doc"><p>Whether two values differ, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Kind::not_equal(Self, Self) -&gt; Bool <a class="anchor" href="#attr.Kind.not_equal" aria-label="Link to Kind::not_equal">#</a></div>
+<div class="desc"><p>Whether two values differ, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="attr.Kind.to_repr" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Kind::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#attr.Kind.to_repr">#</a></div>
-<div class="doc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Kind::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#attr.Kind.to_repr" aria-label="Link to Kind::to_repr">#</a></div>
+<div class="desc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
 </div>
 </div>
 <div class="entry kind-type" id="attr.Spec">
-<div class="sig">pub struct Spec { <a class="anchor" href="#attr.Spec">#</a></div>
-<div class="doc"><p>The parameters one annotation takes. Built by chaining:</p>
+<div class="sig">pub struct Spec <a class="anchor" href="#attr.Spec" aria-label="Link to Spec">#</a></div>
+<div class="desc"><p>The parameters one annotation takes. Built by chaining:</p>
 <pre data-lang="moonbit"><code>Spec::new(&quot;app.get&quot;).positional(&quot;path&quot;, Str).optional(&quot;summary&quot;, Str).many(&quot;tags&quot;, Str)</code></pre></div>
 <div class="entry kind-value" id="attr.Spec.bind" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Spec::bind(Self, @attribute.Attribute) -&gt; Args raise Refused <a class="anchor" href="#attr.Spec.bind">#</a></div>
-<div class="doc"><p>The annotation&#x27;s arguments, checked against the spec.</p>
+<div class="sig">pub fn Spec::bind(Self, @attribute.Attribute) -&gt; Args raise Refused <a class="anchor" href="#attr.Spec.bind" aria-label="Link to Spec::bind">#</a></div>
+<div class="desc"><p>The annotation&#x27;s arguments, checked against the spec.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#app.get(\&quot;/users\&quot;, tag=\&quot;users\&quot;)\nfn list_users() -&gt; Unit {}&quot;
 let impls = @parser.parse_string(source).0
 guard impls is @list.More(impl_, tail=@list.Empty) else {
@@ -396,28 +404,28 @@ inspect(args.str(&quot;path&quot;).unwrap_or(&quot;&quot;), content=&quot;/users
 inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="attr.Spec.many" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Spec::many(Self, String, Kind) -&gt; Self <a class="anchor" href="#attr.Spec.many">#</a></div>
-<div class="doc"><p>A parameter that may be given any number of times, <code>tags=&quot;a&quot;, tags=&quot;b&quot;</code>, which is how a list is written where the grammar has no arrays.</p></div>
+<div class="sig">pub fn Spec::many(Self, String, Kind) -&gt; Self <a class="anchor" href="#attr.Spec.many" aria-label="Link to Spec::many">#</a></div>
+<div class="desc"><p>A parameter that may be given any number of times, <code>tags=&quot;a&quot;, tags=&quot;b&quot;</code>, which is how a list is written where the grammar has no arrays.</p></div>
 </div>
 <div class="entry kind-value" id="attr.Spec.new" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Spec::new(StringView) -&gt; Self <a class="anchor" href="#attr.Spec.new">#</a></div>
+<div class="sig">pub fn Spec::new(StringView) -&gt; Self <a class="anchor" href="#attr.Spec.new" aria-label="Link to Spec::new">#</a></div>
 </div>
 <div class="entry kind-value" id="attr.Spec.optional" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Spec::optional(Self, String, Kind) -&gt; Self <a class="anchor" href="#attr.Spec.optional">#</a></div>
-<div class="doc"><p>A parameter that may be left out.</p></div>
+<div class="sig">pub fn Spec::optional(Self, String, Kind) -&gt; Self <a class="anchor" href="#attr.Spec.optional" aria-label="Link to Spec::optional">#</a></div>
+<div class="desc"><p>A parameter that may be left out.</p></div>
 </div>
 <div class="entry kind-value" id="attr.Spec.positional" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Spec::positional(Self, String, Kind) -&gt; Self <a class="anchor" href="#attr.Spec.positional">#</a></div>
-<div class="doc"><p>A required parameter that may be given by position, in the order these are declared, or by name.</p></div>
+<div class="sig">pub fn Spec::positional(Self, String, Kind) -&gt; Self <a class="anchor" href="#attr.Spec.positional" aria-label="Link to Spec::positional">#</a></div>
+<div class="desc"><p>A required parameter that may be given by position, in the order these are declared, or by name.</p></div>
 </div>
 <div class="entry kind-value" id="attr.Spec.required" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Spec::required(Self, String, Kind) -&gt; Self <a class="anchor" href="#attr.Spec.required">#</a></div>
-<div class="doc"><p>A required parameter given by name.</p></div>
+<div class="sig">pub fn Spec::required(Self, String, Kind) -&gt; Self <a class="anchor" href="#attr.Spec.required" aria-label="Link to Spec::required">#</a></div>
+<div class="desc"><p>A required parameter given by name.</p></div>
 </div>
 </div>
 <div class="entry kind-type" id="attr.Value">
-<div class="sig">pub(all) enum Value { <a class="anchor" href="#attr.Value">#</a></div>
-<div class="doc"><p>One argument, as its kind reads it.</p></div>
+<div class="sig">pub(all) enum Value { <a class="anchor" href="#attr.Value" aria-label="Link to Value">#</a></div>
+<div class="desc"><p>One argument, as its kind reads it.</p></div>
 <ul class="params">
 <li><span class="pname">Str(String)</span></li>
 <li><span class="pname">Bool(Bool)</span></li>
@@ -425,23 +433,23 @@ inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quo
 <li><span class="pname">Type(String)</span></li>
 </ul>
 <div class="entry kind-value" id="attr.Value.equal" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Value::equal(Self, Self) -&gt; Bool <a class="anchor" href="#attr.Value.equal">#</a></div>
-<div class="doc"><p>Whether two values are equal, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Value::equal(Self, Self) -&gt; Bool <a class="anchor" href="#attr.Value.equal" aria-label="Link to Value::equal">#</a></div>
+<div class="desc"><p>Whether two values are equal, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="attr.Value.not_equal" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Value::not_equal(Self, Self) -&gt; Bool <a class="anchor" href="#attr.Value.not_equal">#</a></div>
-<div class="doc"><p>Whether two values differ, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Value::not_equal(Self, Self) -&gt; Bool <a class="anchor" href="#attr.Value.not_equal" aria-label="Link to Value::not_equal">#</a></div>
+<div class="desc"><p>Whether two values differ, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="attr.Value.to_repr" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Value::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#attr.Value.to_repr">#</a></div>
-<div class="doc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Value::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#attr.Value.to_repr" aria-label="Link to Value::to_repr">#</a></div>
+<div class="desc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
 </div>
 </div>
 
-<h3 id="attr-errors">Errors</h3>
+<h3 class="group-head" id="attr-errors">Errors</h3>
 <div class="entry kind-error" id="attr.Refused">
-<div class="sig">pub(all) suberror Refused { <a class="anchor" href="#attr.Refused">#</a></div>
-<div class="doc"><p>Why an annotation&#x27;s arguments were not accepted, with where the annotation stands in its file.</p></div>
+<div class="sig">pub(all) suberror Refused { <a class="anchor" href="#attr.Refused" aria-label="Link to Refused">#</a></div>
+<div class="desc"><p>Why an annotation&#x27;s arguments were not accepted, with where the annotation stands in its file.</p></div>
 <ul class="params">
 <li><span class="pname">Malformed(raw~ : String, line~ : Int32, column~ : Int32)</span> — The payload is outside the annotation grammar: arrays, numbers, a qualified or generic type cannot be written, and a keyword cannot be a label.</li>
 <li><span class="pname">Missing(key~ : String, line~ : Int32, column~ : Int32)</span> — A required parameter was not given.</li>
@@ -450,26 +458,27 @@ inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quo
 <li><span class="pname">Repeated(key~ : String, line~ : Int32, column~ : Int32)</span> — A parameter given twice that may only be given once.</li>
 </ul>
 <div class="entry kind-value" id="attr.Refused.output" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#attr.Refused.output">#</a></div>
-<div class="doc"><p>Writes the value to a logger, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#attr.Refused.output" aria-label="Link to Refused::output">#</a></div>
+<div class="desc"><p>Writes the value to a logger, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="attr.Refused.to_repr" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#attr.Refused.to_repr">#</a></div>
-<div class="doc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#attr.Refused.to_repr" aria-label="Link to Refused::to_repr">#</a></div>
+<div class="desc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="attr.Refused.to_string" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::to_string(Self) -&gt; String <a class="anchor" href="#attr.Refused.to_string">#</a></div>
-<div class="doc"><p>The value as a string, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::to_string(Self) -&gt; String <a class="anchor" href="#attr.Refused.to_string" aria-label="Link to Refused::to_string">#</a></div>
+<div class="desc"><p>The value as a string, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
 </div>
 </div>
 </section>
 <section class="pkg" id="pkg-gen">
+<span class="num-index">PLATE III</span>
 <h2>gen<span class="path">moonbitstack/moonast/gen</span></h2>
 <p class="about">Declarations read from source into plain views, the <code>Generator</code> trait, and <code>render</code>, which gives the file a generator writes. No file access here.</p>
-<h3 id="gen-values">Values</h3>
+<h3 class="group-head" id="gen-values">Values</h3>
 <div class="entry kind-value" id="gen.read">
-<div class="sig">pub fn read(String, String) -&gt; Array[Decl] raise Refused <a class="anchor" href="#gen.read">#</a></div>
-<div class="doc"><p>The declarations of one file, in source order. Refused when the file is not MoonBit, with the first problem&#x27;s position.</p>
+<div class="sig">pub fn read(String, String) -&gt; Array[Decl] raise Refused <a class="anchor" href="#gen.read" aria-label="Link to read">#</a></div>
+<div class="desc"><p>The declarations of one file, in source order. Refused when the file is not MoonBit, with the first problem&#x27;s position.</p>
 <pre data-lang="moonbit"><code>let source = &quot;pub struct Point {\n  x : Int\n  y : Int\n}&quot;
 guard @gen.read(&quot;models.mbt&quot;, source) is [Struct(name~, fields~, ..)] else {
 abort(&quot;a struct&quot;)
@@ -478,13 +487,13 @@ inspect(name, content=&quot;Point&quot;)
 inspect(fields.map(f =&gt; f.name).join(&quot;, &quot;), content=&quot;x, y&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="gen.render">
-<div class="sig">pub fn render(&amp;Generator, Array[(String, String)]) -&gt; String raise <a class="anchor" href="#gen.render">#</a></div>
-<div class="doc"><p>The file a generator writes for <code>inputs</code>: a one-line header naming the generator and the inputs, then the code. The same inputs give the same bytes, so a check can compare them.</p></div>
+<div class="sig">pub fn render(&amp;Generator, Array[(String, String)]) -&gt; String raise <a class="anchor" href="#gen.render" aria-label="Link to render">#</a></div>
+<div class="desc"><p>The file a generator writes for <code>inputs</code>: a one-line header naming the generator and the inputs, then the code. The same inputs give the same bytes, so a check can compare them.</p></div>
 </div>
-<h3 id="gen-types">Types</h3>
+<h3 class="group-head" id="gen-types">Types</h3>
 <div class="entry kind-type" id="gen.Decl">
-<div class="sig">pub(all) enum Decl { <a class="anchor" href="#gen.Decl">#</a></div>
-<div class="doc"><p>A top-level declaration as a generator usually needs it. Types are kept as their source text, which is what a generator splices into new code; <code>raw</code> is the official syntax tree for anything the view leaves out.</p></div>
+<div class="sig">pub(all) enum Decl { <a class="anchor" href="#gen.Decl" aria-label="Link to Decl">#</a></div>
+<div class="desc"><p>A top-level declaration as a generator usually needs it. Types are kept as their source text, which is what a generator splices into new code; <code>raw</code> is the official syntax tree for anything the view leaves out.</p></div>
 <ul class="params">
 <li><span class="pname">Struct(name~ : String, fields~ : Array[Field], attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)</span></li>
 <li><span class="pname">Enum(name~ : String, constructors~ : Array[String], attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)</span></li>
@@ -492,8 +501,8 @@ inspect(fields.map(f =&gt; f.name).join(&quot;, &quot;), content=&quot;x, y&quot
 <li><span class="pname">Other(file~ : String, raw~ : @syntax.Impl)</span></li>
 </ul>
 <div class="entry kind-value" id="gen.Decl.attrs" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Decl::attrs(Self) -&gt; @list.List[@attribute.Attribute] <a class="anchor" href="#gen.Decl.attrs">#</a></div>
-<div class="doc"><p>The annotations on a declaration; none for <code>Other</code>.</p>
+<div class="sig">pub fn Decl::attrs(Self) -&gt; @list.List[@attribute.Attribute] <a class="anchor" href="#gen.Decl.attrs" aria-label="Link to Decl::attrs">#</a></div>
+<div class="desc"><p>The annotations on a declaration; none for <code>Other</code>.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#demo.describe\npub struct Point {\n  x : Int\n}&quot;
 guard @gen.read(&quot;models.mbt&quot;, source) is [decl] else {
 abort(&quot;one declaration&quot;)
@@ -501,13 +510,13 @@ abort(&quot;one declaration&quot;)
 inspect(@attr.find(decl.attrs(), &quot;demo.describe&quot;) is Some(_), content=&quot;true&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="gen.Decl.raw" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Decl::raw(Self) -&gt; @syntax.Impl <a class="anchor" href="#gen.Decl.raw">#</a></div>
-<div class="doc"><p>The official syntax tree behind the view.</p></div>
+<div class="sig">pub fn Decl::raw(Self) -&gt; @syntax.Impl <a class="anchor" href="#gen.Decl.raw" aria-label="Link to Decl::raw">#</a></div>
+<div class="desc"><p>The official syntax tree behind the view.</p></div>
 </div>
 </div>
 <div class="entry kind-type" id="gen.Field">
-<div class="sig">pub(all) struct Field { <a class="anchor" href="#gen.Field">#</a></div>
-<div class="doc"><p>A field of a struct, with its type as written in the source.</p></div>
+<div class="sig">pub(all) struct Field { <a class="anchor" href="#gen.Field" aria-label="Link to Field">#</a></div>
+<div class="desc"><p>A field of a struct, with its type as written in the source.</p></div>
 <ul class="params">
 <li><span class="pname">name</span> : String</li>
 <li><span class="pname">ty</span> : String</li>
@@ -516,8 +525,8 @@ inspect(@attr.find(decl.attrs(), &quot;demo.describe&quot;) is Some(_), content=
 </ul>
 </div>
 <div class="entry kind-type" id="gen.Param">
-<div class="sig">pub(all) struct Param { <a class="anchor" href="#gen.Param">#</a></div>
-<div class="doc"><p>A function parameter: <code>_</code> has no name, and an unannotated one no type.</p></div>
+<div class="sig">pub(all) struct Param { <a class="anchor" href="#gen.Param" aria-label="Link to Param">#</a></div>
+<div class="desc"><p>A function parameter: <code>_</code> has no name, and an unannotated one no type.</p></div>
 <ul class="params">
 <li><span class="pname">name</span> : String?</li>
 <li><span class="pname">ty</span> : String?</li>
@@ -525,8 +534,8 @@ inspect(@attr.find(decl.attrs(), &quot;demo.describe&quot;) is Some(_), content=
 </ul>
 </div>
 <div class="entry kind-type" id="gen.Pass">
-<div class="sig">pub(all) enum Pass { <a class="anchor" href="#gen.Pass">#</a></div>
-<div class="doc"><p>How a function parameter is passed.</p></div>
+<div class="sig">pub(all) enum Pass { <a class="anchor" href="#gen.Pass" aria-label="Link to Pass">#</a></div>
+<div class="desc"><p>How a function parameter is passed.</p></div>
 <ul class="params">
 <li><span class="pname">Positional</span></li>
 <li><span class="pname">Labelled</span></li>
@@ -534,81 +543,82 @@ inspect(@attr.find(decl.attrs(), &quot;demo.describe&quot;) is Some(_), content=
 <li><span class="pname">Defaulted</span></li>
 </ul>
 <div class="entry kind-value" id="gen.Pass.equal" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Pass::equal(Self, Self) -&gt; Bool <a class="anchor" href="#gen.Pass.equal">#</a></div>
-<div class="doc"><p>Whether two values are equal, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Pass::equal(Self, Self) -&gt; Bool <a class="anchor" href="#gen.Pass.equal" aria-label="Link to Pass::equal">#</a></div>
+<div class="desc"><p>Whether two values are equal, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="gen.Pass.not_equal" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Pass::not_equal(Self, Self) -&gt; Bool <a class="anchor" href="#gen.Pass.not_equal">#</a></div>
-<div class="doc"><p>Whether two values differ, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Pass::not_equal(Self, Self) -&gt; Bool <a class="anchor" href="#gen.Pass.not_equal" aria-label="Link to Pass::not_equal">#</a></div>
+<div class="desc"><p>Whether two values differ, as &lt;code&gt;Eq&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="gen.Pass.to_repr" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Pass::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#gen.Pass.to_repr">#</a></div>
-<div class="doc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Pass::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#gen.Pass.to_repr" aria-label="Link to Pass::to_repr">#</a></div>
+<div class="desc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
 </div>
 </div>
-<h3 id="gen-traits">Traits</h3>
+<h3 class="group-head" id="gen-traits">Traits</h3>
 <div class="entry kind-type" id="gen.Generator">
-<div class="sig">pub(open) trait Generator { <a class="anchor" href="#gen.Generator">#</a></div>
-<div class="doc"><p>A generator: given every declaration of its input files, the code to write. One call sees all of them, so a derive can answer per declaration and a registrar can gather every annotated function into one table.</p></div>
+<div class="sig">pub(open) trait Generator { <a class="anchor" href="#gen.Generator" aria-label="Link to Generator">#</a></div>
+<div class="desc"><p>A generator: given every declaration of its input files, the code to write. One call sees all of them, so a derive can answer per declaration and a registrar can gather every annotated function into one table.</p></div>
 <div class="entry kind-value" id="gen.Generator.generate" style="border-top:0;padding-top:8px">
-<div class="sig">fn generate(Self, Array[Decl]) -&gt; @quote.Code raise <a class="anchor" href="#gen.Generator.generate">#</a></div>
-<div class="doc"><p>Every declaration of the inputs, in one call: the code to write for all of them.</p></div>
+<div class="sig">fn generate(Self, Array[Decl]) -&gt; @quote.Code raise <a class="anchor" href="#gen.Generator.generate" aria-label="Link to Generator::generate">#</a></div>
+<div class="desc"><p>Every declaration of the inputs, in one call: the code to write for all of them.</p></div>
 </div>
 <div class="entry kind-value" id="gen.Generator.name" style="border-top:0;padding-top:8px">
-<div class="sig">fn name(Self) -&gt; String <a class="anchor" href="#gen.Generator.name">#</a></div>
-<div class="doc"><p>Short and stable: it goes in the header of every file it writes.</p></div>
+<div class="sig">fn name(Self) -&gt; String <a class="anchor" href="#gen.Generator.name" aria-label="Link to Generator::name">#</a></div>
+<div class="desc"><p>Short and stable: it goes in the header of every file it writes.</p></div>
 </div>
 </div>
-<h3 id="gen-errors">Errors</h3>
+<h3 class="group-head" id="gen-errors">Errors</h3>
 <div class="entry kind-error" id="gen.Refused">
-<div class="sig">pub(all) suberror Refused { <a class="anchor" href="#gen.Refused">#</a></div>
-<div class="doc"><p>Why a generator&#x27;s inputs were not read.</p></div>
+<div class="sig">pub(all) suberror Refused { <a class="anchor" href="#gen.Refused" aria-label="Link to Refused">#</a></div>
+<div class="desc"><p>Why a generator&#x27;s inputs were not read.</p></div>
 <ul class="params">
 <li><span class="pname">Syntax(file~ : String, line~ : Int32, column~ : Int32, msg~ : String)</span> — An input file is not MoonBit.</li>
 </ul>
 <div class="entry kind-value" id="gen.Refused.output" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#gen.Refused.output">#</a></div>
-<div class="doc"><p>Writes the value to a logger, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#gen.Refused.output" aria-label="Link to Refused::output">#</a></div>
+<div class="desc"><p>Writes the value to a logger, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="gen.Refused.to_repr" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#gen.Refused.to_repr">#</a></div>
-<div class="doc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#gen.Refused.to_repr" aria-label="Link to Refused::to_repr">#</a></div>
+<div class="desc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="gen.Refused.to_string" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::to_string(Self) -&gt; String <a class="anchor" href="#gen.Refused.to_string">#</a></div>
-<div class="doc"><p>The value as a string, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::to_string(Self) -&gt; String <a class="anchor" href="#gen.Refused.to_string" aria-label="Link to Refused::to_string">#</a></div>
+<div class="desc"><p>The value as a string, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
 </div>
 </div>
 </section>
 <section class="pkg" id="pkg-cli">
+<span class="num-index">PLATE IV</span>
 <h2>cli<span class="path">moonbitstack/moonast/cli</span></h2>
 <p class="about">The command line of a generator binary: it reads the inputs, has <code>moonast/gen</code> render them, and writes the output or reports that it is stale.</p>
-<h3 id="cli-values">Values</h3>
+<h3 class="group-head" id="cli-values">Values</h3>
 <div class="entry kind-value" id="cli.run">
-<div class="sig">pub async fn run(&amp;@gen.Generator, ArrayView[String]) -&gt; Unit <a class="anchor" href="#cli.run">#</a></div>
-<div class="doc"><p>Run <code>generator</code> the way a dev_build rule calls it: read every input, render them, and write the output; with <code>--check</code>, only compare and refuse when the output is stale. <code>args</code> are the arguments after the program name; <code>-C &lt;dir&gt;</code> makes relative paths relative to <code>dir</code>.</p></div>
+<div class="sig">pub async fn run(&amp;@gen.Generator, ArrayView[String]) -&gt; Unit <a class="anchor" href="#cli.run" aria-label="Link to run">#</a></div>
+<div class="desc"><p>Run <code>generator</code> the way a dev_build rule calls it: read every input, render them, and write the output; with <code>--check</code>, only compare and refuse when the output is stale. <code>args</code> are the arguments after the program name; <code>-C &lt;dir&gt;</code> makes relative paths relative to <code>dir</code>.</p></div>
 </div>
 
 
-<h3 id="cli-errors">Errors</h3>
+<h3 class="group-head" id="cli-errors">Errors</h3>
 <div class="entry kind-error" id="cli.Refused">
-<div class="sig">pub(all) suberror Refused { <a class="anchor" href="#cli.Refused">#</a></div>
-<div class="doc"><p>Why a generator run stopped.</p></div>
+<div class="sig">pub(all) suberror Refused { <a class="anchor" href="#cli.Refused" aria-label="Link to Refused">#</a></div>
+<div class="desc"><p>Why a generator run stopped.</p></div>
 <ul class="params">
 <li><span class="pname">Usage(msg~ : String)</span> — The command line is not <code>[-C &lt;dir&gt;] &lt;inputs...&gt; -o &lt;output&gt; [--check]</code>.</li>
 <li><span class="pname">Stale(output~ : String)</span> — <code>--check</code> found the output out of date with its inputs.</li>
 </ul>
 <div class="entry kind-value" id="cli.Refused.output" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#cli.Refused.output">#</a></div>
-<div class="doc"><p>Writes the value to a logger, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#cli.Refused.output" aria-label="Link to Refused::output">#</a></div>
+<div class="desc"><p>Writes the value to a logger, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="cli.Refused.to_repr" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#cli.Refused.to_repr">#</a></div>
-<div class="doc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#cli.Refused.to_repr" aria-label="Link to Refused::to_repr">#</a></div>
+<div class="desc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
 </div>
 <div class="entry kind-value" id="cli.Refused.to_string" style="border-top:0;padding-top:8px">
-<div class="sig">pub fn Refused::to_string(Self) -&gt; String <a class="anchor" href="#cli.Refused.to_string">#</a></div>
-<div class="doc"><p>The value as a string, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
+<div class="sig">pub fn Refused::to_string(Self) -&gt; String <a class="anchor" href="#cli.Refused.to_string" aria-label="Link to Refused::to_string">#</a></div>
+<div class="desc"><p>The value as a string, as &lt;code&gt;Show&lt;/code&gt; defines it.</p></div>
 </div>
 </div>
 </section>
@@ -622,10 +632,11 @@ inspect(@attr.find(decl.attrs(), &quot;demo.describe&quot;) is Some(_), content=
     <div class="r">
       <a href="index.html">Home</a>
       <a href="guide.html">Guide</a>
+      <a href="chain.html">Chain</a>
       <a href="api.html">API</a>
-      <a href="play.html">Playground</a>
+      <a href="play.html">Play</a>
       <a class="icon" href="https://github.com/moonbitstack/moonast" title="moonast on GitHub" aria-label="moonast on GitHub">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
       </a>
     </div>
   </div>
