@@ -67,6 +67,25 @@
     var(--silver-1) 100%
   );
 
+  /* The same leaf used as a surface rather than as type. A gradient designed
+     for letterforms carries shadowed bands; under dark ink they swallow it. */
+  --gilt-surface: linear-gradient(
+    100deg,
+    var(--gold-2) 0%,
+    var(--gold-4) 22%,
+    var(--gold-5) 48%,
+    var(--gold-3) 72%,
+    var(--gold-2) 100%
+  );
+
+  /* Temper: the colour steel takes when it is drawn from the fire — a plum
+     indigo with a rose edge. It marks what is selected, never what is
+     important, so gold keeps that job to itself. */
+  --temper-0: #2c2238;
+  --temper-1: #4c3654;
+  --rose: #d59a7d;
+  --on-temper: #f8f1e5;
+
   /* Gold that may be used as text on the page ground. */
   --gold-text:  light-dark(#7c5c15, #e9cd85);
   --gold-wash:  light-dark(#f2e8c9, #2b2415);
@@ -383,7 +402,7 @@ blockquote code {
   font-size: 1rem;
   font-weight: 600;
   color: #2a1f08;
-  background: radial-gradient(circle at 34% 26%, var(--gold-4), var(--gold-2) 58%, var(--gold-1));
+  background: radial-gradient(circle at 34% 26%, var(--gold-5), var(--gold-3) 56%, var(--gold-2));
   border-radius: 50%;
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, #fff 55%, transparent),
@@ -439,8 +458,8 @@ blockquote code {
   font-family: var(--font-mono);
   font-size: 0.86rem;
   font-weight: 700;
-  color: #2a1f08;
-  background: var(--gilt);
+  color: #241a05;
+  background: var(--gilt-surface);
   clip-path: var(--cut-sm);
   box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 60%, transparent);
 }
@@ -745,8 +764,9 @@ pre.code code {
 
 /* A hole is the thing the library is about: it is always gold. */
 .tk-hole {
-  color: #2a1f08;
-  background: var(--gilt);
+  color: #241a05;
+  font-weight: 700;
+  background: var(--gilt-surface);
   padding: 0 2px;
   box-shadow: 0 0 0 1px color-mix(in oklab, var(--gold-0) 60%, transparent);
 }
@@ -788,9 +808,11 @@ pre.code code {
 }
 
 .btn.primary {
-  color: #231a06;
-  background: var(--gilt);
+  color: #1d1505;
+  font-weight: 700;
+  background: var(--gilt-surface);
   background-size: 200% 100%;
+  text-shadow: 0 1px 0 color-mix(in oklab, #fff 45%, transparent);
   border-color: transparent;
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, #fff 55%, transparent),
@@ -913,12 +935,13 @@ pre.code code {
 .tag {
   padding: 1px 6px;
   font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  color: #15151a;
-  background: var(--gold-3);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #1d1505;
+  background: linear-gradient(100deg, var(--gold-3), var(--gold-4));
 }
-.tag.h { background: var(--gold-4); }
-.tag.g { background: #c98a4b; }
+.tag.h { background: linear-gradient(100deg, var(--gold-4), var(--gold-5)); }
+.tag.g { background: linear-gradient(100deg, #d9a468, #e9c69c); }
 
 .link {
   display: flex;
@@ -1391,9 +1414,19 @@ blockquote p { margin: 0; color: inherit; }
 }
 
 .chip[aria-pressed="true"] {
-  color: #231a06;
-  background: var(--gilt);
-  border-color: transparent;
+  color: var(--on-temper);
+  font-weight: 600;
+  background: linear-gradient(158deg, var(--temper-1), var(--temper-0));
+  border-color: color-mix(in oklab, var(--rose) 85%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--rose) 55%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, #000 30%, transparent),
+    0 1px 0 color-mix(in oklab, #000 18%, transparent);
+}
+
+.chip[aria-pressed="true"]:hover {
+  background: linear-gradient(158deg, var(--temper-1), var(--temper-0));
+  border-color: var(--rose);
 }
 
 .fills {
