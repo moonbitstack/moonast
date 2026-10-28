@@ -1303,6 +1303,30 @@ blockquote p { margin: 0; color: inherit; }
   padding: 1px;
   clip-path: var(--cut);
   min-width: 0;
+  /* Editors and output are steel, whatever the page's ink is. */
+  color: var(--on-steel);
+}
+
+.pane-box pre {
+  margin: 0;
+  padding: 15px 18px;
+  overflow-x: auto;
+  color: var(--on-steel);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  line-height: 1.72;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.pane-box pre code {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  white-space: inherit;
 }
 
 .pane-box::before {
