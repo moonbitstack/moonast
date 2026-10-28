@@ -13,7 +13,7 @@
 <style>
   /* This page is a plate of its own: the schematic is the subject, so it gets a
      bed of gold leaf behind it and no card of its own. */
-  .bed { padding: 26px 0 8px; }
+  .bed { padding: 0 0 10px; }
   .bed svg text { font-family: var(--font-mono); }
 
   .stage-label { font-size: 12px; letter-spacing: 0.16em; fill: var(--gold-3); text-transform: uppercase; }
@@ -26,8 +26,70 @@
   .detail .card-head { justify-content: space-between; }
   .detail h3 { margin: 18px 22px 6px; }
   .detail p { margin: 0 22px 14px; color: var(--on-steel-dim); }
-  .detail .code-block { margin: 0; clip-path: none; }
+  .detail .code-block { margin: 0 0 1px; clip-path: none; }
   .detail .code-block::before { clip-path: none; }
+
+  .chain-note {
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    fill: var(--ink-faint);
+  }
+
+  /* Below the width at which the drawing can be read, the same five stages are
+     given as an index instead of being shrunk into illegibility. */
+  .stage-list { display: none; }
+
+  @media (width <= 760px) {
+    .bed { display: none; }
+
+    .stage-list {
+      display: grid;
+      margin: 0 0 4px;
+      padding: 0;
+      list-style: none;
+      border-top: var(--hair) solid var(--line-soft);
+    }
+
+    .stage-list li { margin: 0; }
+
+    .stage-list button {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 26px 82px minmax(0, 1fr);
+      gap: 10px;
+      align-items: baseline;
+      padding: 11px 6px 11px 12px;
+      background: none;
+      border: 0;
+      border-bottom: var(--hair) solid var(--line-soft);
+      border-left: 2px solid transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .stage-list button[aria-current="true"] {
+      border-left-color: var(--gold-2);
+      background: color-mix(in oklab, var(--gold-3) 8%, transparent);
+    }
+
+    .stage-list .n {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: var(--gold-text);
+    }
+
+    .stage-list .t {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      color: var(--ink);
+    }
+
+    .stage-list .d {
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+    }
+  }
 </style>
 </head>
 <body>
@@ -54,7 +116,7 @@
 
 <main id="main">
 
-<section class="band" style="padding-bottom:34px">
+<section class="band short">
   <div class="wrap">
     <div class="band-head">
       <div class="label gold">The chain</div>
@@ -64,7 +126,7 @@
     </div>
 
     <figure class="chain-figure bed">
-      <svg class="chain-svg" viewBox="0 0 1200 300" role="img" aria-label="Five stages: the annotated declaration is read into declaration views, its annotation is bound into typed arguments, a template is filled through its holes, and the result is written to a file.">
+      <svg class="chain-svg" viewBox="0 40 1200 240" role="img" aria-label="Five stages: the annotated declaration is read into declaration views, its annotation is bound into typed arguments, a template is filled through its holes, and the result is written to a file.">
         <defs>
           <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <line x1="0" y1="0" x2="0" y2="6" stroke="var(--gold-0)" stroke-width="1" opacity="0.55"/>
@@ -156,14 +218,22 @@
         <g id="chain-mark">
           <path id="chain-mark-shape" d="M117 240l6 6-6 6-6-6z" fill="var(--gold-3)"/>
         </g>
-        <text x="600" y="278" text-anchor="middle" class="stage-dim" style="font-size:11.5px;letter-spacing:.14em;fill:var(--ink-faint)">ONE CALL TO generate() SEES EVERY DECLARATION OF EVERY INPUT</text>
+        <text x="600" y="278" text-anchor="middle" class="chain-note">ONE CALL TO generate() SEES EVERY DECLARATION OF EVERY INPUT</text>
       </svg>
       <figcaption>The same five stages run whether one file is annotated or a hundred.</figcaption>
     </figure>
+
+    <ol class="stage-list">
+      <li><button data-stage="0" aria-current="true"><span class="n">01</span><span class="t">Source</span><span class="d">the annotated declaration</span></button></li>
+      <li><button data-stage="1"><span class="n">02</span><span class="t">Read</span><span class="d">plain views of every declaration</span></button></li>
+      <li><button data-stage="2"><span class="n">03</span><span class="t">Bind</span><span class="d">the annotation as typed arguments</span></button></li>
+      <li><button data-stage="3"><span class="n">04</span><span class="t">Fill</span><span class="d">a template, hole by hole</span></button></li>
+      <li><button data-stage="4"><span class="n">05</span><span class="t">Write</span><span class="d">the file, or a stale report</span></button></li>
+    </ol>
   </div>
 </section>
 
-<section class="band" style="padding-top:0">
+<section class="band tight">
   <div class="wrap">
     <div class="plate detail" id="detail">
       <div class="card-head">
@@ -176,7 +246,7 @@
       <p id="detail-text">The annotation is the whole interface. It sits above a declaration you
         already wrote, names the generator that should run, and changes nothing else about the
         code it annotates.</p>
-      <div class="code-block" style="margin:0 0 1px">
+      <div class="code-block">
         <pre data-lang="moonbit"><code id="detail-code">#demo.describe
 pub struct Point {
   x : Int
@@ -194,7 +264,7 @@ pub struct Point {
       <h2>Each stage only knows what the one before it gave</h2>
     </div>
 
-    <div class="grid two" style="gap:40px">
+    <div class="grid two wide">
       <div>
         <p>A stage is a package, and a package is usable alone. That is what keeps a generator
           small: <code>gen</code> never opens a file, <code>quote</code> never reads a
@@ -224,7 +294,7 @@ pub struct Point {
       </div>
     </div>
 
-    <div class="cta" style="margin-top:28px">
+    <div class="cta">
       <a class="btn primary" href="play.html">Run the chain in the browser</a>
       <a class="btn" href="guide.html">Read the guide</a>
     </div>
@@ -297,6 +367,7 @@ pub struct Point {
   const code = document.getElementById("detail-code");
   const mark = document.getElementById("chain-mark-shape");
   const stages = [...document.querySelectorAll(".chain-stage")];
+  const rows = [...document.querySelectorAll(".stage-list [data-stage]")];
 
   const show = (i) => {
     const s = STAGES[i];
@@ -307,6 +378,7 @@ pub struct Point {
     code.textContent = s.code;
     if (window.moonastSite) window.moonastSite.render(code);
     stages.forEach((g, j) => g.setAttribute("aria-current", String(i === j)));
+    rows.forEach((b, j) => b.setAttribute("aria-current", String(i === j)));
     const box = stages[i].querySelector("rect.hit");
     if (box && mark) {
       const x = Number(box.getAttribute("x")) + Number(box.getAttribute("width")) / 2;
@@ -314,12 +386,15 @@ pub struct Point {
     }
   };
 
-  stages.forEach((g, i) => {
-    g.addEventListener("click", () => show(i));
+  for (const g of [...stages, ...rows]) {
+    g.addEventListener("click", () => show(Number(g.dataset.stage)));
     g.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); show(i); }
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        show(Number(g.dataset.stage));
+      }
     });
-  });
+  }
 
   show(0);
 })();

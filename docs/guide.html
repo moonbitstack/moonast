@@ -72,13 +72,13 @@
 
         <!-- nocheck -->
         <div class="code-block">
-          <pre><code>moon add moonbitstack/moonast</code></pre>
+          <pre data-raw="1"><code>moon add moonbitstack/moonast</code></pre>
         </div>
 
         <p>Four packages come with it. A package that only builds code imports the first three:</p>
 
         <div class="code-block">
-          <pre data-lang="moonbit"><code>// moon.pkg
+          <pre data-raw="1"><code>// moon.pkg
 import {
   "moonbitstack/moonast/quote",
   "moonbitstack/moonast/attr",
@@ -433,7 +433,7 @@ pub struct Point {
 
         <!-- nocheck -->
         <div class="code-block">
-          <pre><code>$ moon run . --target native -- models.mbt -o describe.g.mbt</code></pre>
+          <pre data-raw="1"><code>$ moon run . --target native -- models.mbt -o describe.g.mbt</code></pre>
         </div>
 
         <p>and this is the whole file it writes:</p>
@@ -537,14 +537,14 @@ fn User::id(self : User) -&gt; Int {
 
         <!-- nocheck -->
         <div class="code-block">
-          <pre><code>rule(name: "describe", command: "moonx &lt;module&gt;@&lt;version&gt; -C \"$mod_dir\" \"$input\" -o \"$output\"")</code></pre>
+          <pre data-raw="1"><code>rule(name: "describe", command: "moonx &lt;module&gt;@&lt;version&gt; -C \"$mod_dir\" \"$input\" -o \"$output\"")</code></pre>
         </div>
 
         <p>and one line to the <code>moon.pkg</code> of the package whose declarations it reads:</p>
 
         <!-- nocheck -->
         <div class="code-block">
-          <pre><code>dev_build(rule: "describe", input: "models.mbt", output: "describe.g.mbt")
+          <pre data-raw="1"><code>dev_build(rule: "describe", input: "models.mbt", output: "describe.g.mbt")
 formatter(ignore: [ "describe.g.mbt" ])</code></pre>
         </div>
 
@@ -567,7 +567,7 @@ formatter(ignore: [ "describe.g.mbt" ])</code></pre>
 
         <!-- nocheck -->
         <div class="code-block">
-          <pre><code>$ moon run . --target native -- models.mbt -o describe.g.mbt --check
+          <pre data-raw="1"><code>$ moon run . --target native -- models.mbt -o describe.g.mbt --check
 $ echo $?
 0
 
@@ -587,7 +587,7 @@ $ echo $?
 
         <!-- nocheck -->
         <div class="code-block">
-          <pre><code>-o is required; usage: [-C &lt;dir&gt;] &lt;inputs...&gt; -o &lt;output&gt; [--check]
+          <pre data-raw="1"><code>-o is required; usage: [-C &lt;dir&gt;] &lt;inputs...&gt; -o &lt;output&gt; [--check]
 no input files; usage: [-C &lt;dir&gt;] &lt;inputs...&gt; -o &lt;output&gt; [--check]</code></pre>
         </div>
       </section>
@@ -666,6 +666,7 @@ fn register_create_user(router : Router) -&gt; Unit {
       </section>
 
       <section id="limits">
+        <span class="step-n">Reference</span>
         <h2>What the annotation grammar allows</h2>
         <p>The parser reads strings, <code>true</code>/<code>false</code>, names and nested calls
           as annotation arguments. There are no arrays and no numbers, a generic or qualified
@@ -682,6 +683,7 @@ inspect(@attr.find(attrs, "app.get") is Some(_), content="false")</code></pre>
       </section>
 
       <section id="refusals">
+        <span class="step-n">Reference</span>
         <h2>Refusals</h2>
         <p>Every fallible call gives a <code>Refused</code> with a message and, where there is
           one, a position.</p>
@@ -704,7 +706,7 @@ inspect(@attr.find(attrs, "app.get") is Some(_), content="false")</code></pre>
           through <code>render</code> and <code>run</code> — so a refusal from a template or an
           annotation stops the run with its position intact.</p>
 
-        <div class="cta" style="margin-top:24px">
+        <div class="cta">
           <a class="btn primary" href="play.html">Try it in the playground</a>
           <a class="btn" href="api.html">Browse the API</a>
         </div>

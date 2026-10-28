@@ -51,11 +51,11 @@
   );
   --gilt-edge: linear-gradient(
     135deg,
-    var(--gold-4) 0%,
+    var(--gold-3) 0%,
     var(--gold-1) 22%,
-    var(--gold-3) 44%,
+    var(--gold-2) 44%,
     var(--gold-0) 62%,
-    var(--gold-4) 84%,
+    var(--gold-3) 84%,
     var(--gold-2) 100%
   );
   --argent: linear-gradient(
@@ -293,6 +293,7 @@ h4 { font-size: 1rem; }
 }
 
 .label.gold { color: var(--gold-text); }
+.label.block { display: block; margin-bottom: 8px; }
 
 .num-index {
   font-family: var(--font-display);
@@ -611,6 +612,21 @@ blockquote code {
 
 .plate > * { position: relative; z-index: 1; }
 
+/* The home plate is a stack of three panes inside one frame, so its spacing
+   is its own. */
+#hero-card .stack { padding: 12px; }
+
+#hero-card textarea {
+  min-height: 132px;
+  padding: 10px 0;
+  border-bottom: var(--hair) solid var(--steel-line);
+}
+
+#hero-card pre {
+  padding: 10px 0;
+  font-size: 0.76rem;
+}
+
 /* Bare code and editors inside a plate sit on steel, so they take its ink
    rather than the page's. */
 .plate pre,
@@ -823,7 +839,28 @@ pre.code code {
 
 .btn svg { width: 14px; height: 14px; }
 
-.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.prose .cta,
+.band .cta { margin-top: 26px; }
+
+/* A closing line under a demo, and a limit on how wide prose may run. */
+.tail { margin-top: 26px; }
+.measure { max-width: 70ch; }
+
+/* A stack of steel set flush under the plate above it, and its counterpart. */
+.band.short { padding-bottom: 34px; }
+.band.tight { padding-top: 0; }
+
+/* Two columns with room for a table beside prose. */
+.grid.wide { gap: 40px; }
+
+/* A code plate followed by a remark reads as one thought. */
+.code-block + blockquote { margin-top: 6px; }
 
 /* ------------------------------------------------------------------ hero */
 
@@ -1097,10 +1134,11 @@ table.plain code { font-size: 0.82em; }
 .prose li { margin-bottom: 0.35em; }
 
 .step-n {
-  display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.2em;
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.688rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--gold-text);
   margin-bottom: 8px;
@@ -1133,11 +1171,15 @@ blockquote p { margin: 0; color: inherit; }
 
 /* --------------------------------------------------------------- sidebar */
 
+.doc,
+.page {
+  padding: 44px 0 70px;
+}
+
 .doc {
   display: grid;
   grid-template-columns: 214px minmax(0, 1fr);
   gap: 46px;
-  padding: 44px 0 70px;
   align-items: start;
 }
 
@@ -1214,6 +1256,14 @@ blockquote p { margin: 0; color: inherit; }
   .side h4 { margin-bottom: 5px; }
 }
 
+.side a.pkg-link {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  padding-top: 2px;
+  padding-bottom: 6px;
+}
+
 .side a.sub {
   font-family: var(--font-mono);
   font-size: 0.75rem;
@@ -1223,6 +1273,7 @@ blockquote p { margin: 0; color: inherit; }
 
 /* ------------------------------------------------------------ api entries */
 
+.intro { margin-bottom: 44px; }
 .pkg { margin-bottom: 56px; }
 .pkg h2 {
   display: flex;
@@ -1254,6 +1305,8 @@ blockquote p { margin: 0; color: inherit; }
   padding: 14px 0 16px;
   border-bottom: var(--hair) solid var(--line-soft);
 }
+
+.entry.nested { border-top: 0; padding-top: 8px; }
 
 .entry .sig {
   font-family: var(--font-mono);
@@ -1316,7 +1369,8 @@ blockquote p { margin: 0; color: inherit; }
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
-  align-items: start;
+  /* Two plates of one height, so the pair reads as a single instrument. */
+  align-items: stretch;
 }
 
 @media (width <= 940px) {
@@ -1326,6 +1380,8 @@ blockquote p { margin: 0; color: inherit; }
 .pane-box {
   position: relative;
   isolation: isolate;
+  display: flex;
+  flex-direction: column;
   background: var(--gilt-edge);
   padding: 1px;
   clip-path: var(--cut);
@@ -1379,7 +1435,8 @@ blockquote p { margin: 0; color: inherit; }
   font-family: var(--font-mono);
   font-size: 0.8125rem;
   line-height: 1.72;
-  resize: vertical;
+  resize: none;
+  flex: 1 1 auto;
   white-space: pre;
   overflow-x: auto;
   tab-size: 2;
@@ -1392,6 +1449,7 @@ blockquote p { margin: 0; color: inherit; }
   min-height: 300px;
   max-height: 460px;
   overflow: auto;
+  flex: 1 1 auto;
 }
 
 .chips {

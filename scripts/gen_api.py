@@ -408,7 +408,7 @@ def entry_html(pkg, item, docs, level=3):
                 if tail in FALLBACK:
                     mdoc = [FALLBACK[tail]]
             parts.append(
-                '<div class="entry kind-value" id="%s.%s" style="border-top:0;padding-top:8px">'
+                '<div class="entry kind-value nested" id="%s.%s">'
                 % (pkg, anchor(mth.name))
             )
             parts.append(
@@ -448,8 +448,7 @@ def build():
 
         nav.append('<div class="group"><h4>%s</h4>' % esc(TITLES[pkg]))
         nav.append(
-            '<a href="#pkg-%s" style="font-family:var(--font-mono);font-size:.74rem">%s</a>'
-            % (pkg, esc(PLATES[pkg]))
+            '<a class="pkg-link" href="#pkg-%s">%s</a>' % (pkg, esc(PLATES[pkg]))
         )
         for v in sorted(values, key=lambda i: i.name):
             nav.append('<a class="sub" href="#%s.%s">%s</a>' % (pkg, anchor(v.name), esc(v.name)))
@@ -486,7 +485,7 @@ TEMPLATE = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>API reference — moonast</title>
 <meta name="description" content="Every public type, function, method, trait and error of moonast, grouped by package.">
-<link rel="icon" href="data:image/svg+xml,%%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%%3E%%3Cpath d='M0 0h24l8 8v24H8l-8-8z' fill='%%2315151a'/%%3E%%3Cpath d='M0 0h24l8 8' fill='none' stroke='%%23d8b154' stroke-width='1.4'/%%3E%%3Ctext x='16' y='23' font-family='monospace' font-size='18' font-weight='700' fill='%%23f3dfa0' text-anchor='middle'%%3E%%23%%3C/text%%3E%%3C/svg%%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M0 0h24l8 8v24H8l-8-8z' fill='%2315151a'/%3E%3Cpath d='M0 0h24l8 8' fill='none' stroke='%23d8b154' stroke-width='1.4'/%3E%3Ctext x='16' y='23' font-family='monospace' font-size='18' font-weight='700' fill='%23f3dfa0' text-anchor='middle'%3E%23%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -521,9 +520,9 @@ __NAV__
     </aside>
 
     <div class="prose" id="main">
-      <section style="margin-bottom:44px">
-        <span class="num-index">THE CATALOGUE</span>
-        <h2 style="margin-top:8px">API reference</h2>
+      <section class="intro">
+        <span class="label gold block">The catalogue</span>
+        <h2>API reference</h2>
         <p>Every public type, function, method, trait and error, one plate per package and
           alphabetical within each group. Import one package at a time:
           <code>moonbitstack/moonast/quote</code>, <code>/attr</code>, <code>/gen</code>,
