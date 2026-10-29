@@ -317,7 +317,8 @@ blockquote code {
   border: var(--hair) solid color-mix(in oklab, var(--gold-1) 26%, transparent);
   padding: 0.1em 0.32em;
   color: var(--ink);
-  white-space: nowrap;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /* ---------------------------------------------------------------- layout */
@@ -1613,3 +1614,18 @@ footer.site .r a.icon svg { width: 14px; height: 14px; display: block; }
     transition-duration: 0.001ms !important;
   }
 }
+
+/* The page scroll bar shows while the page moves or under the pointer and
+   hides a moment after; it keeps its place, so nothing shifts. */
+@supports selector(::-webkit-scrollbar) {
+  html:not(.scrolling)::-webkit-scrollbar-thumb { background: transparent; border-color: transparent; box-shadow: none; }
+}
+@supports not selector(::-webkit-scrollbar) {
+  html:not(.scrolling) { scrollbar-color: transparent transparent; }
+}
+
+/* Long identifiers in running text break rather than widen the page. */
+:where(p, li, td, dd, h1, h2, h3, h4) code { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Grid items give way to their scrolling code and tables instead of widening the page. */
+.doc > * { min-width: 0; }
