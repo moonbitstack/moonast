@@ -148,7 +148,7 @@ fn read(
   column : Int32,
 ) -> Value raise Refused {
   match (param.kind, expr) {
-    (Str, String(s)) => Str(s)
+    (Str, String(s)) => Str(decoded(s))
     (Bool, Bool(b)) => Bool(b)
     (Ident, Ident({ qual: None, name, })) => Ident(name)
     (Type, String(s)) if is_type(s) => Type(s)
