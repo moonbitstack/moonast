@@ -132,12 +132,45 @@ pub extend Code with Show::{to_string, output}
 fn print(body : Body) -> String {
   match body {
     Items(@list.Empty) => ""
-    Items(impls) => @fmt.format(@fmt.impls_to_string(impls))
+    Items(impls) => print_items(impls)
     Expr(w) => unwrap_body(@fmt.impls_to_string(@list.singleton(w)))
     Type(w) => unwrap_type(@fmt.impls_to_string(@list.singleton(w)))
     Name(n) => n
     Text(t) => "\"" + escape(t) + "\""
   }
+}
+
+///|
+/// The printer writes a `declare fn` as a `fn` with no body, which does not compile, so those
+/// go through one at a time and get the word back.
+fn print_items(impls : @list.List[@syntax.Impl]) -> String {
+  if !impls.iter().any(declared) {
+    return @fmt.format(@fmt.impls_to_string(impls))
+  }
+  let out = StringBuilder()
+  for one in impls {
+    let text = @fmt.format(@fmt.impls_to_string(@list.singleton(one)))
+    out.write_string(if declared(one) { with_declare(text) } else { text })
+  }
+  out.to_string()
+}
+
+///|
+fn declared(one : @syntax.Impl) -> Bool {
+  one is TopFuncDef(decl_body=DeclNone, ..)
+}
+
+///|
+/// `text` with `declare` before the line its function starts on, below any `///` above it.
+fn with_declare(text : String) -> String {
+  let lines = text.split("\n").map(l => l.to_owned()).to_array()
+  for i, line in lines {
+    if !line.has_prefix("//") && !line.has_prefix("#") && line != "" {
+      lines[i] = "declare " + line
+      break
+    }
+  }
+  lines.join("\n")
 }
 
 ///|

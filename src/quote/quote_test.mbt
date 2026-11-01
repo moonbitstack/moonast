@@ -330,3 +330,23 @@ test "a name that is not an identifier is refused" {
     fail("a qualified name is refused")
   }
 }
+
+///|
+test "a declared function keeps its `declare`" {
+  let code = @quote.items(
+    "declare fn f(a : Int) -> Int raise\n\nfn g() -> Int { 1 }\n\ndeclare async fn T::h(self : T) -> Unit",
+  ).render()
+  let text = code.to_string()
+  assert_true(text.contains("declare fn f(a : Int) -> Int raise"))
+  assert_true(text.contains("declare async fn T::h(self : T) -> Unit"))
+  assert_true(text.contains("\nfn g() -> Int {"))
+  assert_eq(text.split("declare").count(), 3)
+}
+
+///|
+test "a declared function keeps the comment above it" {
+  let text = @quote.items("/// Adds.\ndeclare fn add(a : Int) -> Int")
+    .render()
+    .to_string()
+  assert_true(text.contains("/// Adds.\ndeclare fn add(a : Int) -> Int"))
+}
