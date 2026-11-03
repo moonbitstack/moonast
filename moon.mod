@@ -1,6 +1,6 @@
 name = "moonbitstack/moonast"
 
-version = "0.2.4"
+version = "0.2.5"
 
 readme = "README.md"
 
@@ -8,7 +8,23 @@ repository = "https://github.com/moonbitstack/moonast"
 
 license = "Apache-2.0"
 
-keywords = [ "moonbit", "codegen", "ast", "macro", "derive", "attribute" ]
+keywords = [
+  "codegen",
+  "code-generation",
+  "ast",
+  "macro",
+  "macros",
+  "derive",
+  "attribute",
+  "attributes",
+  "annotation",
+  "annotations",
+  "metaprogramming",
+  "quote",
+  "syntax-tree",
+  "parser",
+  "moonbit",
+]
 
 description = "Code generation for MoonBit from annotated declarations."
 
