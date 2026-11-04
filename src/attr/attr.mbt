@@ -104,3 +104,34 @@ pub fn under(
   .filter(a => name_of(a) is Some(n) && n.has_prefix(prefix))
   .collect()
 }
+
+///|
+/// The annotations starting `#lib.` whose payload the parser could not read, in source order. A
+/// key that is a keyword does this: `#app.get(type="x")`. `under`, `find` and `all` go by the parsed
+/// name and pass over them, so a generator asks here first and reports them, rather than ignoring
+/// what was written.
+///
+/// ```mbt check
+/// test {
+///   let source = "#app.get(type=\"x\")\nfn list_users() -> Unit {}"
+///   let impls = @parser.parse_string(source).0
+///   guard impls is @list.More(impl_, tail=@list.Empty) else {
+///     abort("one declaration")
+///   }
+///   guard impl_ is @syntax.TopFuncDef(fun_decl={ attrs, .. }, ..) else {
+///     abort("a function")
+///   }
+///   inspect(@attr.under(attrs, "app").length(), content="0")
+///   inspect(@attr.malformed(attrs, "app").length(), content="1")
+/// }
+/// ```
+pub fn malformed(
+  attrs : @list.List[@attribute.Attribute],
+  lib : StringView,
+) -> Array[@attribute.Attribute] {
+  let prefix = "#" + lib.to_owned() + "."
+  attrs
+  .iter()
+  .filter(a => name_of(a) is None && a.raw.has_prefix(prefix))
+  .collect()
+}

@@ -96,3 +96,36 @@ async test "relative paths resolve against -C, the way a dev_build rule passes t
   @cli.run(Names::{ }, ["-C", dir, "models.mbt", "-o", "out.g.mbt"])
   assert_true(@fs.read_file(dir + "/out.g.mbt").text().contains("[\"A\"]"))
 }
+
+///|
+/// Refuses every file, in the words of a generator that found something wrong in it.
+struct Fussy {}
+
+///|
+impl @gen.Generator for Fussy with fn name(_) {
+  "fussy"
+}
+
+///|
+impl @gen.Generator for Fussy with fn generate(_, _) {
+  fail("models.mbt:3:1: `#demo.x` goes on a struct")
+}
+
+///|
+async test "a generator's refusal comes out as its own sentence" {
+  let dir = @fs.tmpdir(prefix="moonast-cli-refuse")
+  defer @fs.rmdir(dir, recursive=true)
+  let input = dir + "/models.mbt"
+  @fs.write_file(input, "struct A {\n  x : Int\n}\n")
+  let refused = try
+    @cli.run(Fussy::{ }, [input, "-o", dir + "/out.g.mbt"])
+  catch {
+    e => Some(e)
+  } noraise {
+    _ => None
+  }
+  guard refused is Some(@cli.Generator(msg~)) else {
+    fail("the refusal did not come through")
+  }
+  assert_eq(msg, "models.mbt:3:1: `#demo.x` goes on a struct")
+}

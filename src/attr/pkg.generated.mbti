@@ -12,6 +12,8 @@ pub fn all(@list.List[@attribute.Attribute], StringView) -> Array[@attribute.Att
 
 pub fn find(@list.List[@attribute.Attribute], StringView) -> @attribute.Attribute?
 
+pub fn malformed(@list.List[@attribute.Attribute], StringView) -> Array[@attribute.Attribute]
+
 pub fn name_of(@attribute.Attribute) -> String?
 
 pub fn under(@list.List[@attribute.Attribute], StringView) -> Array[@attribute.Attribute]
@@ -61,7 +63,7 @@ pub fn Spec::bind(Self, @attribute.Attribute) -> Args raise Refused
 pub fn Spec::many(Self, String, Kind) -> Self
 pub fn Spec::new(StringView) -> Self
 pub fn Spec::optional(Self, String, Kind) -> Self
-pub fn Spec::positional(Self, String, Kind) -> Self
+pub fn Spec::positional(Self, String, Kind, optional? : Bool) -> Self
 pub fn Spec::required(Self, String, Kind) -> Self
 
 #derive(Eq, @debug.Debug)

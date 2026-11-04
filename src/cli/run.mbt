@@ -6,6 +6,8 @@ pub(all) suberror Refused {
   Usage(msg~ : String)
   /// `--check` found the output out of date with its inputs.
   Stale(output~ : String)
+  /// The generator refused what it read, in its own words.
+  Generator(msg~ : String)
 }
 
 ///|
@@ -17,6 +19,7 @@ pub impl Show for Refused with fn output(self, logger) {
     Usage(msg~) => "\{msg}; usage: [-C <dir>] <inputs...> -o <output> [--check]"
     Stale(output~) =>
       "\{output} is out of date with its inputs; run the generator again"
+    Generator(msg~) => msg
   }
   logger.write_string(text)
 }
@@ -87,6 +90,17 @@ fn plan(args : ArrayView[String]) -> Plan raise Refused {
 }
 
 ///|
+/// What a generator said with `fail`, without the place in the generator's own source that `fail`
+/// puts in front of it. The sentence already names the place in the user's.
+fn sentence(msg : String) -> String {
+  let mark = "FAILED: "
+  match msg.find(mark) {
+    Some(at) => msg[at + mark.length():].to_owned()
+    None => msg
+  }
+}
+
+///|
 /// Run `generator` the way a dev_build rule calls it: read every input, render
 /// them, and write the output; with `--check`, only compare and refuse when the
 /// output is stale. `args` are the arguments after the program name; `-C <dir>`
@@ -97,7 +111,10 @@ pub async fn run(generator : &@gen.Generator, args : ArrayView[String]) -> Unit 
   for path in plan.inputs {
     sources.push((path, @fs.read_file(path).text()))
   }
-  let rendered = @gen.render(generator, sources)
+  let rendered = @gen.render(generator, sources) catch {
+    Failure(msg) => raise Generator(msg=sentence(msg))
+    e => raise e
+  }
   if plan.check {
     let current = if @fs.exists(plan.output) {
       @fs.read_file(plan.output).text()

@@ -14,6 +14,7 @@ pub async fn run(&@gen.Generator, ArrayView[String]) -> Unit
 pub(all) suberror Refused {
   Usage(msg~ : String)
   Stale(output~ : String)
+  Generator(msg~ : String)
 }
 pub fn Refused::output(Self, &Logger) -> Unit
 pub fn Refused::to_repr(Self) -> @debug.Repr

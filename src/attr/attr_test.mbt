@@ -115,3 +115,53 @@ test "a payload outside the annotation grammar is refused as malformed" {
     }
   }
 }
+
+///|
+test "an annotation that does not parse is found by its prefix, and no other" {
+  let source = "#app.get(type=\"x\")\n#other.thing(type=\"y\")\n#app.post(\"/a\")\nfn f() -> Unit {}"
+  let impls = @parser.parse_string(source).0
+  guard impls is @list.More(impl_, tail=@list.Empty) else {
+    fail("one declaration")
+  }
+  guard impl_ is @syntax.TopFuncDef(fun_decl={ attrs, .. }, ..) else {
+    fail("a function")
+  }
+  let broken = @attr.malformed(attrs, "app")
+  assert_eq(broken.length(), 1)
+  assert_true(broken[0].raw.has_prefix("#app.get"))
+  assert_eq(@attr.under(attrs, "app").length(), 1)
+  assert_eq(@attr.malformed(attrs, "missing").length(), 0)
+}
+
+///|
+test "a positional parameter marked optional can be left out, and a required one cannot" {
+  let attrs = (source : String) => {
+    let impls = @parser.parse_string(source + "\nfn f() -> Unit {}").0
+    guard impls
+      is @list.More(
+        @syntax.TopFuncDef(fun_decl={ attrs, .. }, ..),
+        tail=@list.Empty
+      ) else {
+      abort("one function")
+    }
+    attrs
+  }
+  let spec = @attr.Spec::new("orm.table").positional("name", Str, optional=true)
+  guard @attr.find(attrs("#orm.table"), "orm.table") is Some(bare) else {
+    fail("annotated")
+  }
+  assert_eq(spec.bind(bare).str("name"), None)
+  guard @attr.find(attrs("#orm.table(\"heroes\")"), "orm.table") is Some(given) else {
+    fail("annotated")
+  }
+  assert_eq(spec.bind(given).str("name"), Some("heroes"))
+  let strict = @attr.Spec::new("orm.table").positional("name", Str)
+  let missing = try {
+    ignore(strict.bind(bare))
+    false
+  } catch {
+    Missing(key="name", ..) => true
+    _ => false
+  }
+  assert_true(missing)
+}

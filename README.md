@@ -250,8 +250,9 @@ println(code)
 | `find(attrs, name)` | annotations, a name | the first one called that |
 | `all(attrs, name)` | annotations, a name | every one called that |
 | `under(attrs, lib)` | annotations, a prefix | every one under `lib.` |
+| `malformed(attrs, lib)` | annotations, a prefix | every one under `lib.` that does not parse |
 | `Spec::new(name)` | an annotation's name | a spec with no parameters |
-| `Spec::positional(key, kind)` | required, by position or name | the spec |
+| `Spec::positional(key, kind, optional?)` | by position or name, required unless `optional=true` | the spec |
 | `Spec::required(key, kind)` | required, by name | the spec |
 | `Spec::optional(key, kind)` | may be left out | the spec |
 | `Spec::many(key, kind)` | may be given again | the spec |
@@ -302,7 +303,7 @@ keyword cannot be a label. A list is written as a repeated key, `tags="a", tags=
 `Spec::many` accepts.
 
 When a payload is outside that grammar, the annotation has no name as far as moonast is
-concerned, so `find` does not see it.
+concerned, so `find` does not see it. `malformed` does: a generator asks it first and reports what it finds.
 
 ## Refusals
 
@@ -314,7 +315,7 @@ give:
 | `quote` | the template is not MoonBit, a hole is left empty, a fill names no hole, or a fill does not fit where it stands |
 | `attr` | the payload cannot be read, a required parameter is missing, one is unknown, mistyped, or given twice |
 | `gen` | an input file is not MoonBit |
-| `cli` | the command line is wrong, or `--check` found the output out of date |
+| `cli` | the command line is wrong, `--check` found the output out of date, or the generator refused, in which case `Generator` carries its sentence |
 
 ## Examples
 

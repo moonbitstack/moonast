@@ -52,10 +52,16 @@ fn Spec::add(self : Spec, param : Param) -> Spec {
 }
 
 ///|
-/// A required parameter that may be given by position, in the order these are
-/// declared, or by name.
-pub fn Spec::positional(self : Spec, key : String, kind : Kind) -> Spec {
-  self.add({ key, kind, required: true, positional: true, many: false, })
+/// A parameter that may be given by position, in the order these are declared, or by name. It is
+/// required unless `optional` says otherwise, which is what lets `#orm.table("heroes")` and a bare
+/// `#orm.table` both stand.
+pub fn Spec::positional(
+  self : Spec,
+  key : String,
+  kind : Kind,
+  optional~ : Bool = false,
+) -> Spec {
+  self.add({ key, kind, required: !optional, positional: true, many: false, })
 }
 
 ///|
