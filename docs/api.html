@@ -55,6 +55,7 @@
 <a class="pkg-link" href="#pkg-attr">Plate II</a>
 <a class="sub" href="#attr.all">all</a>
 <a class="sub" href="#attr.find">find</a>
+<a class="sub" href="#attr.malformed">malformed</a>
 <a class="sub" href="#attr.name_of">name_of</a>
 <a class="sub" href="#attr.under">under</a>
 <a class="sub" href="#attr.Args">Args</a>
@@ -261,6 +262,20 @@ abort(&quot;a function&quot;)
 }
 inspect(@attr.find(attrs, &quot;app.get&quot;) is Some(_), content=&quot;true&quot;)</code></pre></div>
 </div>
+<div class="entry kind-value" id="attr.malformed">
+<div class="sig">pub fn malformed(@list.List[@attribute.Attribute], StringView) -&gt; Array[@attribute.Attribute] <a class="anchor" href="#attr.malformed" aria-label="Link to malformed">#</a></div>
+<div class="desc"><p>The annotations starting <code>#lib.</code> whose payload the parser could not read, in source order. A key that is a keyword does this: <code>#app.get(type=&quot;x&quot;)</code>. <code>under</code>, <code>find</code> and <code>all</code> go by the parsed name and pass over them, so a generator asks here first and reports them, rather than ignoring what was written.</p>
+<pre data-lang="moonbit"><code>let source = &quot;#app.get(type=\&quot;x\&quot;)\nfn list_users() -&gt; Unit {}&quot;
+let impls = @parser.parse_string(source).0
+guard impls is @list.More(impl_, tail=@list.Empty) else {
+abort(&quot;one declaration&quot;)
+}
+guard impl_ is @syntax.TopFuncDef(fun_decl={ attrs, .. }, ..) else {
+abort(&quot;a function&quot;)
+}
+inspect(@attr.under(attrs, &quot;app&quot;).length(), content=&quot;0&quot;)
+inspect(@attr.malformed(attrs, &quot;app&quot;).length(), content=&quot;1&quot;)</code></pre></div>
+</div>
 <div class="entry kind-value" id="attr.name_of">
 <div class="sig">pub fn name_of(@attribute.Attribute) -&gt; String? <a class="anchor" href="#attr.name_of" aria-label="Link to name_of">#</a></div>
 <div class="desc"><p>The full name of an annotation, <code>lib.name</code> for <code>#lib.name(...)</code>; <code>None</code> when the parser could not read its payload.</p>
@@ -416,8 +431,8 @@ inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quo
 <div class="desc"><p>A parameter that may be left out.</p></div>
 </div>
 <div class="entry kind-value nested" id="attr.Spec.positional">
-<div class="sig">pub fn Spec::positional(Self, String, Kind) -&gt; Self <a class="anchor" href="#attr.Spec.positional" aria-label="Link to Spec::positional">#</a></div>
-<div class="desc"><p>A required parameter that may be given by position, in the order these are declared, or by name.</p></div>
+<div class="sig">pub fn Spec::positional(Self, String, Kind, optional? : Bool) -&gt; Self <a class="anchor" href="#attr.Spec.positional" aria-label="Link to Spec::positional">#</a></div>
+<div class="desc"><p>A parameter that may be given by position, in the order these are declared, or by name. It is required unless <code>optional</code> says otherwise, which is what lets <code>#orm.table(&quot;heroes&quot;)</code> and a bare <code>#orm.table</code> both stand.</p></div>
 </div>
 <div class="entry kind-value nested" id="attr.Spec.required">
 <div class="sig">pub fn Spec::required(Self, String, Kind) -&gt; Self <a class="anchor" href="#attr.Spec.required" aria-label="Link to Spec::required">#</a></div>
@@ -510,6 +525,14 @@ abort(&quot;one declaration&quot;)
 }
 inspect(@attr.find(decl.attrs(), &quot;demo.describe&quot;) is Some(_), content=&quot;true&quot;)</code></pre></div>
 </div>
+<div class="entry kind-value nested" id="gen.Decl.raises">
+<div class="sig">pub fn Decl::raises(Self) -&gt; String <a class="anchor" href="#gen.Decl.raises" aria-label="Link to Decl::raises">#</a></div>
+<div class="desc"><p>What a function says after its return type, as source: empty, <code>raise</code>, <code>raise E</code> or <code>raise? E</code>, so a wrapper can say the same. A type with arguments cannot be an error type, so the name is all there is to print. Empty for anything that is not a function.</p>
+<pre data-lang="moonbit"><code>guard @gen.read(&quot;m.mbt&quot;, &quot;fn f() -&gt; Unit raise @a.Bad {}&quot;) is [decl] else {
+abort(&quot;a function&quot;)
+}
+inspect(decl.raises(), content=&quot;raise @a.Bad&quot;)</code></pre></div>
+</div>
 <div class="entry kind-value nested" id="gen.Decl.raw">
 <div class="sig">pub fn Decl::raw(Self) -&gt; @syntax.Impl <a class="anchor" href="#gen.Decl.raw" aria-label="Link to Decl::raw">#</a></div>
 <div class="desc"><p>The official syntax tree behind the view.</p></div>
@@ -533,6 +556,28 @@ inspect(@attr.find(decl.attrs(), &quot;demo.describe&quot;) is Some(_), content=
 <li><span class="pname">ty</span> : String?</li>
 <li><span class="pname">pass</span> : Pass</li>
 </ul>
+<div class="entry kind-value nested" id="gen.Param.declared">
+<div class="sig">pub fn Param::declared(Self) -&gt; String? <a class="anchor" href="#gen.Param.declared" aria-label="Link to Param::declared">#</a></div>
+<div class="desc"><p>A parameter as a wrapper&#x27;s signature declares it: <code>a : Int</code>, <code>a~ : Int</code>, <code>a? : Int</code>. A parameter with a default comes out optional, since the default itself stays with the function being wrapped. <code>None</code> when it has no name or no type, so there is nothing to pass along.</p>
+<pre data-lang="moonbit"><code>guard @gen.read(
+&quot;m.mbt&quot;, &quot;fn f(a : Int, b~ : String, c~ : Bool = true) -&gt; Unit {}&quot;,
+)
+is [Func(params~, ..)] else {
+abort(&quot;a function&quot;)
+}
+inspect(
+params.map(p =&gt; p.declared().unwrap_or(&quot;&quot;)).join(&quot;, &quot;),
+content=&quot;a : Int, b~ : String, c? : Bool&quot;,
+)
+inspect(
+params.map(p =&gt; p.passed().unwrap_or(&quot;&quot;)).join(&quot;, &quot;),
+content=&quot;a, b~, c?&quot;,
+)</code></pre></div>
+</div>
+<div class="entry kind-value nested" id="gen.Param.passed">
+<div class="sig">pub fn Param::passed(Self) -&gt; String? <a class="anchor" href="#gen.Param.passed" aria-label="Link to Param::passed">#</a></div>
+<div class="desc"><p>A parameter as a wrapper passes it on: <code>a</code>, <code>a~</code>, <code>a?</code>. <code>None</code> when it has no name.</p></div>
+</div>
 </div>
 <div class="entry kind-type" id="gen.Pass">
 <div class="sig">pub(all) enum Pass { <a class="anchor" href="#gen.Pass" aria-label="Link to Pass">#</a></div>
@@ -608,6 +653,7 @@ inspect(@attr.find(decl.attrs(), &quot;demo.describe&quot;) is Some(_), content=
 <ul class="params">
 <li><span class="pname">Usage(msg~ : String)</span> — The command line is not <code>[-C &lt;dir&gt;] &lt;inputs...&gt; -o &lt;output&gt; [--check]</code>.</li>
 <li><span class="pname">Stale(output~ : String)</span> — <code>--check</code> found the output out of date with its inputs.</li>
+<li><span class="pname">Generator(msg~ : String)</span> — The generator refused what it read, in its own words.</li>
 </ul>
 <div class="entry kind-value nested" id="cli.Refused.output">
 <div class="sig">pub fn Refused::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#cli.Refused.output" aria-label="Link to Refused::output">#</a></div>

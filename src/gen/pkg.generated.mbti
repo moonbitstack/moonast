@@ -32,6 +32,7 @@ pub(all) enum Decl {
   Other(file~ : String, raw~ : @syntax.Impl)
 }
 pub fn Decl::attrs(Self) -> @list.List[@attribute.Attribute]
+pub fn Decl::raises(Self) -> String
 pub fn Decl::raw(Self) -> @syntax.Impl
 
 pub(all) struct Field {
@@ -46,6 +47,8 @@ pub(all) struct Param {
   ty : String?
   pass : Pass
 }
+pub fn Param::declared(Self) -> String?
+pub fn Param::passed(Self) -> String?
 
 #derive(Eq, @debug.Debug)
 pub(all) enum Pass {
