@@ -170,6 +170,8 @@ def docs_for(pkg_dir):
             if s.startswith("///"):
                 buf.append(s[3:].lstrip() if s != "///" else "")
                 continue
+            if s.startswith("#"):
+                continue
 
             m = DECL.match(line)
             if m:
