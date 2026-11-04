@@ -273,6 +273,8 @@ asked for.
 | `Decl` | — | `Struct`, `Enum`, `Func` or `Other` |
 | `Decl::attrs()`, `Decl::raw()` | — | the annotations on it, the syntax tree behind it |
 | `Field`, `Param`, `Pass` | — | a struct field, a parameter, how it is passed |
+| `Decl::raises()` | — | what a function says after its return type: empty, `raise` or `raise E` |
+| `Param::declared()`, `Param::passed()` | — | a parameter as a wrapper declares it and passes it on, for a generator that wraps a function |
 
 ### `moonast/cli`
 
