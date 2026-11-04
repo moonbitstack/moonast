@@ -1,9 +1,10 @@
 ///|
 /// Why a generator's inputs were not read.
+#derive(Debug)
 pub(all) suberror Refused {
   /// An input file is not MoonBit.
   Syntax(file~ : String, line~ : Int32, column~ : Int32, msg~ : String)
-} derive(Debug)
+}
 
 ///|
 pub extend Refused with Debug::{to_repr}

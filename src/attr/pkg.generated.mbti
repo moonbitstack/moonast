@@ -17,13 +17,14 @@ pub fn name_of(@attribute.Attribute) -> String?
 pub fn under(@list.List[@attribute.Attribute], StringView) -> Array[@attribute.Attribute]
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror Refused {
   Malformed(raw~ : String, line~ : Int32, column~ : Int32)
   Missing(key~ : String, line~ : Int32, column~ : Int32)
   Unknown(key~ : String, line~ : Int32, column~ : Int32)
   Mistyped(key~ : String, expected~ : String, line~ : Int32, column~ : Int32)
   Repeated(key~ : String, line~ : Int32, column~ : Int32)
-} derive(@debug.Debug)
+}
 pub fn Refused::output(Self, &Logger) -> Unit
 pub fn Refused::to_repr(Self) -> @debug.Repr
 pub fn Refused::to_string(Self) -> String
@@ -42,12 +43,13 @@ pub fn Args::has(Self, StringView) -> Bool
 pub fn Args::str(Self, StringView) -> String?
 pub fn Args::strs(Self, StringView) -> Array[String]
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Kind {
   Str
   Bool
   Ident
   Type
-} derive(Eq, @debug.Debug)
+}
 pub fn Kind::equal(Self, Self) -> Bool
 pub fn Kind::not_equal(Self, Self) -> Bool
 pub fn Kind::to_repr(Self) -> @debug.Repr
@@ -62,12 +64,13 @@ pub fn Spec::optional(Self, String, Kind) -> Self
 pub fn Spec::positional(Self, String, Kind) -> Self
 pub fn Spec::required(Self, String, Kind) -> Self
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Value {
   Str(String)
   Bool(Bool)
   Ident(String)
   Type(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn Value::equal(Self, Self) -> Bool
 pub fn Value::not_equal(Self, Self) -> Bool
 pub fn Value::to_repr(Self) -> @debug.Repr

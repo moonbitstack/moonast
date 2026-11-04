@@ -1,6 +1,7 @@
 ///|
 /// Why a template or a code was not accepted. Each variant is named after the
 /// thing that was wrong.
+#derive(Debug)
 pub(all) suberror Refused {
   /// The template is not MoonBit once its holes are in place.
   Template(msg~ : String, line~ : Int32, column~ : Int32)
@@ -14,7 +15,7 @@ pub(all) suberror Refused {
   Name(name~ : String)
   /// `join` was given a code that is not declarations.
   Kind(expected~ : String)
-} derive(Debug)
+}
 
 ///|
 pub extend Refused with Debug::{to_repr}

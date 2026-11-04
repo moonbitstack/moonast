@@ -1,11 +1,12 @@
 ///|
 /// One argument, as its kind reads it.
+#derive(Eq, Debug)
 pub(all) enum Value {
   Str(String)
   Bool(Bool)
   Ident(String)
   Type(String)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Value with Eq::{equal, not_equal}

@@ -1,6 +1,7 @@
 ///|
 /// Why an annotation's arguments were not accepted, with where the annotation
 /// stands in its file.
+#derive(Debug)
 pub(all) suberror Refused {
   /// The payload is outside the annotation grammar: arrays, numbers, a qualified
   /// or generic type cannot be written, and a keyword cannot be a label.
@@ -13,7 +14,7 @@ pub(all) suberror Refused {
   Mistyped(key~ : String, expected~ : String, line~ : Int32, column~ : Int32)
   /// A parameter given twice that may only be given once.
   Repeated(key~ : String, line~ : Int32, column~ : Int32)
-} derive(Debug)
+}
 
 ///|
 pub extend Refused with Debug::{to_repr}

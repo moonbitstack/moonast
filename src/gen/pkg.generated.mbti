@@ -15,9 +15,10 @@ pub fn read(String, String) -> Array[Decl] raise Refused
 pub fn render(&Generator, Array[(String, String)]) -> String raise
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror Refused {
   Syntax(file~ : String, line~ : Int32, column~ : Int32, msg~ : String)
-} derive(@debug.Debug)
+}
 pub fn Refused::output(Self, &Logger) -> Unit
 pub fn Refused::to_repr(Self) -> @debug.Repr
 pub fn Refused::to_string(Self) -> String
@@ -46,12 +47,13 @@ pub(all) struct Param {
   pass : Pass
 }
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Pass {
   Positional
   Labelled
   Optional
   Defaulted
-} derive(Eq, @debug.Debug)
+}
 pub fn Pass::equal(Self, Self) -> Bool
 pub fn Pass::not_equal(Self, Self) -> Bool
 pub fn Pass::to_repr(Self) -> @debug.Repr

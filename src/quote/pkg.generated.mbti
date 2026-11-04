@@ -25,6 +25,7 @@ pub fn string(StringView) -> Code
 pub fn ty(StringView) -> Template
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror Refused {
   Template(msg~ : String, line~ : Int32, column~ : Int32)
   Unfilled(hole~ : String)
@@ -32,7 +33,7 @@ pub(all) suberror Refused {
   Misfit(hole~ : String, expected~ : String)
   Name(name~ : String)
   Kind(expected~ : String)
-} derive(@debug.Debug)
+}
 pub fn Refused::output(Self, &Logger) -> Unit
 pub fn Refused::to_repr(Self) -> @debug.Repr
 pub fn Refused::to_string(Self) -> String

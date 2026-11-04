@@ -1,5 +1,6 @@
 ///|
 /// What a parameter accepts.
+#derive(Eq, Debug)
 pub(all) enum Kind {
   /// A string literal.
   Str
@@ -10,7 +11,7 @@ pub(all) enum Kind {
   /// A string holding a MoonBit type: `response="Array[User]"`. A generic or a
   /// qualified type is outside the annotation grammar, so it comes as a string.
   Type
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Kind with Eq::{equal, not_equal}

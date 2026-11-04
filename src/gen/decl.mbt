@@ -9,12 +9,13 @@ pub(all) struct Field {
 
 ///|
 /// How a function parameter is passed.
+#derive(Eq, Debug)
 pub(all) enum Pass {
   Positional
   Labelled
   Optional
   Defaulted
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Pass with Eq::{equal, not_equal}

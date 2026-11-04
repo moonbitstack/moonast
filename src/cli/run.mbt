@@ -1,11 +1,12 @@
 ///|
 /// Why a generator run stopped.
+#derive(Debug)
 pub(all) suberror Refused {
   /// The command line is not `[-C <dir>] <inputs...> -o <output> [--check]`.
   Usage(msg~ : String)
   /// `--check` found the output out of date with its inputs.
   Stale(output~ : String)
-} derive(Debug)
+}
 
 ///|
 pub extend Refused with Debug::{to_repr}
