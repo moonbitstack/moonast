@@ -389,3 +389,11 @@ test "a byte string says the same thing in any source encoding" {
     .render()
   assert_eq(code.to_string(), "key.equal_to_bytes(b\"max-retries\")")
 }
+
+///|
+test "a mutable local keeps its `mut` and its colon" {
+  let text = @quote.items("fn f() -> Unit {\n  let mut x : Int = 1\n  x = 2\n}")
+    .render()
+    .to_string()
+  assert_eq(text, "///|\nfn f() -> Unit {\n  let mut x : Int = 1\n  x = 2\n}\n")
+}
