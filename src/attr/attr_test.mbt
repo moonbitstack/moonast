@@ -221,3 +221,22 @@ test "a list of positional arguments is one parameter taken many times" {
   }
   assert_true(refused)
 }
+
+///|
+test "a repeating positional comes after the ones that take one value each" {
+  let source = "#demo.route(GET, \"users\", \"admin\")\nfn f() -> Unit { () }"
+  let (impls, _) = @parser.parse_string(source)
+  guard impls is @list.More(impl_, tail=@list.Empty) else {
+    fail("one declaration")
+  }
+  guard impl_ is TopFuncDef(fun_decl~, ..) else { fail("a function") }
+  guard @attr.find(fun_decl.attrs, "demo.route") is Some(annotation) else {
+    fail("annotated")
+  }
+  let spec = @attr.Spec::new("demo.route")
+    .positional("method", Ident)
+    .many("tag", Str, positional=true)
+  let args = spec.bind(annotation)
+  assert_eq(args.str("method"), Some("GET"))
+  assert_eq(args.strs("tag"), ["users", "admin"])
+}
