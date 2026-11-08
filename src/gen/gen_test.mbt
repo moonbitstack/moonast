@@ -113,3 +113,85 @@ test "an input that is not MoonBit is refused with its position" {
     fail("a broken file reads")
   }
 }
+
+///|
+/// A file with one of each body a generator has to tell apart.
+let bodies : String =
+  #|pub struct Point {
+  #|  x : Int
+  #|  nick : String?
+  #|  seen : Option[Int]
+  #|}
+  #|
+  #|pub struct Rgb(Int, Int, Int)
+  #|
+  #|pub struct Meters(Double)
+  #|
+  #|pub struct Marker {}
+  #|
+  #|pub enum Shape {
+  #|  Empty
+  #|  Circle(Double)
+  #|  Rect(Double, Double)
+  #|  Tagged(name~ : String, size~ : Int)
+  #|}
+
+///|
+test "the view of a type's body covers every shape a type can have" {
+  let shapes = @gen.read("bodies.mbt", bodies).map(decl => {
+    match decl.shape() {
+      None => "none"
+      Some(Empty) => "empty"
+      Some(Tuple(arity~)) => "tuple of \{arity}"
+      Some(Record(fields~)) => "record of \{fields.length()}"
+      Some(Cases(cases~)) => "cases of \{cases.length()}"
+    }
+  })
+  assert_eq(shapes, [
+    "record of 3", "tuple of 3", "tuple of 1", "empty", "cases of 4",
+  ])
+}
+
+///|
+test "a field says whether its type is Option, however it is written" {
+  let decls = @gen.read("bodies.mbt", bodies)
+  guard decls is [Struct(fields~, ..), ..] else { fail("a record") }
+  assert_eq(fields.map(f => (f.name, f.optional)), [
+    ("x", false),
+    ("nick", true),
+    ("seen", true),
+  ])
+}
+
+///|
+test "a variant says what it carries" {
+  let decls = @gen.read("bodies.mbt", bodies)
+  guard decls[4] is Enum(cases~, ..) else { fail("an enum") }
+  let carried = cases.map(c => {
+    match c.payload {
+      Empty => "empty"
+      Tuple(arity~) => "tuple of \{arity}"
+      Record(fields~) =>
+        "record of " + fields.map(f => f.name + ": " + f.ty).join(", ")
+      Cases(_) => "cases"
+    }
+  })
+  assert_eq(carried, [
+    "empty", "tuple of 1", "tuple of 2", "record of name: String, size: Int",
+  ])
+}
+
+///|
+test "a tuple struct has a name and a visibility without a variant of its own" {
+  let decls = @gen.read("bodies.mbt", bodies)
+  guard decls[1] is Other(..) else { fail("a tuple struct is Other") }
+  assert_eq(decls[1].name(), "Rgb")
+  assert_eq(decls[1].is_public(), true)
+  assert_eq(@attr.find(decls[1].attrs(), "demo.describe") is None, true)
+}
+
+///|
+test "a generic type keeps its parameters" {
+  let decls = @gen.read("m.mbt", "pub struct Pair[A, B] {\n  first : A\n}")
+  assert_eq(decls[0].params(), ["A", "B"])
+}

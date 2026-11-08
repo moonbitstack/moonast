@@ -25,22 +25,37 @@ pub fn Refused::to_string(Self) -> String
 pub impl Show for Refused
 
 // Types and methods
+#derive(@debug.Debug)
+pub(all) struct Case {
+  name : String
+  payload : Shape
+  attrs : @list.List[@attribute.Attribute]
+}
+pub fn Case::to_repr(Self) -> @debug.Repr
+
 pub(all) enum Decl {
   Struct(name~ : String, fields~ : Array[Field], attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)
-  Enum(name~ : String, constructors~ : Array[String], attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)
+  Enum(name~ : String, constructors~ : Array[String], cases~ : Array[Case], attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)
   Func(owner~ : String?, name~ : String, params~ : Array[Param], returns~ : String?, is_async~ : Bool, attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)
-  Other(file~ : String, raw~ : @syntax.Impl)
+  Other(file~ : String, attrs~ : @list.List[@attribute.Attribute], raw~ : @syntax.Impl)
 }
 pub fn Decl::attrs(Self) -> @list.List[@attribute.Attribute]
+pub fn Decl::is_public(Self) -> Bool
+pub fn Decl::name(Self) -> String
+pub fn Decl::params(Self) -> Array[String]
 pub fn Decl::raises(Self) -> String
 pub fn Decl::raw(Self) -> @syntax.Impl
+pub fn Decl::shape(Self) -> Shape?
 
+#derive(@debug.Debug)
 pub(all) struct Field {
   name : String
   ty : String
   mutable : Bool
+  optional : Bool
   attrs : @list.List[@attribute.Attribute]
 }
+pub fn Field::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Param {
   name : String?
@@ -60,6 +75,15 @@ pub(all) enum Pass {
 pub fn Pass::equal(Self, Self) -> Bool
 pub fn Pass::not_equal(Self, Self) -> Bool
 pub fn Pass::to_repr(Self) -> @debug.Repr
+
+#derive(@debug.Debug)
+pub(all) enum Shape {
+  Empty
+  Tuple(arity~ : Int32)
+  Record(fields~ : Array[Field])
+  Cases(cases~ : Array[Case])
+}
+pub fn Shape::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 
