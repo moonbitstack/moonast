@@ -1,0 +1,23 @@
+// A command registrar rewritten on `moonast/gen`: every `#proton.command` function
+// becomes a `registrar.bind` in the package's `register_commands`, grouped by the
+// type it is a method of. Run it the way a dev_build rule would:
+//
+//     moon run src/examples/proton-registrar --target native -- commands.mbt -o commands.g.mbt
+supported_targets = "+native+wasm"
+
+pkgtype(kind: "executable")
+
+import {
+  "moonbitstack/moonast/quote",
+  "moonbitstack/moonast/attr",
+  "moonbitstack/moonast/gen",
+  "moonbitstack/moonast/cli",
+  "moonbitlang/async",
+  "moonbitlang/core/env",
+  "moonbitlang/parser/attribute",
+}
+
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+} for "wbtest"

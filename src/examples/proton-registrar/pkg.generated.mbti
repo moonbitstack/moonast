@@ -1,0 +1,27 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbitstack/moonast/examples/proton-registrar"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+#derive(@debug.Debug)
+pub(all) suberror Refused {
+  Bad(at~ : String, msg~ : String)
+}
+pub fn Refused::output(Self, &Logger) -> Unit
+pub fn Refused::to_repr(Self) -> @debug.Repr
+pub fn Refused::to_string(Self) -> String
+pub impl Show for Refused
+
+// Types and methods
+type Command
+
+type Registrar
+
+// Type aliases
+
+// Traits
