@@ -8,6 +8,9 @@ pub(all) enum Kind {
   Bool
   /// A bare name: `style=plain`, `model=User`.
   Ident
+  /// A name with one qualifier, `contract=Registry.users`, which is how a value
+  /// in another namespace is written: the annotation grammar has no `@pkg.name`.
+  Path
   /// A string holding a MoonBit type: `response="Array[User]"`. A generic or a
   /// qualified type is outside the annotation grammar, so it comes as a string.
   Type
@@ -78,9 +81,16 @@ pub fn Spec::optional(self : Spec, key : String, kind : Kind) -> Spec {
 
 ///|
 /// A parameter that may be given any number of times, `tags="a", tags="b"`,
-/// which is how a list is written where the grammar has no arrays.
-pub fn Spec::many(self : Spec, key : String, kind : Kind) -> Spec {
-  self.add({ key, kind, required: false, positional: false, many: true, })
+/// which is how a list is written where the grammar has no arrays. With
+/// `positional`, the list is written as bare arguments, `#serde.derive(Serialize,
+/// Deserialize)`, and it takes every one of them from where it starts.
+pub fn Spec::many(
+  self : Spec,
+  key : String,
+  kind : Kind,
+  positional~ : Bool = false,
+) -> Spec {
+  self.add({ key, kind, required: false, positional, many: true, })
 }
 
 ///|
@@ -125,11 +135,20 @@ pub fn Spec::bind(
           None => raise Unknown(key~, line~, column~)
         }
       Expr(expr) => {
-        guard positionals.get(next) is Some(p) else {
-          raise Unknown(key="argument \{next + 1}", line~, column~)
+        // A positional that may repeat keeps taking arguments; the ones before
+        // it are used up one at a time.
+        let taken = if next < positionals.length() {
+          positionals[next]
+        } else {
+          match positionals.search_by(p => p.many) {
+            Some(i) => positionals[i]
+            None => raise Unknown(key="argument \{next + 1}", line~, column~)
+          }
         }
-        next = next + 1
-        (p, expr)
+        if !taken.many {
+          next = next + 1
+        }
+        (taken, expr)
       }
     }
     let value = read(param, expr, line, column)
@@ -158,6 +177,8 @@ fn read(
     (Str, String(s)) => Str(decoded(s))
     (Bool, Bool(b)) => Bool(b)
     (Ident, Ident({ qual: None, name, })) => Ident(name)
+    (Path, Ident({ qual: Some(q), name, })) => Ident(q + "." + name)
+    (Path, Ident({ qual: None, name, })) => Ident(name)
     (Type, String(s)) if is_type(s) => Type(s)
     _ =>
       raise Mistyped(
@@ -166,6 +187,7 @@ fn read(
           Str => "a string"
           Bool => "true or false"
           Ident => "a name"
+          Path => "a name, or a name after a qualifier"
           Type => "a string holding a type"
         },
         line~,

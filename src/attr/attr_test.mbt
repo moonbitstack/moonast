@@ -165,3 +165,59 @@ test "a positional parameter marked optional can be left out, and a required one
   }
   assert_true(missing)
 }
+
+///|
+test "a name after a qualifier is a path, and a bare name reads the same" {
+  let source = "#demo.bind(contract=registry.create)\nfn f() -> Unit { () }"
+  let (impls, _) = @parser.parse_string(source)
+  guard impls is @list.More(impl_, tail=@list.Empty) else {
+    fail("one declaration")
+  }
+  guard impl_ is TopFuncDef(fun_decl~, ..) else { fail("a function") }
+  guard @attr.find(fun_decl.attrs, "demo.bind") is Some(annotation) else {
+    fail("annotated")
+  }
+  let spec = @attr.Spec::new("demo.bind").required("contract", Path)
+  assert_eq(spec.bind(annotation).str("contract"), Some("registry.create"))
+  let bare = @attr.Spec::new("demo.bind").required("contract", Ident)
+  let refused = try {
+    ignore(bare.bind(annotation))
+    false
+  } catch {
+    Mistyped(key="contract", ..) => true
+    _ => false
+  }
+  assert_true(refused)
+}
+
+///|
+test "a list of positional arguments is one parameter taken many times" {
+  let source = "#demo.derive(Serialize, Deserialize)\nstruct P {\n  x : Int\n}"
+  let (impls, _) = @parser.parse_string(source)
+  guard impls is @list.More(impl_, tail=@list.Empty) else {
+    fail("one declaration")
+  }
+  guard impl_ is TopTypeDef(decl) else { fail("a type") }
+  guard @attr.find(decl.attrs, "demo.derive") is Some(annotation) else {
+    fail("annotated")
+  }
+  let spec = @attr.Spec::new("demo.derive").many(
+    "trait",
+    Ident,
+    positional=true,
+  )
+  assert_eq(spec.bind(annotation).strs("trait"), ["Serialize", "Deserialize"])
+  let one = @attr.Spec::new("demo.derive").positional(
+    "trait",
+    Ident,
+    optional=true,
+  )
+  let refused = try {
+    ignore(one.bind(annotation))
+    false
+  } catch {
+    Unknown(key="argument 2", ..) => true
+    _ => false
+  }
+  assert_true(refused)
+}

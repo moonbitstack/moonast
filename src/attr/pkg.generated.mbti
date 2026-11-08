@@ -50,6 +50,7 @@ pub(all) enum Kind {
   Str
   Bool
   Ident
+  Path
   Type
 }
 pub fn Kind::equal(Self, Self) -> Bool
@@ -60,7 +61,7 @@ pub struct Spec {
   // private fields
 }
 pub fn Spec::bind(Self, @attribute.Attribute) -> Args raise Refused
-pub fn Spec::many(Self, String, Kind) -> Self
+pub fn Spec::many(Self, String, Kind, positional? : Bool) -> Self
 pub fn Spec::new(StringView) -> Self
 pub fn Spec::optional(Self, String, Kind) -> Self
 pub fn Spec::positional(Self, String, Kind, optional? : Bool) -> Self
