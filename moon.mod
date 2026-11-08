@@ -11,6 +11,11 @@ license = "Apache-2.0"
 keywords = [
   "codegen",
   "code-generation",
+  "code-generator",
+  "source-generation",
+  "proc-macro",
+  "derive-macro",
+  "annotation-processor",
   "ast",
   "macro",
   "macros",
