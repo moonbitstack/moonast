@@ -40,6 +40,7 @@
 <div class="group"><h4>quote</h4>
 <a class="pkg-link" href="#pkg-quote">Plate I</a>
 <a class="sub" href="#quote.bool">bool</a>
+<a class="sub" href="#quote.bytes">bytes</a>
 <a class="sub" href="#quote.expr">expr</a>
 <a class="sub" href="#quote.ident">ident</a>
 <a class="sub" href="#quote.int">int</a>
@@ -68,10 +69,12 @@
 <a class="pkg-link" href="#pkg-gen">Plate III</a>
 <a class="sub" href="#gen.read">read</a>
 <a class="sub" href="#gen.render">render</a>
+<a class="sub" href="#gen.Case">Case</a>
 <a class="sub" href="#gen.Decl">Decl</a>
 <a class="sub" href="#gen.Field">Field</a>
 <a class="sub" href="#gen.Param">Param</a>
 <a class="sub" href="#gen.Pass">Pass</a>
+<a class="sub" href="#gen.Shape">Shape</a>
 <a class="sub" href="#gen.Generator">Generator</a>
 <a class="sub" href="#gen.Refused">Refused</a>
 </div>
@@ -100,6 +103,15 @@
 <div class="sig">pub fn bool(Bool) -&gt; Code <a class="anchor" href="#quote.bool" aria-label="Link to bool">#</a></div>
 <div class="desc"><p>A boolean literal.</p>
 <pre data-lang="moonbit"><code>inspect(@quote.bool(true).to_string(), content=&quot;true&quot;)</code></pre></div>
+</div>
+<div class="entry kind-value" id="quote.bytes">
+<div class="sig">pub fn bytes(StringView) -&gt; Code <a class="anchor" href="#quote.bytes" aria-label="Link to bytes">#</a></div>
+<div class="desc"><p>A byte string literal, <code>b&quot;...&quot;</code>, holding <code>text</code> in UTF-8. Every byte outside printable ASCII is written <code>\xNN</code>, so the literal says the same thing in a source file of any encoding; <code>string</code> is the text form of the same value.</p>
+<pre data-lang="moonbit"><code>inspect(@quote.bytes(&quot;max-retries&quot;).to_string(), content=&quot;b\&quot;max-retries\&quot;&quot;)
+inspect(
+@quote.bytes(&quot;坐标&quot;).to_string(),
+content=&quot;b\&quot;\\xe5\\x9d\\x90\\xe6\\xa0\\x87\&quot;&quot;,
+)</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.expr">
 <div class="sig">pub fn expr(StringView) -&gt; Template <a class="anchor" href="#quote.expr" aria-label="Link to expr">#</a></div>
@@ -383,6 +395,7 @@ inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quo
 <li><span class="pname">Str</span></li>
 <li><span class="pname">Bool</span></li>
 <li><span class="pname">Ident</span></li>
+<li><span class="pname">Path</span></li>
 <li><span class="pname">Type</span></li>
 </ul>
 <div class="entry kind-value nested" id="attr.Kind.equal">
@@ -420,8 +433,8 @@ inspect(args.str(&quot;path&quot;).unwrap_or(&quot;&quot;), content=&quot;/users
 inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value nested" id="attr.Spec.many">
-<div class="sig">pub fn Spec::many(Self, String, Kind) -&gt; Self <a class="anchor" href="#attr.Spec.many" aria-label="Link to Spec::many">#</a></div>
-<div class="desc"><p>A parameter that may be given any number of times, <code>tags=&quot;a&quot;, tags=&quot;b&quot;</code>, which is how a list is written where the grammar has no arrays.</p></div>
+<div class="sig">pub fn Spec::many(Self, String, Kind, positional? : Bool) -&gt; Self <a class="anchor" href="#attr.Spec.many" aria-label="Link to Spec::many">#</a></div>
+<div class="desc"><p>A parameter that may be given any number of times, <code>tags=&quot;a&quot;, tags=&quot;b&quot;</code>, which is how a list is written where the grammar has no arrays. With <code>positional</code>, the list is written as bare arguments, <code>#serde.derive(Serialize, Deserialize)</code>, and it takes every one of them from where it starts.</p></div>
 </div>
 <div class="entry kind-value nested" id="attr.Spec.new">
 <div class="sig">pub fn Spec::new(StringView) -&gt; Self <a class="anchor" href="#attr.Spec.new" aria-label="Link to Spec::new">#</a></div>
@@ -507,23 +520,55 @@ inspect(fields.map(f =&gt; f.name).join(&quot;, &quot;), content=&quot;x, y&quot
 <div class="desc"><p>The file a generator writes for <code>inputs</code>: a one-line header naming the generator and the inputs, then the code. The same inputs give the same bytes, so a check can compare them.</p></div>
 </div>
 <h3 class="group-head" id="gen-types">Types</h3>
+<div class="entry kind-type" id="gen.Case">
+<div class="sig">pub(all) struct Case { <a class="anchor" href="#gen.Case" aria-label="Link to Case">#</a></div>
+<div class="desc"><p>One variant of an enum, and the annotations written on it. Its <code>payload</code> is <code>Empty</code>, <code>Tuple</code> or <code>Record</code>; an enum inside an enum&#x27;s variant would be a different type altogether, so <code>Cases</code> never appears here.</p></div>
+<ul class="params">
+<li><span class="pname">name</span> : String</li>
+<li><span class="pname">payload</span> : Shape</li>
+<li><span class="pname">attrs</span> : @list.List[@attribute.Attribute]</li>
+</ul>
+<div class="entry kind-value nested" id="gen.Case.to_repr">
+<div class="sig">pub fn Case::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#gen.Case.to_repr" aria-label="Link to Case::to_repr">#</a></div>
+<div class="desc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
+</div>
+</div>
 <div class="entry kind-type" id="gen.Decl">
 <div class="sig">pub(all) enum Decl { <a class="anchor" href="#gen.Decl" aria-label="Link to Decl">#</a></div>
 <div class="desc"><p>A top-level declaration as a generator usually needs it. Types are kept as their source text, which is what a generator splices into new code; <code>raw</code> is the official syntax tree for anything the view leaves out.</p></div>
 <ul class="params">
 <li><span class="pname">Struct(name~ : String, fields~ : Array[Field], attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)</span></li>
-<li><span class="pname">Enum(name~ : String, constructors~ : Array[String], attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)</span></li>
+<li><span class="pname">Enum(name~ : String, constructors~ : Array[String], cases~ : Array[Case], attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)</span></li>
 <li><span class="pname">Func(owner~ : String?, name~ : String, params~ : Array[Param], returns~ : String?, is_async~ : Bool, attrs~ : @list.List[@attribute.Attribute], public~ : Bool, file~ : String, raw~ : @syntax.Impl)</span></li>
-<li><span class="pname">Other(file~ : String, raw~ : @syntax.Impl)</span></li>
+<li><span class="pname">Other(file~ : String, attrs~ : @list.List[@attribute.Attribute], raw~ : @syntax.Impl)</span> — Anything else, with the annotations on it: a tuple struct is here, since <code>Struct</code> covers the record case only, and so is an <code>impl</code> or a <code>trait</code>.</li>
 </ul>
 <div class="entry kind-value nested" id="gen.Decl.attrs">
 <div class="sig">pub fn Decl::attrs(Self) -&gt; @list.List[@attribute.Attribute] <a class="anchor" href="#gen.Decl.attrs" aria-label="Link to Decl::attrs">#</a></div>
-<div class="desc"><p>The annotations on a declaration; none for <code>Other</code>.</p>
+<div class="desc"><p>The annotations on a declaration, whatever the view makes of its body.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#demo.describe\npub struct Point {\n  x : Int\n}&quot;
 guard @gen.read(&quot;models.mbt&quot;, source) is [decl] else {
 abort(&quot;one declaration&quot;)
 }
 inspect(@attr.find(decl.attrs(), &quot;demo.describe&quot;) is Some(_), content=&quot;true&quot;)</code></pre></div>
+</div>
+<div class="entry kind-value nested" id="gen.Decl.is_public">
+<div class="sig">pub fn Decl::is_public(Self) -&gt; Bool <a class="anchor" href="#gen.Decl.is_public" aria-label="Link to Decl::is_public">#</a></div>
+<div class="desc"><p>Whether the declaration is <code>pub</code>, for every kind the view has a variant for and for the tuple structs that land in <code>Other</code>.</p></div>
+</div>
+<div class="entry kind-value nested" id="gen.Decl.name">
+<div class="sig">pub fn Decl::name(Self) -&gt; String <a class="anchor" href="#gen.Decl.name" aria-label="Link to Decl::name">#</a></div>
+<div class="desc"><p>The name a declaration introduces: a type&#x27;s or a function&#x27;s. Empty for one that introduces none, such as an <code>impl</code>. A tuple struct has no variant of its own, so this is how a generator learns its name without reading <code>raw</code> itself.</p>
+<pre data-lang="moonbit"><code>let source = &quot;pub struct Rgb(Int, Int, Int)\n\npub fn f() -&gt; Unit { () }&quot;
+let names = @gen.read(&quot;m.mbt&quot;, source).map(decl =&gt; decl.name())
+inspect(names.join(&quot;, &quot;), content=&quot;Rgb, f&quot;)</code></pre></div>
+</div>
+<div class="entry kind-value nested" id="gen.Decl.params">
+<div class="sig">pub fn Decl::params(Self) -&gt; Array[String] <a class="anchor" href="#gen.Decl.params" aria-label="Link to Decl::params">#</a></div>
+<div class="desc"><p>The generic parameters of a type declaration, as written: <code>[&quot;A&quot;, &quot;B&quot;]</code> for <code>struct Pair[A, B]</code>. Empty for a function, whose own parameters live on <code>Func</code>.</p>
+<pre data-lang="moonbit"><code>guard @gen.read(&quot;m.mbt&quot;, &quot;pub struct Pair[A, B] {\n  first : A\n}&quot;) is [decl] else {
+abort(&quot;a struct&quot;)
+}
+inspect(decl.params().join(&quot;, &quot;), content=&quot;A, B&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value nested" id="gen.Decl.raises">
 <div class="sig">pub fn Decl::raises(Self) -&gt; String <a class="anchor" href="#gen.Decl.raises" aria-label="Link to Decl::raises">#</a></div>
@@ -537,6 +582,19 @@ inspect(decl.raises(), content=&quot;raise @a.Bad&quot;)</code></pre></div>
 <div class="sig">pub fn Decl::raw(Self) -&gt; @syntax.Impl <a class="anchor" href="#gen.Decl.raw" aria-label="Link to Decl::raw">#</a></div>
 <div class="desc"><p>The official syntax tree behind the view.</p></div>
 </div>
+<div class="entry kind-value nested" id="gen.Decl.shape">
+<div class="sig">pub fn Decl::shape(Self) -&gt; Shape? <a class="anchor" href="#gen.Decl.shape" aria-label="Link to Decl::shape">#</a></div>
+<div class="desc"><p>The body of a type declaration, tuple structs included: <code>Struct</code> covers the record case, and this answers the other two. <code>None</code> for a function or a declaration that is not a type at all.</p>
+<pre data-lang="moonbit"><code>let source = &quot;pub struct Rgb(Int, Int, Int)&quot;
+guard @gen.read(&quot;m.mbt&quot;, source) is [decl] else { abort(&quot;a declaration&quot;) }
+inspect(
+match decl.shape() {
+Some(Tuple(arity~)) =&gt; &quot;tuple of \{arity}&quot;
+_ =&gt; &quot;not a tuple struct&quot;
+},
+content=&quot;tuple of 3&quot;,
+)</code></pre></div>
+</div>
 </div>
 <div class="entry kind-type" id="gen.Field">
 <div class="sig">pub(all) struct Field { <a class="anchor" href="#gen.Field" aria-label="Link to Field">#</a></div>
@@ -545,8 +603,13 @@ inspect(decl.raises(), content=&quot;raise @a.Bad&quot;)</code></pre></div>
 <li><span class="pname">name</span> : String</li>
 <li><span class="pname">ty</span> : String</li>
 <li><span class="pname">mutable</span> : Bool</li>
+<li><span class="pname">optional</span> : Bool</li>
 <li><span class="pname">attrs</span> : @list.List[@attribute.Attribute]</li>
 </ul>
+<div class="entry kind-value nested" id="gen.Field.to_repr">
+<div class="sig">pub fn Field::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#gen.Field.to_repr" aria-label="Link to Field::to_repr">#</a></div>
+<div class="desc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
+</div>
 </div>
 <div class="entry kind-type" id="gen.Param">
 <div class="sig">pub(all) struct Param { <a class="anchor" href="#gen.Param" aria-label="Link to Param">#</a></div>
@@ -598,6 +661,44 @@ content=&quot;a, b~, c?&quot;,
 </div>
 <div class="entry kind-value nested" id="gen.Pass.to_repr">
 <div class="sig">pub fn Pass::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#gen.Pass.to_repr" aria-label="Link to Pass::to_repr">#</a></div>
+<div class="desc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
+</div>
+</div>
+<div class="entry kind-type" id="gen.Shape">
+<div class="sig">pub(all) enum Shape { <a class="anchor" href="#gen.Shape" aria-label="Link to Shape">#</a></div>
+<div class="desc"><p>The body of a type declaration: what a struct is made of, or the cases an enum has. One type for both, because a variant carries the same three shapes a struct can have — nothing, a run of positional types, or named fields.</p>
+<pre data-lang="moonbit"><code>let source =
+#|pub enum Shape {
+#|  Empty
+#|  Circle(Double)
+#|  Rect(Double, Double)
+#|  Tagged(name~ : String, size~ : Int)
+#|}
+guard @gen.read(&quot;m.mbt&quot;, source) is [Enum(cases~, ..)] else {
+abort(&quot;an enum&quot;)
+}
+let shapes = cases.map(c =&gt; {
+match c.payload {
+Empty =&gt; &quot;empty&quot;
+Tuple(arity~) =&gt; &quot;tuple of \{arity}&quot;
+Record(fields~) =&gt; &quot;record of \{fields.length()}&quot;
+_ =&gt; &quot;cases&quot;
+}
+})
+inspect(
+shapes.join(&quot;, &quot;),
+content=&quot;empty, tuple of 1, tuple of 2, record of 2&quot;,
+)</code></pre></div>
+<ul class="params">
+<li><span class="pname">Empty</span></li>
+</ul>
+<ul class="params">
+<li><span class="pname">Tuple(arity~ : Int32)</span> — <code>struct Rgb(Int, Int, Int)</code>, or <code>Circle(Double)</code>: a newtype when the count is one. A generator that writes <code>self.0</code> and <code>self.1</code> needs the count and nothing else; one that needs the types reads them off <code>Decl::raw</code>.</li>
+<li><span class="pname">Record(fields~ : Array[Field])</span> — <code>struct Point { x : Int }</code>, or <code>Tagged(name~ : String)</code>: the fields, with their types as written in the source.</li>
+<li><span class="pname">Cases(cases~ : Array[Case])</span> — <code>enum Shape { ... }</code>: its variants, in source order.</li>
+</ul>
+<div class="entry kind-value nested" id="gen.Shape.to_repr">
+<div class="sig">pub fn Shape::to_repr(Self) -&gt; @debug.Repr <a class="anchor" href="#gen.Shape.to_repr" aria-label="Link to Shape::to_repr">#</a></div>
 <div class="desc"><p>The value as a &lt;code&gt;Repr&lt;/code&gt;, as &lt;code&gt;Debug&lt;/code&gt; defines it.</p></div>
 </div>
 </div>

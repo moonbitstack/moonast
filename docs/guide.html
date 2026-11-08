@@ -281,7 +281,8 @@ func -::dist a, b, scale -&gt; Double</code></pre>
           <code>owner</code> is <code>Point</code>; a method written inside an
           <code>impl</code> block arrives as <code>Other</code>, with the block in
           <code>raw</code>. <code>Decl::attrs()</code> answers the annotations of any of them,
-          and none for <code>Other</code>.</p>
+          <code>Other</code> included: a tuple struct lands there, and its name and visibility
+          come from <code>Decl::name()</code> and <code>Decl::is_public()</code>.</p>
 
         <div class="code-block">
           <pre data-lang="moonbit"><code>for decl in @gen.read("p.mbt", "fn Point::norm(self : Point) -&gt; Double {\n  0.0\n}") {
@@ -292,6 +293,39 @@ func -::dist a, b, scale -&gt; Double</code></pre>
           <div class="status"><span class="dot gen"></span><span>output</span></div>
           <pre data-lang="moonbit"><code>Point::norm</code></pre>
         </div>
+
+        <h3>What a type's body is</h3>
+        <p><code>Decl::shape</code> answers the question a derive asks first: is this a struct
+          with fields, a run of positional types, a struct with nothing in it, or an enum? A
+          variant carries the first three, so one type describes a payload too.</p>
+
+        <div class="code-block">
+          <pre data-lang="moonbit"><code>let source =
+  #|pub struct Rgb(Int, Int, Int)
+  #|
+  #|pub enum Shape {
+  #|  Empty
+  #|  Circle(Double)
+  #|}
+for decl in @gen.read("shapes.mbt", source) {
+  match decl.shape() {
+    Some(Tuple(arity~)) =&gt; println(decl.name() + " takes " + arity.to_string())
+    Some(Cases(cases~)) =&gt;
+      println(decl.name() + " has " + cases.length().to_string() + " cases")
+    _ =&gt; println("nothing to write")
+  }
+}</code></pre>
+          <div class="status"><span class="dot gen"></span><span>output</span></div>
+          <pre data-lang="moonbit"><code>Rgb takes 3
+Shape has 2 cases</code></pre>
+        </div>
+
+        <p><code>Decl::params</code> gives the generic parameters,
+          <code>Decl::raises</code> what a function says after its return type, and
+          <code>Field::optional</code> whether a field's type is <code>Option</code> — reading
+          that off the type text gets it wrong, because <code>T?</code> and
+          <code>Option[T]</code> are the same type and neither is the text
+          <code>Option</code>.</p>
       </section>
 
       <section id="annotations">
@@ -513,20 +547,20 @@ fn User::name(self : User) -&gt; String {
           directly, for instance in a test:</p>
 
         <div class="code-block">
-          <pre data-lang="moonbit"><code>let source =
-  #|fn $T::$field(self : $T) -&gt; $Ty {
-  #|  self.$field
-  #|}
-let code = @quote.items(source)
-  .set("T", @quote.ident("User"))
-  .set("field", @quote.ident("id"))
-  .set("Ty", @quote.ty("Int").render())
-println(code)</code></pre>
-          <div class="status"><span class="dot gen"></span><span>output</span></div>
-          <pre data-lang="moonbit"><code>///|
-fn User::id(self : User) -&gt; Int {
-  self.id
+          <pre data-lang="moonbit"><code>fn getter() -&gt; String raise {
+  let source =
+    #|fn $T::$field(self : $T) -&gt; $Ty {
+    #|  self.$field
+    #|}
+  @quote.items(source)
+    .set("T", @quote.ident("User"))
+    .set("field", @quote.ident("id"))
+    .set("Ty", @quote.ty("Int").render())
+    .render()
+    .to_string()
 }</code></pre>
+          <div class="status"><span class="dot gen"></span><span>getter()</span></div>
+          <pre data-lang="moonbit"><code>"///|\nfn User::id(self : User) -&gt; Int {\n  self.id\n}\n"</code></pre>
         </div>
       </section>
 
