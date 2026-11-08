@@ -1,0 +1,27 @@
+// A derive rewritten on `moonast/gen`: `#serde.derive(Serialize, Deserialize)`
+// on a type gives it both implementations, and `#serde.rename` / `#serde.skip`
+// on a field or variant say how it is written on the wire. Run it the way a
+// dev_build rule would:
+//
+//     moon run src/examples/serde-derive --target native -- models.mbt -o models.g.mbt
+supported_targets = "+native+wasm"
+
+pkgtype(kind: "executable")
+
+import {
+  "moonbitstack/moonast/quote",
+  "moonbitstack/moonast/attr",
+  "moonbitstack/moonast/gen",
+  "moonbitstack/moonast/cli",
+  "moonbitlang/async",
+  "moonbitlang/core/env",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/list",
+  "moonbitlang/parser/attribute",
+}
+
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/core/encoding/utf8",
+} for "wbtest"
