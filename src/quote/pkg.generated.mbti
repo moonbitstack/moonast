@@ -10,6 +10,8 @@ import {
 // Values
 pub fn bool(Bool) -> Code
 
+pub fn bytes(StringView) -> Code
+
 pub fn expr(StringView) -> Template
 
 pub fn ident(StringView) -> Code raise Refused

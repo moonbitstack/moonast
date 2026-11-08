@@ -6,4 +6,5 @@ import {
   "moonbitlang/parser/syntax",
   "moonbitlang/parser/fmt",
   "moonbitlang/core/list",
+  "moonbitlang/core/encoding/utf8",
 }

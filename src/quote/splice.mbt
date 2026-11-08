@@ -142,6 +142,26 @@ fn Splicer::rename(self : Splicer, name : String) -> String? {
 }
 
 ///|
+/// A hole where a pattern stands takes a name or a string: `$case => ...` with a
+/// name stands for a constructor, a binding or another pattern, and with a string
+/// it matches that text. A match the generator writes arm by arm needs both.
+impl @syntax.MapVisitor for Splicer with fn visit_Pattern_Var(self, binder) {
+  if self.ones.get(binder.name) is Some((hole, body)) {
+    match body {
+      Name(n) => return Var({ ..binder, name: n, })
+      Text(t) => return Constant(c=String(escape(t)), loc=binder.loc)
+      Expr(w) =>
+        match expr_of(w) {
+          Constant(c~, ..) => return Constant(c~, loc=binder.loc)
+          _ => self.misfit(hole, "a name, a string, or a literal in a pattern")
+        }
+      _ => self.misfit(hole, "a name, a string, or a literal in a pattern")
+    }
+  }
+  Var(@syntax.MapVisitor::visit_Binder(self, binder))
+}
+
+///|
 impl @syntax.MapVisitor for Splicer with fn visit_Binder(self, binder) {
   match self.rename(binder.name) {
     Some(name) => { ..binder, name, }

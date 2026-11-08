@@ -50,6 +50,51 @@ pub fn string(text : StringView) -> Code {
 }
 
 ///|
+/// A byte string literal, `b"..."`, holding `text` in UTF-8. Every byte outside
+/// printable ASCII is written `\xNN`, so the literal says the same thing in a
+/// source file of any encoding; `string` is the text form of the same value.
+///
+/// ```mbt check
+/// test {
+///   inspect(@quote.bytes("max-retries").to_string(), content="b\"max-retries\"")
+///   inspect(
+///     @quote.bytes("坐标").to_string(),
+///     content="b\"\\xe5\\x9d\\x90\\xe6\\xa0\\x87\"",
+///   )
+/// }
+/// ```
+pub fn bytes(text : StringView) -> Code {
+  let out = StringBuilder()
+  out.write_string("b\"")
+  for byte in @utf8.encode(text.to_owned()) {
+    let n = byte.to_int()
+    if n == 0x22 || n == 0x5C {
+      out.write_char('\\')
+      out.write_char(n.unsafe_to_char())
+    } else if n >= 0x20 && n <= 0x7E {
+      out.write_char(n.unsafe_to_char())
+    } else {
+      out.write_string("\\x")
+      out.write_char(hex_digit(n >> 4))
+      out.write_char(hex_digit(n & 0x0F))
+    }
+  }
+  out.write_char('"')
+  { body: Expr(parse_expr(out.to_string())), } catch {
+    _ => abort("a byte string literal always parses")
+  }
+}
+
+///|
+fn hex_digit(n : Int32) -> Char {
+  if n < 10 {
+    ('0'.to_int() + n).unsafe_to_char()
+  } else {
+    ('a'.to_int() + n - 10).unsafe_to_char()
+  }
+}
+
+///|
 /// An integer literal.
 ///
 /// ```mbt check

@@ -350,3 +350,42 @@ test "a declared function keeps the comment above it" {
     .to_string()
   assert_true(text.contains("/// Adds.\ndeclare fn add(a : Int) -> Int"))
 }
+
+///|
+test "a hole where a pattern stands takes a string or a name" {
+  let strings = @quote.expr(
+      (
+        #|match name {
+        #|  $first => 1
+        #|  _ => 0
+        #|}
+      ),
+    )
+    .set("first", @quote.string("x"))
+    .render()
+  assert_eq(strings.to_string(), "match name {\n  \"x\" => 1\n  _ => 0\n}")
+  let names = @quote.expr(
+      (
+        #|match shape {
+        #|  $case => 1
+        #|  _ => 0
+        #|}
+      ),
+    )
+    .set("case", @quote.ident("Empty"))
+    .render()
+  assert_eq(names.to_string(), "match shape {\n  Empty => 1\n  _ => 0\n}")
+}
+
+///|
+test "a byte string says the same thing in any source encoding" {
+  assert_eq(@quote.bytes("x").to_string(), "b\"x\"")
+  assert_eq(
+    @quote.bytes("坐标").to_string(),
+    "b\"\\xe5\\x9d\\x90\\xe6\\xa0\\x87\"",
+  )
+  let code = @quote.expr("key.equal_to_bytes($want)")
+    .set("want", @quote.bytes("max-retries"))
+    .render()
+  assert_eq(code.to_string(), "key.equal_to_bytes(b\"max-retries\")")
+}
