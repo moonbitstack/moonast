@@ -195,3 +195,81 @@ test "a generic type keeps its parameters" {
   let decls = @gen.read("m.mbt", "pub struct Pair[A, B] {\n  first : A\n}")
   assert_eq(decls[0].params(), ["A", "B"])
 }
+
+///|
+/// A file whose declarations the view has no variant for: each one carries its
+/// own annotations.
+let annotated_others : String =
+  #|#demo.track
+  #|let counter : Int = 0
+  #|
+  #|#demo.track
+  #|impl Show for Point with fn output(self, logger) {
+  #|  logger.write_string("")
+  #|}
+  #|
+  #|#demo.track
+  #|pub trait Named {
+  #|  name(Self) -> String
+  #|}
+
+///|
+test "an annotation on a top-level let is read off its own node" {
+  guard @gen.read("m.mbt", annotated_others) is [decl, ..] else {
+    fail("declarations")
+  }
+  guard decl is Other(..) else { fail("a let is Other") }
+  assert_eq(decl.attrs().iter().map(@attr.name_of).collect(), [
+    Some("demo.track"),
+  ])
+}
+
+///|
+test "an annotation on an impl is read off its own node" {
+  let decls = @gen.read("m.mbt", annotated_others)
+  guard decls is [_, decl, ..] else { fail("declarations") }
+  guard decl is Other(..) else { fail("an impl is Other") }
+  assert_eq(decl.attrs().iter().map(@attr.name_of).collect(), [
+    Some("demo.track"),
+  ])
+}
+
+///|
+test "an annotation on a trait is read off its own node" {
+  let decls = @gen.read("m.mbt", annotated_others)
+  guard decls is [_, _, decl] else { fail("declarations") }
+  guard decl is Other(..) else { fail("a trait is Other") }
+  assert_eq(decl.attrs().iter().map(@attr.name_of).collect(), [
+    Some("demo.track"),
+  ])
+  assert_eq(decl.name(), "Named")
+  assert_eq(decl.is_public(), true)
+}
+
+///|
+test "a declaration says which file it came from" {
+  let decls = @gen.read("src/models.mbt", models)
+  assert_eq(decls.map(decl => decl.file()), [
+    "src/models.mbt", "src/models.mbt", "src/models.mbt",
+  ])
+}
+
+///|
+test "a refusal about an annotation names the file the declaration came from" {
+  let source = "#demo.getters\npub struct User {\n  id : Int\n}"
+  guard @gen.read("src/models.mbt", source) is [decl] else {
+    fail("one declaration")
+  }
+  guard @attr.find(decl.attrs(), "demo.getters") is Some(annotation) else {
+    fail("annotated")
+  }
+  let refused = try {
+    let _ = @attr.Spec::new("demo.getters")
+      .required("path", Str)
+      .bind(annotation, file=decl.file())
+    "bound"
+  } catch {
+    e => e.to_string()
+  }
+  assert_eq(refused, "src/models.mbt:1:1: path is required")
+}

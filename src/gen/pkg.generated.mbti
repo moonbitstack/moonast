@@ -40,6 +40,7 @@ pub(all) enum Decl {
   Other(file~ : String, attrs~ : @list.List[@attribute.Attribute], raw~ : @syntax.Impl)
 }
 pub fn Decl::attrs(Self) -> @list.List[@attribute.Attribute]
+pub fn Decl::file(Self) -> String
 pub fn Decl::is_public(Self) -> Bool
 pub fn Decl::name(Self) -> String
 pub fn Decl::params(Self) -> Array[String]

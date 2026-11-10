@@ -175,9 +175,30 @@ pub fn Decl::raw(self : Decl) -> @syntax.Impl {
 }
 
 ///|
-/// The name a declaration introduces: a type's or a function's. Empty for one that
-/// introduces none, such as an `impl`. A tuple struct has no variant of its own, so
-/// this is how a generator learns its name without reading `raw` itself.
+/// The file the declaration was read from, as `read` was told it. A refusal a
+/// generator writes names this file, so a reader can open the line it points at.
+///
+/// ```mbt check
+/// test {
+///   let source = "#demo.describe\npub struct Point {\n  x : Int\n}"
+///   guard @gen.read("src/models.mbt", source) is [decl] else {
+///     abort("one declaration")
+///   }
+///   inspect(decl.file(), content="src/models.mbt")
+/// }
+/// ```
+pub fn Decl::file(self : Decl) -> String {
+  match self {
+    Struct(file~, ..) | Enum(file~, ..) | Func(file~, ..) | Other(file~, ..) =>
+      file
+  }
+}
+
+///|
+/// The name a declaration introduces: a type's, a function's or a trait's. Empty
+/// for one that introduces none, such as an `impl`. A tuple struct and a trait
+/// have no variant of their own, so this is how a generator learns their names
+/// without reading `raw` itself.
 ///
 /// ```mbt check
 /// test {
@@ -192,6 +213,7 @@ pub fn Decl::name(self : Decl) -> String {
     Other(..) =>
       match self.raw() {
         TopTypeDef(decl) => decl.tycon
+        TopTrait(decl) => decl.name.name
         _ => ""
       }
   }
@@ -199,13 +221,14 @@ pub fn Decl::name(self : Decl) -> String {
 
 ///|
 /// Whether the declaration is `pub`, for every kind the view has a variant for
-/// and for the tuple structs that land in `Other`.
+/// and for the tuple structs and traits that land in `Other`.
 pub fn Decl::is_public(self : Decl) -> Bool {
   match self {
     Struct(public~, ..) | Enum(public~, ..) | Func(public~, ..) => public
     Other(..) =>
       match self.raw() {
         TopTypeDef(decl) => visible(decl.type_vis)
+        TopTrait(decl) => visible(decl.vis)
         _ => false
       }
   }
@@ -344,7 +367,27 @@ fn view(source : String, file : String, impl_ : @syntax.Impl) -> Decl {
         file~,
         raw=impl_,
       )
-    _ => Other(file~, attrs=@list.List([]), raw=impl_)
+    _ => Other(file~, attrs=attrs_of(impl_), raw=impl_)
+  }
+}
+
+///|
+/// The annotations on a declaration, read off the node they are written on. A
+/// generator that answers to an annotation has to see it wherever it is written;
+/// a top-level `let`, an `impl` and a `trait` carry theirs on their own nodes,
+/// and so do the rest of the top-level forms.
+fn attrs_of(impl_ : @syntax.Impl) -> @list.List[@attribute.Attribute] {
+  match impl_ {
+    TopLetDef(attrs~, ..)
+    | TopTest(attrs~, ..)
+    | TopImpl(attrs~, ..)
+    | TopView(attrs~, ..)
+    | TopImplRelation(attrs~, ..)
+    | TopExtend(attrs~, ..)
+    | TopUsing(attrs~, ..) => attrs
+    TopTrait(decl) => decl.attrs
+    TopExpr(..) | TopImport(..) | TopTypeDef(_) | TopFuncDef(..) =>
+      @list.List([])
   }
 }
 
