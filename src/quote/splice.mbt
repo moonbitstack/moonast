@@ -55,6 +55,52 @@ fn Splicer::expand(
 }
 
 ///|
+/// The same for the arguments of a call: a field code fills the place where a
+/// labelled argument goes, since `label: value` and `label=value` are one field
+/// written for two positions.
+fn Splicer::expand_arguments(
+  self : Splicer,
+  args : @list.List[@syntax.Argument],
+) -> @list.List[@syntax.Argument] {
+  let out = []
+  for arg in args {
+    let fill = match (arg.kind, arg.value) {
+      (Positional, Ident(id={ name: Ident(name~), .. }, ..)) =>
+        self.manys.get(name)
+      _ => None
+    }
+    match fill {
+      None => out.push(arg)
+      Some((hole, bodies)) =>
+        for body in bodies {
+          match body {
+            Expr(w) => out.push({ value: expr_of(w), kind: Positional, })
+            Name(n) =>
+              out.push({
+                value: @syntax.Expr::Ident(
+                  id={ name: long_ident(n), loc: arg.value.loc(), },
+                  loc=arg.value.loc(),
+                ),
+                kind: Positional,
+              })
+            Text(t) =>
+              out.push({
+                value: Constant(c=String(escape(t)), loc=arg.value.loc()),
+                kind: Positional,
+              })
+            Fields(w) =>
+              for field in fields_of(w) {
+                out.push({ value: field.expr, kind: Labelled(field.label), })
+              }
+            _ => self.misfit(hole, "expressions or record fields")
+          }
+        }
+    }
+  }
+  @list.List(out)
+}
+
+///|
 impl @syntax.MapVisitor for Splicer with fn visit_Expr_Ident(self, id~, loc~) {
   // A list hole that is a block's only statement: the parser gives the block as
   // that one expression, so no sequence is there to expand it into.
@@ -62,11 +108,7 @@ impl @syntax.MapVisitor for Splicer with fn visit_Expr_Ident(self, id~, loc~) {
     let all = self
       .expand(@list.singleton(@syntax.Expr::Ident(id~, loc~)))
       .to_array()
-    return match all.pop() {
-      None => Unit(loc~, faked=false)
-      Some(last) if all.is_empty() => last
-      Some(last) => Sequence(exprs=@list.List(all), last_expr=last, loc~)
-    }
+    return chain(all[:], Unit(loc~, faked=false))
   }
   if id.name is Ident(name~) && self.ones.get(name) is Some((hole, body)) {
     match body {
@@ -77,6 +119,26 @@ impl @syntax.MapVisitor for Splicer with fn visit_Expr_Ident(self, id~, loc~) {
     }
   }
   @syntax.MapVisitor::visit_Expr_Ident(@syntax.MapVisitorBase(self), id~, loc~)
+}
+
+///|
+/// A hole where a constructor stands, in an expression or in a pattern: the name
+/// of the constructor the fill gives. A constructor is written upper case, and so
+/// is the hole, which is what lets a pattern with arguments take one.
+impl @syntax.MapVisitor for Splicer with fn visit_Constructor(self, constr) {
+  match self.ones.get(constr.name.name) {
+    Some((_, Name(n))) if !n.has_prefix("@") =>
+      { ..constr, name: { ..constr.name, name: n, }, }
+    Some((hole, _)) => {
+      self.misfit(hole, "a constructor name")
+      constr
+    }
+    None =>
+      @syntax.MapVisitor::visit_Constructor(
+        @syntax.MapVisitorBase(self),
+        constr,
+      )
+  }
 }
 
 ///|
@@ -244,15 +306,51 @@ impl @syntax.MapVisitor for Splicer with fn visit_Expr_Sequence(
 ) {
   let given = exprs.to_array()
   given.push(last_expr)
-  let all = self.expand(@list.List(given)).to_array()
-  guard all.pop() is Some(last) else { return Unit(loc~, faked=false) }
-  let init = @list.List(all)
-  @syntax.MapVisitor::visit_Expr_Sequence(
-    @syntax.MapVisitorBase(self),
-    exprs=init,
-    last_expr=last,
-    loc~,
-  )
+  let items = self.expand(@list.List(given)).to_array()
+  let visited = items.map(e => @syntax.MapVisitor::visit_Expr(self, e))
+  chain(visited[:], Unit(loc~, faked=true))
+}
+
+///|
+/// A run of statements as one expression. A `let` binds the rest of its block, so
+/// the run folds from the right; one that ends in a `let` binds a unit, which is
+/// how the parser writes `let x = 1` on its own.
+fn chain(items : ArrayView[@syntax.Expr], base : @syntax.Expr) -> @syntax.Expr {
+  let plain = []
+  let mut i = 0
+  while i < items.length() && !binds(items[i]) {
+    plain.push(items[i])
+    i = i + 1
+  }
+  if i == items.length() {
+    guard plain.pop() is Some(last) else { return base }
+    guard !plain.is_empty() else { return last }
+    return Sequence(exprs=@list.List(plain), last_expr=last, loc=base.loc())
+  }
+  let tail = bind(items[i], chain(items[i + 1:], base))
+  guard !plain.is_empty() else { return tail }
+  Sequence(exprs=@list.List(plain), last_expr=tail, loc=base.loc())
+}
+
+///|
+/// Whether an expression introduces a binding, and so takes the rest of its block
+/// as its body.
+fn binds(expr : @syntax.Expr) -> Bool {
+  match expr {
+    Let(body=Unit(..), ..) | LetMut(body=Unit(..), ..) => true
+    _ => false
+  }
+}
+
+///|
+/// `head` with `tail` as the body it binds.
+fn bind(head : @syntax.Expr, tail : @syntax.Expr) -> @syntax.Expr {
+  match head {
+    Let(pattern~, expr~, ..) => Let(pattern~, expr~, body=tail, loc=head.loc())
+    LetMut(binder~, ty~, expr~, ..) =>
+      LetMut(binder~, ty~, expr~, body=tail, loc=head.loc())
+    _ => head
+  }
 }
 
 ///|
@@ -262,20 +360,132 @@ impl @syntax.MapVisitor for Splicer with fn visit_Expr_Apply(
   args~,
   loc~,
 ) {
-  let out = []
-  for arg in args {
-    if arg.kind is Positional {
-      for e in self.expand(@list.singleton(arg.value)) {
-        out.push(@syntax.Argument::{ value: e, kind: Positional, })
-      }
-    } else {
-      out.push(arg)
-    }
-  }
   @syntax.MapVisitor::visit_Expr_Apply(
     @syntax.MapVisitorBase(self),
     func~,
-    args=@list.List(out),
+    args=self.expand_arguments(args),
+    loc~,
+  )
+}
+
+///|
+/// A lone placeholder where a field stands is a punned field, `{ $fields* }` is
+/// `{ moonast__fields }`; that one field is where the list goes.
+fn Splicer::field_hole(self : Splicer, field : @syntax.FieldDef) -> String? {
+  guard field.expr is Ident(id={ name: Ident(name~), .. }, ..) else {
+    return None
+  }
+  guard field.label.name == name && self.manys.contains(name) else {
+    return None
+  }
+  Some(name)
+}
+
+///|
+/// A list of fields, expanded where a record's field list goes.
+fn Splicer::expand_fields(
+  self : Splicer,
+  fields : @list.List[@syntax.FieldDef],
+) -> @list.List[@syntax.FieldDef] {
+  let out = []
+  for field in fields {
+    match self.field_hole(field) {
+      None => out.push(field)
+      Some(name) => {
+        let (hole, bodies) = self.manys.get(name).unwrap()
+        for body in bodies {
+          match body {
+            Fields(w) =>
+              for one in fields_of(w) {
+                out.push(one)
+              }
+            _ => self.misfit(hole, "a list of record fields")
+          }
+        }
+      }
+    }
+  }
+  @list.List(out)
+}
+
+///|
+impl @syntax.MapVisitor for Splicer with fn visit_Expr_Record(
+  self,
+  type_name~,
+  fields~,
+  trailing~,
+  loc~,
+) {
+  @syntax.MapVisitor::visit_Expr_Record(
+    @syntax.MapVisitorBase(self),
+    type_name~,
+    fields=self.expand_fields(fields),
+    trailing~,
+    loc~,
+  )
+}
+
+///|
+impl @syntax.MapVisitor for Splicer with fn visit_Expr_RecordUpdate(
+  self,
+  type_name~,
+  record~,
+  fields~,
+  loc~,
+) {
+  @syntax.MapVisitor::visit_Expr_RecordUpdate(
+    @syntax.MapVisitorBase(self),
+    type_name~,
+    record~,
+    fields=self.expand_fields(fields),
+    loc~,
+  )
+}
+
+///|
+/// The placeholder a case list stands as: a case is never written without a body,
+/// so the hole takes `$cases* => ()` and the `()` goes with it.
+fn Splicer::case_hole(self : Splicer, case_ : @syntax.Case) -> String? {
+  guard case_.pattern is Var(binder) else { return None }
+  guard self.manys.get(binder.name) is Some((hole, _)) else { return None }
+  guard case_.guard_ is None && case_.body is Unit(..) else {
+    self.misfit(hole, "a case list, written `$\{hole}* => ()`")
+    return None
+  }
+  Some(binder.name)
+}
+
+///|
+impl @syntax.MapVisitor for Splicer with fn visit_Expr_Match(
+  self,
+  expr~,
+  cases~,
+  match_loc~,
+  loc~,
+) {
+  let out = []
+  for case_ in cases {
+    match self.case_hole(case_) {
+      None => out.push(case_)
+      Some(name) => {
+        let (hole, bodies) = self.manys.get(name).unwrap()
+        for body in bodies {
+          match body {
+            Cases(w) =>
+              for one in cases_of(w) {
+                out.push(one)
+              }
+            _ => self.misfit(hole, "a list of match cases")
+          }
+        }
+      }
+    }
+  }
+  @syntax.MapVisitor::visit_Expr_Match(
+    @syntax.MapVisitorBase(self),
+    expr~,
+    cases=@list.List(out),
+    match_loc~,
     loc~,
   )
 }

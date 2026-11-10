@@ -397,3 +397,128 @@ test "a mutable local keeps its `mut` and its colon" {
     .to_string()
   assert_eq(text, "///|\nfn f() -> Unit {\n  let mut x : Int = 1\n  x = 2\n}\n")
 }
+
+///|
+test "a list hole expands where a match's cases go" {
+  let cases = ["Empty", "Circle"].map(name => {
+    @quote.cases("$pattern => $value")
+    .set("pattern", @quote.ident(name))
+    .set("value", @quote.string(name))
+    .render()
+  })
+  let code = @quote.expr(
+      (
+        #|match shape {
+        #|  $cases* => ()
+        #|}
+      ),
+    )
+    .splice("cases", cases)
+    .render()
+  assert_eq(
+    code.to_string(),
+    "match shape {\n  Empty => \"Empty\"\n  Circle => \"Circle\"\n}",
+  )
+}
+
+///|
+test "a list hole expands where a record's fields go" {
+  let fields = ["x", "y"].map(name => {
+    @quote.fields("$label: $value")
+    .set("label", @quote.ident(name))
+    .set("value", @quote.string(name))
+    .render()
+  })
+  let code = @quote.expr("$T::{ $fields* }")
+    .set("T", @quote.ident("Point"))
+    .splice("fields", fields)
+    .render()
+  assert_eq(code.to_string(), "Point::{ x: \"x\", y: \"y\" }")
+}
+
+///|
+test "a list hole expands where a constructor's labelled arguments go" {
+  let fields = ["name", "size"].mapi((i, name) => {
+    @quote.fields("$label: $value")
+    .set("label", @quote.ident(name))
+    .set("value", @quote.ident("v\{i}"))
+    .render()
+  })
+  let code = @quote.expr("$case($fields*)")
+    .set("case", @quote.ident("Tagged"))
+    .splice("fields", fields)
+    .render()
+  assert_eq(code.to_string(), "Tagged(name=v0, size=v1)")
+}
+
+///|
+test "a hole where a constructor with arguments stands takes a name" {
+  let code = @quote.expr("match shape {\n  $Case(v0) => 1\n  _ => 0\n}")
+    .set("Case", @quote.ident("Circle"))
+    .render()
+  assert_eq(code.to_string(), "match shape {\n  Circle(v0) => 1\n  _ => 0\n}")
+}
+
+///|
+test "a list hole among statements keeps the bindings it splices" {
+  let lines = [
+    @quote.expr("let mut x = 1").render(),
+    @quote.expr("let y = x + 1").render(),
+    @quote.expr("y").render(),
+  ]
+  let code = @quote.items("fn f() -> Int {\n  $lines*\n}")
+    .splice("lines", lines)
+    .render()
+  assert_eq(
+    code.to_string(),
+    "///|\nfn f() -> Int {\n  let mut x = 1\n  let y = x + 1\n  y\n}\n",
+  )
+}
+
+///|
+test "an empty list leaves a record with no fields" {
+  inspect(
+    @quote.expr("Point::{ $fields* }").splice("fields", []).render(),
+    content="Point::{  }",
+  )
+  inspect(
+    @quote.expr("match shape {\n  $cases* => ()\n}")
+    .splice("cases", [])
+    .render(),
+    content="match shape {\n  \n}",
+  )
+}
+
+///|
+test "a list hole where fields go refuses an expression" {
+  let statement = @quote.expr("start()").render()
+  guard refusal(() => {
+      @quote.expr("Point::{ $fields* }").splice("fields", [statement]).render()
+    })
+    is Some(e) else {
+    fail("an expression fills a field list")
+  }
+  assert_eq(e.to_string(), "hole $fields takes a list of record fields")
+  guard refusal(() => {
+      @quote.expr("match shape {\n  $cases* => ()\n}")
+      .splice("cases", [statement])
+      .render()
+    })
+    is Some(e) else {
+    fail("an expression fills a case list")
+  }
+  assert_eq(e.to_string(), "hole $cases takes a list of match cases")
+}
+
+///|
+test "a case hole written without the unit after the arrow is refused" {
+  guard refusal(() => {
+      @quote.expr("match shape {\n  $cases* => 1\n}")
+      .splice("cases", [@quote.cases("_ => 0").render()])
+      .render()
+    })
+    is Some(e) else {
+    fail("a case hole with a body renders")
+  }
+  assert_true(e.to_string().contains("$cases* => ()"))
+}

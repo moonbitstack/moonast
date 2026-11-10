@@ -13,6 +13,14 @@ priv enum Body {
   Type(@syntax.Impl)
   Name(String)
   Text(String)
+  /// The cases of a `match`, kept in the wrapper function they were parsed in.
+  /// They have no source form of their own, so printing one takes the wrapper
+  /// off again; splicing one hands the cases to a `match` that has a hole where
+  /// its case list goes.
+  Cases(@syntax.Impl)
+  /// The fields of a record, kept the same way. Written `label: value`, the same
+  /// text is a labelled argument, so one code fills both places.
+  Fields(@syntax.Impl)
 }
 
 ///|
@@ -182,7 +190,51 @@ fn print(body : Body) -> String {
     Type(w) => unwrap_type(@fmt.impls_to_string(@list.singleton(w)))
     Name(n) => n
     Text(t) => "\"" + escape(t) + "\""
+    Cases(w) => uncase(unwrap_body(@fmt.impls_to_string(@list.singleton(w))))
+    Fields(w) => unfield(unwrap_body(@fmt.impls_to_string(@list.singleton(w))))
   }
+}
+
+///|
+/// The cases of a printed `match`, one per line, without the `match` that gives
+/// them their layout.
+fn uncase(text : String) -> String {
+  let lines = text.split("\n").map(l => l.to_owned()).to_array()
+  guard lines.length() > 2 else { return "" }
+  dedent(lines[1:lines.length() - 1])
+}
+
+///|
+/// The fields of a printed record, without its braces: on one line when the
+/// printer kept them there, one per line when it did not.
+fn unfield(text : String) -> String {
+  if text.has_prefix("{ ") && text.has_suffix(" }") && text.length() > 3 {
+    return without_last_comma(text[2:text.length() - 2].to_owned())
+  }
+  let lines = text.split("\n").map(l => l.to_owned()).to_array()
+  guard lines.length() > 2 else { return "" }
+  without_last_comma(dedent(lines[1:lines.length() - 1]))
+}
+
+///|
+/// The printer writes a comma after every field, `{ x: 1, }`; the list a reader
+/// gets back reads better without the one at the end.
+fn without_last_comma(text : String) -> String {
+  if text.has_suffix(",") {
+    text[:text.length() - 1].to_owned()
+  } else {
+    text
+  }
+}
+
+///|
+/// Lines that stood one level inside braces, as they read one level out.
+fn dedent(lines : ArrayView[String]) -> String {
+  let out = []
+  for line in lines {
+    out.push(if line.has_prefix("  ") { line[2:].to_owned() } else { line })
+  }
+  out.join("\n")
 }
 
 ///|

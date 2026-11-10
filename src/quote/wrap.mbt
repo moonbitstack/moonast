@@ -4,6 +4,11 @@
 let wrapper = "moonast__wrap"
 
 ///|
+/// What a template of match cases is parsed against. Nothing in a rendered code
+/// ever names it.
+let subject = "moonast__subject"
+
+///|
 fn parse(source : String) -> @list.List[@syntax.Impl] raise Refused {
   let (impls, reports) = @parser.parse_string(source)
   if reports.length() > 0 {
@@ -33,6 +38,48 @@ fn parse_type(source : String) -> @syntax.Impl raise Refused {
     raise Template(msg="expected one type", line=1, column=1)
   }
   impl_
+}
+
+///|
+/// Match cases and record fields are parsed the same way, inside the construct
+/// that has room for them.
+fn parse_cases(source : String) -> @syntax.Impl raise Refused {
+  let impls = parse(
+    "fn \{wrapper}() -> Unit {\n  match \{subject} {\n" + source + "\n  }\n}",
+  )
+  guard impls is More(impl_, tail=Empty) &&
+    impl_ is TopFuncDef(decl_body=DeclBody(expr=Match(..)), ..) else {
+    raise Template(msg="expected match cases", line=1, column=1)
+  }
+  impl_
+}
+
+///|
+fn parse_fields(source : String) -> @syntax.Impl raise Refused {
+  let impls = parse("fn \{wrapper}() -> Unit {\n  {\n" + source + "\n  }\n}")
+  guard impls is More(impl_, tail=Empty) &&
+    impl_ is TopFuncDef(decl_body=DeclBody(expr=Record(..)), ..) else {
+    raise Template(msg="expected record fields", line=1, column=1)
+  }
+  impl_
+}
+
+///|
+/// The cases of a rendered cases template.
+fn cases_of(impl_ : @syntax.Impl) -> @list.List[@syntax.Case] {
+  guard impl_ is TopFuncDef(decl_body=DeclBody(expr=Match(cases~, ..)), ..) else {
+    abort("a cases code is always a wrapped match")
+  }
+  cases
+}
+
+///|
+/// The fields of a rendered fields template.
+fn fields_of(impl_ : @syntax.Impl) -> @list.List[@syntax.FieldDef] {
+  guard impl_ is TopFuncDef(decl_body=DeclBody(expr=Record(fields~, ..)), ..) else {
+    abort("a fields code is always a wrapped record")
+  }
+  fields
 }
 
 ///|

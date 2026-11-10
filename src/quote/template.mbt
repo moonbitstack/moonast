@@ -3,8 +3,8 @@
 ///
 /// A hole is `$name`; write it in the case the position wants, `$T` where a type
 /// or constructor goes and `$name` where a value or a name goes. `$name*` takes a
-/// list and expands among statements, array elements or positional arguments.
-/// `$$` is a literal dollar sign.
+/// list and expands among statements, array elements, positional arguments, a
+/// match's cases and a record's fields. `$$` is a literal dollar sign.
 pub struct Template {
   priv kind : Kind
   priv source : String
@@ -17,6 +17,8 @@ priv enum Kind {
   Items
   Expr
   Type
+  Cases
+  Fields
 }
 
 ///|
@@ -63,6 +65,42 @@ pub fn expr(source : StringView) -> Template {
 /// ```
 pub fn ty(source : StringView) -> Template {
   { kind: Type, source: source.to_owned(), ones: Map([]), manys: Map([]), }
+}
+
+///|
+/// A template of match cases, for the hole a `match` has where its case list
+/// goes. Each case is `pattern => body`, on its own line, exactly as it is
+/// written between the braces of a `match`.
+///
+/// ```mbt check
+/// test {
+///   let cases = @quote.cases("$pattern => $value")
+///     .set("pattern", @quote.ident("Empty"))
+///     .set("value", @quote.int(0))
+///     .render()
+///   inspect(cases.to_string(), content="Empty => 0")
+/// }
+/// ```
+pub fn cases(source : StringView) -> Template {
+  { kind: Cases, source: source.to_owned(), ones: Map([]), manys: Map([]), }
+}
+
+///|
+/// A template of record fields, for the hole a record has where its field list
+/// goes. Each field is `label: value`; the same code fills the arguments of a
+/// constructor, where a labelled argument is written the same way.
+///
+/// ```mbt check
+/// test {
+///   let fields = @quote.fields("$label: $value")
+///     .set("label", @quote.ident("x"))
+///     .set("value", @quote.int(1))
+///     .render()
+///   inspect(fields.to_string(), content="x: 1")
+/// }
+/// ```
+pub fn fields(source : StringView) -> Template {
+  { kind: Fields, source: source.to_owned(), ones: Map([]), manys: Map([]), }
 }
 
 ///|
@@ -155,6 +193,9 @@ pub fn Template::render(self : Template) -> Code raise Refused {
       Items(parse(text).map(i => @syntax.MapVisitor::visit_Impl(splicer, i)))
     Expr => Expr(@syntax.MapVisitor::visit_Impl(splicer, parse_expr(text)))
     Type => Type(@syntax.MapVisitor::visit_Impl(splicer, parse_type(text)))
+    Cases => Cases(@syntax.MapVisitor::visit_Impl(splicer, parse_cases(text)))
+    Fields =>
+      Fields(@syntax.MapVisitor::visit_Impl(splicer, parse_fields(text)))
   }
   if splicer.misfits.get(0) is Some(first) {
     raise first
