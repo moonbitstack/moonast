@@ -38,11 +38,13 @@ struct Variant {
 }
 
 ///|
-/// Why the derive stopped. An annotation that does not bind is reported by
-/// `moonast/attr`; this is for the rules its values have to obey.
+/// Why the derive stopped, as one sentence. An annotation that does not bind is
+/// reported by `moonast/attr` and arrives here already naming the file, line and
+/// column it stands at; the rules this derive enforces add their own place the
+/// same way.
 #derive(Debug)
 pub(all) suberror Refused {
-  Bad(at~ : String, msg~ : String)
+  Bad(msg~ : String)
 }
 
 ///|
@@ -51,7 +53,7 @@ pub extend Refused with Debug::{to_repr}
 ///|
 pub impl Show for Refused with fn output(self, logger) {
   let text = match self {
-    Bad(at~, msg~) => "\{at}: \{msg}"
+    Bad(msg~) => msg
   }
   logger.write_string(text)
 }
@@ -79,31 +81,37 @@ fn skip_spec() -> @attr.Spec {
 }
 
 ///|
-/// Where a declaration stands, so a message can say which one it is about.
-fn at(decl : @gen.Decl) -> String {
+/// Where a declaration stands: the file `moonast/gen` read it from, and the
+/// position, `file:line:column`, a message about it points at.
+struct Place {
+  file : String
+  at : String
+}
+
+///|
+fn place_of(decl : @gen.Decl) -> Place {
   let start = decl.raw().loc().start
-  "\{file_of(decl)}:\{start.lnum}:\{start.column()}"
+  let file = decl.file()
+  { file, at: "\{file}:\{start.lnum}:\{start.column()}", }
 }
 
 ///|
-fn file_of(decl : @gen.Decl) -> String {
-  match decl {
-    Struct(file~, ..) | Enum(file~, ..) | Func(file~, ..) | Other(file~, ..) =>
-      file
-  }
+/// A refusal that names the place it is about.
+fn refuse(place : Place, msg : String) -> Refused {
+  Bad(msg="\{place.at}: \{msg}")
 }
 
 ///|
-/// Bind an annotation, and put the file in front of what `moonast/attr` says
-/// about it: its message names the line and column, and the reader needs the file
-/// those are in.
+/// Bind an annotation, handing `moonast/attr` the file so its message names the
+/// file, line and column the annotation stands at. Nothing is added to it here:
+/// the payload's place is its own, not the declaration's.
 fn arguments(
   spec : @attr.Spec,
   annotation : @attribute.Attribute,
-  at~ : String,
+  place : Place,
 ) -> @attr.Args raise {
-  spec.bind(annotation) catch {
-    e => raise Bad(at~, msg=e.to_string())
+  spec.bind(annotation, file=place.file) catch {
+    e => raise Bad(msg=e.to_string())
   }
 }
 
@@ -113,11 +121,11 @@ fn arguments(
 /// not know.
 fn member_attributes(
   attrs : @list.List[@attribute.Attribute],
-  at~ : String,
+  place : Place,
   ident : String,
 ) -> (String, Bool) raise {
   guard @attr.malformed(attrs, "serde").is_empty() else {
-    raise Bad(at~, msg="cannot make sense of an annotation on `\{ident}`")
+    raise refuse(place, "cannot make sense of an annotation on `\{ident}`")
   }
   let mut name = ident
   let mut skip = false
@@ -125,15 +133,15 @@ fn member_attributes(
     let call = @attr.name_of(annotation).unwrap_or("")
     match call {
       "serde.rename" => {
-        let args = arguments(rename_spec(), annotation, at~)
+        let args = arguments(rename_spec(), annotation, place)
         name = args.str("name").unwrap_or(ident)
       }
       "serde.skip" => {
-        let _ = arguments(skip_spec(), annotation, at~)
+        let _ = arguments(skip_spec(), annotation, place)
         skip = true
       }
       other =>
-        raise Bad(at~, msg="unknown annotation `#\{other}` on `\{ident}`")
+        raise refuse(place, "unknown annotation `#\{other}` on `\{ident}`")
     }
   }
   (name, skip)
@@ -142,9 +150,9 @@ fn member_attributes(
 ///|
 /// The members of a record, in source order, refusing two fields that would be
 /// written under the same name.
-fn members_of(fields : Array[@gen.Field], at~ : String) -> Array[Entry] raise {
+fn members_of(fields : Array[@gen.Field], place : Place) -> Array[Entry] raise {
   let members = fields.map(field => {
-    let (name, skip) = member_attributes(field.attrs, at~, field.name)
+    let (name, skip) = member_attributes(field.attrs, place, field.name)
     { ident: field.name, name, optional: field.optional, skip, }
   })
   for index, entry in members {
@@ -152,9 +160,9 @@ fn members_of(fields : Array[@gen.Field], at~ : String) -> Array[Entry] raise {
     for earlier in 0..<index {
       let other = members[earlier]
       guard other.skip || other.name != entry.name else {
-        raise Bad(
-          at~,
-          msg="fields `\{other.ident}` and `\{entry.ident}` both serialize as `\{entry.name}`",
+        raise refuse(
+          place,
+          "fields `\{other.ident}` and `\{entry.ident}` both serialize as `\{entry.name}`",
         )
       }
     }
@@ -164,32 +172,32 @@ fn members_of(fields : Array[@gen.Field], at~ : String) -> Array[Entry] raise {
 
 ///|
 /// One variant, refusing the payload shapes that have no data model equivalent.
-fn variant_of(case_ : @gen.Case, at~ : String) -> Variant raise {
-  let (name, skip) = member_attributes(case_.attrs, at~, case_.name)
+fn variant_of(case_ : @gen.Case, place : Place) -> Variant raise {
+  let (name, skip) = member_attributes(case_.attrs, place, case_.name)
   guard !skip else {
-    raise Bad(
-      at~,
-      msg="`#serde.skip` is not supported on the variant `\{case_.name}`",
+    raise refuse(
+      place,
+      "`#serde.skip` is not supported on the variant `\{case_.name}`",
     )
   }
   let body = match case_.payload {
     Empty => Unit
     Tuple(arity~) => if arity == 1 { Newtype } else { Tuple(arity) }
-    Record(fields~) => Record(members_of(fields, at~))
-    Cases(_) => raise Bad(at~, msg="a variant cannot hold an enum")
+    Record(fields~) => Record(members_of(fields, place))
+    Cases(_) => raise refuse(place, "a variant cannot hold an enum")
   }
   { ident: case_.name, name, body, }
 }
 
 ///|
 /// The body of a type, `None` when it is not something a derive can write.
-fn body_of(decl : @gen.Decl, at~ : String) -> Body? raise {
+fn body_of(decl : @gen.Decl, place : Place) -> Body? raise {
   match decl.shape() {
     None => None
     Some(Empty) => Some(Unit)
     Some(Tuple(arity~)) => Some(if arity == 1 { Newtype } else { Tuple(arity) })
-    Some(Record(fields~)) => Some(Record(members_of(fields, at~)))
-    Some(Cases(cases~)) => Some(Variants(cases.map(c => variant_of(c, at~))))
+    Some(Record(fields~)) => Some(Record(members_of(fields, place)))
+    Some(Cases(cases~)) => Some(Variants(cases.map(c => variant_of(c, place))))
   }
 }
 
@@ -199,23 +207,23 @@ fn body_of(decl : @gen.Decl, at~ : String) -> Body? raise {
 fn targets_of(decls : Array[@gen.Decl]) -> Array[Target] raise {
   let out = []
   for decl in decls {
-    let at = at(decl)
+    let place = place_of(decl)
     let attrs = decl.attrs()
     guard @attr.malformed(attrs, "serde").is_empty() else {
-      raise Bad(at~, msg="cannot make sense of a `#serde.` annotation")
+      raise refuse(place, "cannot make sense of a `#serde.` annotation")
     }
     for annotation in @attr.under(attrs, "serde") {
       let name = @attr.name_of(annotation).unwrap_or("")
       guard name == "serde.derive" else {
-        raise Bad(at~, msg="unknown annotation `#\{name}` on a type")
+        raise refuse(place, "unknown annotation `#\{name}` on a type")
       }
     }
     guard @attr.find(attrs, "serde.derive") is Some(annotation) else {
       continue
     }
-    let traits = arguments(derive_spec(), annotation, at~).strs("trait")
+    let traits = arguments(derive_spec(), annotation, place).strs("trait")
     guard !traits.is_empty() else {
-      raise Bad(at~, msg="`#serde.derive` names no traits")
+      raise refuse(place, "`#serde.derive` names no traits")
     }
     let mut serialize = false
     let mut deserialize = false
@@ -224,16 +232,15 @@ fn targets_of(decls : Array[@gen.Decl]) -> Array[Target] raise {
         "Serialize" => serialize = true
         "Deserialize" => deserialize = true
         other =>
-          raise Bad(
-            at~,
-            msg="cannot derive `\{other}`; expected Serialize or Deserialize",
+          raise refuse(
+            place,
+            "cannot derive `\{other}`; expected Serialize or Deserialize",
           )
       }
     }
-    guard body_of(decl, at~) is Some(body) else {
-      raise Bad(
-        at~,
-        msg="not a struct or an enum, so there is nothing to derive",
+    guard body_of(decl, place) is Some(body) else {
+      raise refuse(
+        place, "not a struct or an enum, so there is nothing to derive",
       )
     }
     out.push({
