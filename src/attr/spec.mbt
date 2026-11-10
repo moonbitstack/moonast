@@ -113,16 +113,43 @@ pub fn Spec::many(
 ///   inspect(args.strs("tag").join(", "), content="users")
 /// }
 /// ```
+///
+/// Pass the file the annotation was read from and every refusal names it, so the
+/// line and column in the message can be opened:
+///
+/// ```mbt check
+/// test {
+///   let source = "#app.get\nfn list_users() -> Unit {}"
+///   let impls = @parser.parse_string(source).0
+///   guard impls is @list.More(impl_, tail=@list.Empty) else {
+///     abort("one declaration")
+///   }
+///   guard impl_ is @syntax.TopFuncDef(fun_decl={ attrs, .. }, ..) else {
+///     abort("a function")
+///   }
+///   guard @attr.find(attrs, "app.get") is Some(a) else { abort("annotated") }
+///   let refused = try {
+///     let _ = @attr.Spec::new("app.get")
+///       .positional("path", Str)
+///       .bind(a, file="models.mbt")
+///     "bound"
+///   } catch {
+///     e => e.to_string()
+///   }
+///   inspect(refused, content="models.mbt:1:1: path is required")
+/// }
+/// ```
 pub fn Spec::bind(
   self : Spec,
   attr : @attribute.Attribute,
+  file~ : String = "",
 ) -> Args raise Refused {
   let line = attr.loc.start.lnum
   let column = attr.loc.start.column()
   let props = match attr.parsed {
     Some(Apply(_, props)) => props
     Some(Ident(_)) => @list.List([])
-    _ => raise Malformed(raw=attr.raw, line~, column~)
+    _ => raise Malformed(raw=attr.raw, line~, column~, file~)
   }
   let values : Map[String, Array[Value]] = Map([])
   let positionals = self.params.filter(p => p.positional)
@@ -132,7 +159,7 @@ pub fn Spec::bind(
       Labeled(key, expr) =>
         match self.params.search_by(p => p.key == key) {
           Some(i) => (self.params[i], expr)
-          None => raise Unknown(key~, line~, column~)
+          None => raise Unknown(key~, line~, column~, file~)
         }
       Expr(expr) => {
         // A positional that may repeat keeps taking arguments; the ones before
@@ -142,7 +169,8 @@ pub fn Spec::bind(
         } else {
           match positionals.search_by(p => p.many) {
             Some(i) => positionals[i]
-            None => raise Unknown(key="argument \{next + 1}", line~, column~)
+            None =>
+              raise Unknown(key="argument \{next + 1}", line~, column~, file~)
           }
         }
         if !taken.many {
@@ -151,19 +179,19 @@ pub fn Spec::bind(
         (taken, expr)
       }
     }
-    let value = read(param, expr, line, column)
+    let value = read(param, expr, line, column, file)
     let seen = values.get_or_init(param.key, () => [])
     if seen.length() > 0 && !param.many {
-      raise Repeated(key=param.key, line~, column~)
+      raise Repeated(key=param.key, line~, column~, file~)
     }
     seen.push(value)
   }
   for param in self.params {
     if param.required && !values.contains(param.key) {
-      raise Missing(key=param.key, line~, column~)
+      raise Missing(key=param.key, line~, column~, file~)
     }
   }
-  { name: self.name, values, line, column, }
+  { name: self.name, values, line, column, file, }
 }
 
 ///|
@@ -172,6 +200,7 @@ fn read(
   expr : @attribute.Expr,
   line : Int32,
   column : Int32,
+  file : String,
 ) -> Value raise Refused {
   match (param.kind, expr) {
     (Str, String(s)) => Str(decoded(s))
@@ -192,6 +221,7 @@ fn read(
         },
         line~,
         column~,
+        file~,
       )
   }
 }

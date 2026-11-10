@@ -240,3 +240,24 @@ test "a repeating positional comes after the ones that take one value each" {
   assert_eq(args.str("method"), Some("GET"))
   assert_eq(args.strs("tag"), ["users", "admin"])
 }
+
+///|
+test "a refusal names the file when the caller says which file it read" {
+  let attrs = attrs_of("\n#app.get(summary=\"x\")\nfn f() -> Unit { () }")
+  guard attrs is More(attr, ..) else { fail("no annotation") }
+  guard refusal(() => get.bind(attr, file="models.mbt")) is Some(e) else {
+    fail("a missing path binds")
+  }
+  assert_eq(e.to_string(), "models.mbt:2:1: path is required")
+  guard e is Missing(file="models.mbt", ..) else {
+    fail("the file is on the refusal")
+  }
+}
+
+///|
+test "the file an annotation was bound from is on its arguments" {
+  let attrs = attrs_of("#app.get(\"/a\")\nfn f() -> Unit { () }")
+  guard attrs is More(attr, ..) else { fail("no annotation") }
+  assert_eq(get.bind(attr, file="routes.mbt").file, "routes.mbt")
+  assert_eq(get.bind(attr).file, "")
+}

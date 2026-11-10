@@ -22,6 +22,9 @@ pub struct Args {
   priv values : Map[String, Array[Value]]
   line : Int32
   column : Int32
+  /// The file the annotation stands in, as `bind` was told it; empty when it was
+  /// not told one.
+  file : String
 }
 
 ///|

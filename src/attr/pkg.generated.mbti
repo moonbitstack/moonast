@@ -21,11 +21,11 @@ pub fn under(@list.List[@attribute.Attribute], StringView) -> Array[@attribute.A
 // Errors
 #derive(@debug.Debug)
 pub(all) suberror Refused {
-  Malformed(raw~ : String, line~ : Int32, column~ : Int32)
-  Missing(key~ : String, line~ : Int32, column~ : Int32)
-  Unknown(key~ : String, line~ : Int32, column~ : Int32)
-  Mistyped(key~ : String, expected~ : String, line~ : Int32, column~ : Int32)
-  Repeated(key~ : String, line~ : Int32, column~ : Int32)
+  Malformed(raw~ : String, line~ : Int32, column~ : Int32, file~ : String)
+  Missing(key~ : String, line~ : Int32, column~ : Int32, file~ : String)
+  Unknown(key~ : String, line~ : Int32, column~ : Int32, file~ : String)
+  Mistyped(key~ : String, expected~ : String, line~ : Int32, column~ : Int32, file~ : String)
+  Repeated(key~ : String, line~ : Int32, column~ : Int32, file~ : String)
 }
 pub fn Refused::output(Self, &Logger) -> Unit
 pub fn Refused::to_repr(Self) -> @debug.Repr
@@ -37,6 +37,7 @@ pub struct Args {
   name : String
   line : Int32
   column : Int32
+  file : String
   // private fields
 }
 pub fn Args::bool(Self, StringView) -> Bool?
@@ -60,7 +61,7 @@ pub fn Kind::to_repr(Self) -> @debug.Repr
 pub struct Spec {
   // private fields
 }
-pub fn Spec::bind(Self, @attribute.Attribute) -> Args raise Refused
+pub fn Spec::bind(Self, @attribute.Attribute, file? : String) -> Args raise Refused
 pub fn Spec::many(Self, String, Kind, positional? : Bool) -> Self
 pub fn Spec::new(StringView) -> Self
 pub fn Spec::optional(Self, String, Kind) -> Self
