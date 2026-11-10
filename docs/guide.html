@@ -155,6 +155,8 @@ fn answer() -&gt; Int {
             <tr><td><code>$name</code></td><td>a value, an expression, or a name</td><td><code>$value + 1</code></td><td><code>41 + 1</code></td></tr>
             <tr><td><code>@pkg.$name</code></td><td>a name inside a package</td><td><code>app : @web.$T</code></td><td><code>app : @web.App</code></td></tr>
             <tr><td><code>$name*</code></td><td>a list, spliced among statements, array elements or arguments</td><td><code>[$items*]</code></td><td><code>[1, 2, 3]</code></td></tr>
+            <tr><td><code>$name*</code></td><td>a list, spliced where a match's cases or a record's fields go</td><td><code>match x { $arms* =&gt; () }</code></td><td>every arm</td></tr>
+            <tr><td><code>$Case</code></td><td>a constructor, with arguments after it</td><td><code>$Case(v0) =&gt; 0</code></td><td><code>Circle(v0) =&gt; 0</code></td></tr>
             <tr><td><code>$name</code> in a string</td><td>a name or a string, as text</td><td><code>"field $key"</code></td><td><code>"field first name"</code></td></tr>
             <tr><td><code>$$</code></td><td>a literal dollar sign</td><td><code>"$$5"</code></td><td><code>"$5"</code></td></tr>
           </tbody>
@@ -200,6 +202,50 @@ fn main {
           is not spliced — it becomes one block expression. Give it an array literal,
           <code>r.add($a, [$tags*])</code>, or call a plain function, <code>add(r, $a, $tags*)</code>.
         </div>
+
+        <p>Two more positions take a list: a match's cases, and a record's fields. Each item is a
+          template of its own, and the template around them has the hole where the list goes.</p>
+
+        <div class="code-block">
+          <pre data-lang="moonbit"><code>let arms = ["Empty", "Circle"].map(name =&gt; {
+  @quote.cases("$pattern =&gt; $text")
+  .set("pattern", @quote.ident(name))
+  .set("text", @quote.string(name))
+  .render()
+})
+println(
+  @quote.expr("match shape {\n  $arms* =&gt; ()\n}")
+  .splice("arms", arms)
+  .render(),
+)</code></pre>
+          <div class="status"><span class="dot gen"></span><span>output</span></div>
+          <pre data-lang="moonbit"><code>match shape {
+  Empty =&gt; "Empty"
+  Circle =&gt; "Circle"
+}</code></pre>
+        </div>
+
+        <p>A case is never written without a body, so the hole stands as one case and the
+          <code>()</code> after its arrow goes with it. A field is a punned one, which is what a
+          lone name in a record already reads as:</p>
+
+        <div class="code-block">
+          <pre data-lang="moonbit"><code>let fields = ["x", "y"].mapi((i, name) =&gt; {
+  @quote.fields("$label: $value")
+  .set("label", @quote.ident(name))
+  .set("value", @quote.int(i))
+  .render()
+})
+println(@quote.expr("Point::{ $fields* }").splice("fields", fields).render())</code></pre>
+          <div class="status"><span class="dot gen"></span><span>output</span></div>
+          <pre data-lang="moonbit"><code>Point::{ x: 0, y: 1 }</code></pre>
+        </div>
+
+        <p>The same field code fills the arguments of a constructor, where a labelled argument is
+          written <code>name=value</code>, and it fills a pattern's labelled arguments the same
+          way. A constructor is written upper case, so a hole that stands for one is too:
+          <code>$Case(v0)</code> is a pattern with one argument, while <code>$case(v0)</code>
+          would be a binder.</p>
 
         <p>Two more: a qualified name, and the dollar sign itself.</p>
 
@@ -721,7 +767,9 @@ inspect(@attr.find(attrs, "app.get") is Some(_), content="false")</code></pre>
         <span class="step-n">Reference</span>
         <h2>Refusals</h2>
         <p>Every fallible call gives a <code>Refused</code> with a message and, where there is
-          one, a position.</p>
+          one, a position. A position names the file too when the caller says which file it read:
+          <code>gen</code> takes one, and <code>bind</code> takes one as <code>file</code>, so a
+          generator passes the declaration's own and the message opens in an editor.</p>
 
         <div class="tscroll"><table class="plain">
           <thead><tr><th>From</th><th>Means</th></tr></thead>
@@ -730,7 +778,7 @@ inspect(@attr.find(attrs, "app.get") is Some(_), content="false")</code></pre>
             <tr><td><code>quote</code></td><td><code>hole $name was given nothing</code></td></tr>
             <tr><td><code>quote</code></td><td><code>the template has no hole $x</code></td></tr>
             <tr><td><code>quote</code></td><td><code>a-b is not an identifier</code>, <code>expected declarations</code></td></tr>
-            <tr><td><code>attr</code></td><td><code>1:1: cannot read the arguments of #app.get("/users", 1)</code></td></tr>
+            <tr><td><code>attr</code></td><td><code>models.mbt:1:1: cannot read the arguments of #app.get("/users", 1)</code>, and the same place without the file when <code>bind</code> was given none</td></tr>
             <tr><td><code>attr</code></td><td>missing, unknown, mistyped, repeated — each with a line and column</td></tr>
             <tr><td><code>gen</code></td><td><code>models.mbt:3:5: …</code> when an input is not MoonBit</td></tr>
             <tr><td><code>cli</code></td><td>a usage message, or <code>… is out of date with its inputs</code></td></tr>

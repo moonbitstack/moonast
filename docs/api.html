@@ -41,7 +41,9 @@
 <a class="pkg-link" href="#pkg-quote">Plate I</a>
 <a class="sub" href="#quote.bool">bool</a>
 <a class="sub" href="#quote.bytes">bytes</a>
+<a class="sub" href="#quote.cases">cases</a>
 <a class="sub" href="#quote.expr">expr</a>
+<a class="sub" href="#quote.fields">fields</a>
 <a class="sub" href="#quote.ident">ident</a>
 <a class="sub" href="#quote.int">int</a>
 <a class="sub" href="#quote.items">items</a>
@@ -113,6 +115,15 @@ inspect(
 content=&quot;b\&quot;\\xe5\\x9d\\x90\\xe6\\xa0\\x87\&quot;&quot;,
 )</code></pre></div>
 </div>
+<div class="entry kind-value" id="quote.cases">
+<div class="sig">pub fn cases(StringView) -&gt; Template <a class="anchor" href="#quote.cases" aria-label="Link to cases">#</a></div>
+<div class="desc"><p>A template of match cases, for the hole a <code>match</code> has where its case list goes. Each case is <code>pattern =&gt; body</code>, on its own line, exactly as it is written between the braces of a <code>match</code>.</p>
+<pre data-lang="moonbit"><code>let cases = @quote.cases(&quot;$pattern =&gt; $value&quot;)
+.set(&quot;pattern&quot;, @quote.ident(&quot;Empty&quot;))
+.set(&quot;value&quot;, @quote.int(0))
+.render()
+inspect(cases.to_string(), content=&quot;Empty =&gt; 0&quot;)</code></pre></div>
+</div>
 <div class="entry kind-value" id="quote.expr">
 <div class="sig">pub fn expr(StringView) -&gt; Template <a class="anchor" href="#quote.expr" aria-label="Link to expr">#</a></div>
 <div class="desc"><p>A template of one expression.</p>
@@ -121,6 +132,15 @@ content=&quot;b\&quot;\\xe5\\x9d\\x90\\xe6\\xa0\\x87\&quot;&quot;,
 .set(&quot;b&quot;, @quote.int(2))
 .render()
 inspect(code.to_string(), content=&quot;1 + 2&quot;)</code></pre></div>
+</div>
+<div class="entry kind-value" id="quote.fields">
+<div class="sig">pub fn fields(StringView) -&gt; Template <a class="anchor" href="#quote.fields" aria-label="Link to fields">#</a></div>
+<div class="desc"><p>A template of record fields, for the hole a record has where its field list goes. Each field is <code>label: value</code>; the same code fills the arguments of a constructor, where a labelled argument is written the same way.</p>
+<pre data-lang="moonbit"><code>let fields = @quote.fields(&quot;$label: $value&quot;)
+.set(&quot;label&quot;, @quote.ident(&quot;x&quot;))
+.set(&quot;value&quot;, @quote.int(1))
+.render()
+inspect(fields.to_string(), content=&quot;x: 1&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.ident">
 <div class="sig">pub fn ident(StringView) -&gt; Code raise Refused <a class="anchor" href="#quote.ident" aria-label="Link to ident">#</a></div>
@@ -186,7 +206,7 @@ inspect(code.items() is Some(_), content=&quot;true&quot;)</code></pre></div>
 <div class="entry kind-type" id="quote.Template">
 <div class="sig">pub struct Template <a class="anchor" href="#quote.Template" aria-label="Link to Template">#</a></div>
 <div class="desc"><p>A piece of MoonBit with holes, waiting to be filled and rendered.</p>
-<p>A hole is <code>$name</code>; write it in the case the position wants, <code>$T</code> where a type or constructor goes and <code>$name</code> where a value or a name goes. <code>$name*</code> takes a list and expands among statements, array elements or positional arguments. <code>$$</code> is a literal dollar sign.</p></div>
+<p>A hole is <code>$name</code>; write it in the case the position wants, <code>$T</code> where a type or constructor goes and <code>$name</code> where a value or a name goes. <code>$name*</code> takes a list and expands among statements, array elements, positional arguments, a match&#x27;s cases and a record&#x27;s fields. <code>$$</code> is a literal dollar sign.</p></div>
 <div class="entry kind-value nested" id="quote.Template.render">
 <div class="sig">pub fn Template::render(Self) -&gt; Code raise Refused <a class="anchor" href="#quote.Template.render" aria-label="Link to Template::render">#</a></div>
 <div class="desc"><p>Parse the template with its holes standing as placeholders, put each fill where its placeholder stands, and give back the result. Refused when a hole is left empty, a fill names no hole, a fill does not fit where it stands, or the template is not MoonBit.</p>
@@ -323,6 +343,7 @@ inspect(@attr.under(attrs, &quot;app&quot;).length(), content=&quot;1&quot;)</co
 <li><span class="pname">name</span> : String</li>
 <li><span class="pname">line</span> : Int32</li>
 <li><span class="pname">column</span> : Int32</li>
+<li><span class="pname">file</span> : String</li>
 </ul>
 <div class="entry kind-value nested" id="attr.Args.bool">
 <div class="sig">pub fn Args::bool(Self, StringView) -&gt; Bool? <a class="anchor" href="#attr.Args.bool" aria-label="Link to Args::bool">#</a></div>
@@ -416,7 +437,7 @@ inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quo
 <div class="desc"><p>The parameters one annotation takes. Built by chaining:</p>
 <pre data-lang="moonbit"><code>Spec::new(&quot;app.get&quot;).positional(&quot;path&quot;, Str).optional(&quot;summary&quot;, Str).many(&quot;tags&quot;, Str)</code></pre></div>
 <div class="entry kind-value nested" id="attr.Spec.bind">
-<div class="sig">pub fn Spec::bind(Self, @attribute.Attribute) -&gt; Args raise Refused <a class="anchor" href="#attr.Spec.bind" aria-label="Link to Spec::bind">#</a></div>
+<div class="sig">pub fn Spec::bind(Self, @attribute.Attribute, file? : String) -&gt; Args raise Refused <a class="anchor" href="#attr.Spec.bind" aria-label="Link to Spec::bind">#</a></div>
 <div class="desc"><p>The annotation&#x27;s arguments, checked against the spec.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#app.get(\&quot;/users\&quot;, tag=\&quot;users\&quot;)\nfn list_users() -&gt; Unit {}&quot;
 let impls = @parser.parse_string(source).0
@@ -430,7 +451,26 @@ guard @attr.find(attrs, &quot;app.get&quot;) is Some(a) else { abort(&quot;annot
 let spec = @attr.Spec::new(&quot;app.get&quot;).positional(&quot;path&quot;, Str).many(&quot;tag&quot;, Str)
 let args = spec.bind(a)
 inspect(args.str(&quot;path&quot;).unwrap_or(&quot;&quot;), content=&quot;/users&quot;)
-inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quot;)</code></pre></div>
+inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quot;)</code></pre>
+<p>Pass the file the annotation was read from and every refusal names it, so the line and column in the message can be opened:</p>
+<pre data-lang="moonbit"><code>let source = &quot;#app.get\nfn list_users() -&gt; Unit {}&quot;
+let impls = @parser.parse_string(source).0
+guard impls is @list.More(impl_, tail=@list.Empty) else {
+abort(&quot;one declaration&quot;)
+}
+guard impl_ is @syntax.TopFuncDef(fun_decl={ attrs, .. }, ..) else {
+abort(&quot;a function&quot;)
+}
+guard @attr.find(attrs, &quot;app.get&quot;) is Some(a) else { abort(&quot;annotated&quot;) }
+let refused = try {
+let _ = @attr.Spec::new(&quot;app.get&quot;)
+.positional(&quot;path&quot;, Str)
+.bind(a, file=&quot;models.mbt&quot;)
+&quot;bound&quot;
+} catch {
+e =&gt; e.to_string()
+}
+inspect(refused, content=&quot;models.mbt:1:1: path is required&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value nested" id="attr.Spec.many">
 <div class="sig">pub fn Spec::many(Self, String, Kind, positional? : Bool) -&gt; Self <a class="anchor" href="#attr.Spec.many" aria-label="Link to Spec::many">#</a></div>
@@ -478,13 +518,13 @@ inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quo
 <h3 class="group-head" id="attr-errors">Errors</h3>
 <div class="entry kind-error" id="attr.Refused">
 <div class="sig">pub(all) suberror Refused { <a class="anchor" href="#attr.Refused" aria-label="Link to Refused">#</a></div>
-<div class="desc"><p>Why an annotation&#x27;s arguments were not accepted, with where the annotation stands in its file.</p></div>
+<div class="desc"><p>Why an annotation&#x27;s arguments were not accepted, with where the annotation stands in its file. <code>file</code> is empty when the caller did not say which file it read the annotation from, and then the message names the position alone.</p></div>
 <ul class="params">
-<li><span class="pname">Malformed(raw~ : String, line~ : Int32, column~ : Int32)</span> — The payload is outside the annotation grammar: arrays, numbers, a qualified or generic type cannot be written, and a keyword cannot be a label.</li>
-<li><span class="pname">Missing(key~ : String, line~ : Int32, column~ : Int32)</span> — A required parameter was not given.</li>
-<li><span class="pname">Unknown(key~ : String, line~ : Int32, column~ : Int32)</span> — A parameter the spec does not have.</li>
-<li><span class="pname">Mistyped(key~ : String, expected~ : String, line~ : Int32, column~ : Int32)</span> — A parameter of the wrong kind.</li>
-<li><span class="pname">Repeated(key~ : String, line~ : Int32, column~ : Int32)</span> — A parameter given twice that may only be given once.</li>
+<li><span class="pname">Malformed(raw~ : String, line~ : Int32, column~ : Int32, file~ : String)</span> — The payload is outside the annotation grammar: arrays, numbers, a qualified or generic type cannot be written, and a keyword cannot be a label.</li>
+<li><span class="pname">Missing(key~ : String, line~ : Int32, column~ : Int32, file~ : String)</span> — A required parameter was not given.</li>
+<li><span class="pname">Unknown(key~ : String, line~ : Int32, column~ : Int32, file~ : String)</span> — A parameter the spec does not have.</li>
+<li><span class="pname">Mistyped(key~ : String, expected~ : String, line~ : Int32, column~ : Int32, file~ : String)</span> — A parameter of the wrong kind.</li>
+<li><span class="pname">Repeated(key~ : String, line~ : Int32, column~ : Int32, file~ : String)</span> — A parameter given twice that may only be given once.</li>
 </ul>
 <div class="entry kind-value nested" id="attr.Refused.output">
 <div class="sig">pub fn Refused::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#attr.Refused.output" aria-label="Link to Refused::output">#</a></div>
@@ -551,13 +591,22 @@ abort(&quot;one declaration&quot;)
 }
 inspect(@attr.find(decl.attrs(), &quot;demo.describe&quot;) is Some(_), content=&quot;true&quot;)</code></pre></div>
 </div>
+<div class="entry kind-value nested" id="gen.Decl.file">
+<div class="sig">pub fn Decl::file(Self) -&gt; String <a class="anchor" href="#gen.Decl.file" aria-label="Link to Decl::file">#</a></div>
+<div class="desc"><p>The file the declaration was read from, as <code>read</code> was told it. A refusal a generator writes names this file, so a reader can open the line it points at.</p>
+<pre data-lang="moonbit"><code>let source = &quot;#demo.describe\npub struct Point {\n  x : Int\n}&quot;
+guard @gen.read(&quot;src/models.mbt&quot;, source) is [decl] else {
+abort(&quot;one declaration&quot;)
+}
+inspect(decl.file(), content=&quot;src/models.mbt&quot;)</code></pre></div>
+</div>
 <div class="entry kind-value nested" id="gen.Decl.is_public">
 <div class="sig">pub fn Decl::is_public(Self) -&gt; Bool <a class="anchor" href="#gen.Decl.is_public" aria-label="Link to Decl::is_public">#</a></div>
-<div class="desc"><p>Whether the declaration is <code>pub</code>, for every kind the view has a variant for and for the tuple structs that land in <code>Other</code>.</p></div>
+<div class="desc"><p>Whether the declaration is <code>pub</code>, for every kind the view has a variant for and for the tuple structs and traits that land in <code>Other</code>.</p></div>
 </div>
 <div class="entry kind-value nested" id="gen.Decl.name">
 <div class="sig">pub fn Decl::name(Self) -&gt; String <a class="anchor" href="#gen.Decl.name" aria-label="Link to Decl::name">#</a></div>
-<div class="desc"><p>The name a declaration introduces: a type&#x27;s or a function&#x27;s. Empty for one that introduces none, such as an <code>impl</code>. A tuple struct has no variant of its own, so this is how a generator learns its name without reading <code>raw</code> itself.</p>
+<div class="desc"><p>The name a declaration introduces: a type&#x27;s, a function&#x27;s or a trait&#x27;s. Empty for one that introduces none, such as an <code>impl</code>. A tuple struct and a trait have no variant of their own, so this is how a generator learns their names without reading <code>raw</code> itself.</p>
 <pre data-lang="moonbit"><code>let source = &quot;pub struct Rgb(Int, Int, Int)\n\npub fn f() -&gt; Unit { () }&quot;
 let names = @gen.read(&quot;m.mbt&quot;, source).map(decl =&gt; decl.name())
 inspect(names.join(&quot;, &quot;), content=&quot;Rgb, f&quot;)</code></pre></div>

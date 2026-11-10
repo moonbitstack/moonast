@@ -149,7 +149,9 @@ inspect(fields.map(f =&gt; f.name).join(", "), content="x, y")</code></pre>
           <span class="n">02 — moonast/quote</span>
           <h3>Fill templates</h3>
           <p>A template is MoonBit with <code>$holes</code>. It is parsed with the holes standing
-            as placeholders; each fill replaces the node its placeholder stands for.</p>
+            as placeholders; each fill replaces the node its placeholder stands for. A list that
+            varies with the type — statements, a match's cases, a record's fields — is a list
+            hole, spliced with one code per item.</p>
         </div>
         <div class="code-block">
           <pre data-lang="moonbit"><code>let source =
@@ -337,7 +339,8 @@ impl @gen.Generator for Describe with fn generate(_, decls) {
       <div class="layer">
         <span class="n">cli</span>
         <h3>Positions in refusals</h3>
-        <p>Every refusal carries the line and column of what was wrong, not a stack trace.</p>
+        <p>Every refusal carries the line and column of what was wrong, and the file with it when
+          the caller knows which file it read. Not a stack trace.</p>
       </div>
     </div>
 

@@ -262,6 +262,38 @@ let kinds = @gen.read("shapes.mbt", shapes).map(decl => {
 assert_eq(kinds.join("; "), "Rgb takes 3; Shape has 2 cases")
 ```
 
+A match's cases and a record's fields are lists too. Each item is a template of its own, and the
+template around them has the list hole where that list goes:
+
+```moonbit
+let cases = ["Empty", "Circle"].map(name => {
+  @quote.cases("$pattern => $text")
+  .set("pattern", @quote.ident(name))
+  .set("text", @quote.string(name))
+  .render()
+})
+let matched = @quote
+  .expr("match shape {\n  $cases* => ()\n}")
+  .splice("cases", cases)
+  .render()
+assert_eq(
+  matched.to_string(),
+  "match shape {\n  Empty => \"Empty\"\n  Circle => \"Circle\"\n}",
+)
+
+let fields = ["x", "y"].map(name => {
+  @quote.fields("$label: $value")
+  .set("label", @quote.ident(name))
+  .set("value", @quote.string(name))
+  .render()
+})
+let record = @quote
+  .expr("Point::{ $fields* }")
+  .splice("fields", fields)
+  .render()
+assert_eq(record.to_string(), "Point::{ x: \"x\", y: \"y\" }")
+```
+
 ## Interface
 
 ### `moonast/gen`
@@ -277,6 +309,7 @@ assert_eq(kinds.join("; "), "Rgb takes 3; Shape has 2 cases")
 | `Decl::params()` | — | the generic parameters, `["A", "B"]` |
 | `Decl::name()`, `Decl::is_public()` | — | what the declaration introduces, for the tuple structs `Other` holds |
 | `Decl::attrs()`, `Decl::raw()` | — | the annotations on it, the syntax tree behind it |
+| `Decl::file()` | — | the file it was read from |
 | `Decl::raises()` | — | what a function says after its return type: empty, `raise` or `raise E` |
 | `Field` | — | a struct field: its name, type as written, `mutable`, `optional`, annotations |
 | `Shape::Cases` holds `Case` | — | one variant: its name, the `Shape` it carries, its annotations |
@@ -290,6 +323,8 @@ assert_eq(kinds.join("; "), "Rgb takes 3; Shape has 2 cases")
 | `items(source)` | MoonBit declarations with holes | a `Template` |
 | `expr(source)` | one expression with holes | a `Template` |
 | `ty(source)` | one type with holes | a `Template` |
+| `cases(source)` | match cases with holes | a `Template` |
+| `fields(source)` | record fields with holes | a `Template` |
 | `Template::set(hole, code)` | a hole's name, a `Code` | the template, filled |
 | `Template::splice(hole, codes)` | a list hole's name, codes | the template, spliced |
 | `Template::render()` | — | a `Code`, or `Refused` |
@@ -315,7 +350,7 @@ assert_eq(kinds.join("; "), "Rgb takes 3; Shape has 2 cases")
 | `Spec::required(key, kind)` | required, by name | the spec |
 | `Spec::optional(key, kind)` | may be left out | the spec |
 | `Spec::many(key, kind, positional?)` | may be given again, by name or as bare arguments | the spec |
-| `Spec::bind(attr)` | an annotation | its arguments, or `Refused` |
+| `Spec::bind(attr, file?)` | an annotation, the file it stands in | its arguments, or `Refused` |
 | `Args::get`, `str`, `strs`, `bool`, `has` | a parameter's key | what was given for it |
 
 `Kind` is `Str`, `Bool`, `Ident`, `Path` or `Type`; each `Args` reader answers in the kind its
@@ -336,13 +371,21 @@ value in another namespace is written: the annotation grammar has no `@pkg.name`
 | `$name` | a value, an expression, or a name | `$value + 1` | `41 + 1` |
 | `@pkg.$name` | a name inside a package | `app : @web.$T` | `app : @web.App` |
 | `$name*` | a list of them | `[$items*]` | `[1, 2, 3]` |
+| `$name*` where a case list goes | cases, from `cases` | `match x { $cases* => () }` | every arm |
+| `$name*` where a field list goes | fields, from `fields` | `P::{ $fields* }` | `P::{ x: 1 }` |
 | `$name` in a string | a name or a string, as text | `"field $key"` | `"field first name"` |
 | `$name` in a pattern | a name, a string, or a literal | `$case => 1` | `Empty => 1` |
+| `$Case` where a constructor goes | a constructor name | `$Case(v0) => 0` | `Circle(v0) => 0` |
 | `$$` | a literal dollar sign | `"$$5"` | `"$5"` |
 
 A hole's case is part of the grammar: upper case where a type or constructor goes, lower case
 where a value or a binder goes. A list hole expands among statements, array elements, and the
 arguments of a function application.
+
+Two more positions take a list. A case is never written without a body, so a hole where a match's
+case list goes is written as one case and the `()` after its arrow goes with it. A field is a
+punned one, `{ $fields* }`, which is what a lone name in a record reads as; the same code fills
+the arguments of a constructor, where a labelled argument is written `name=v0`.
 
 ## Annotation arguments
 
@@ -359,7 +402,9 @@ what it finds.
 ## Refusals
 
 Every fallible call gives a `Refused` with a message, and with a position where there is one to
-give:
+give. A message that has a position names the file too, `file:line:column: what`, whenever the
+caller knows which file it read: `gen` takes one, and `bind` takes one as `file`, so a generator
+passes the declaration's own.
 
 | From | Refused when |
 |:--|:--|

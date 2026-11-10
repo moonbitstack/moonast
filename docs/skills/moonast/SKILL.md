@@ -104,6 +104,41 @@ let shapes = @gen.read("shapes.mbt", source).map(decl => {
 assert_eq(shapes.join("; "), "Rgb takes 3; Shape has 2 cases")
 ```
 
+## Build a match or a record
+
+A list that varies with the type — the cases of a match, the fields of a record or
+of a constructor — is a list hole. Each item is a template of its own, and the
+template around them has the hole where the list goes.
+
+```mbt
+let arms = ["Empty", "Circle"].map(name => {
+  @quote.cases("$pattern => $text")
+  .set("pattern", @quote.ident(name))
+  .set("text", @quote.string(name))
+  .render()
+})
+let matched = @quote
+  .expr("match shape {\n  $arms* => ()\n}")
+  .splice("arms", arms)
+  .render()
+assert_eq(
+  matched.to_string(),
+  "match shape {\n  Empty => \"Empty\"\n  Circle => \"Circle\"\n}",
+)
+
+let rows = ["x", "y"].map(name => {
+  @quote.fields("$label: $value")
+  .set("label", @quote.ident(name))
+  .set("value", @quote.string(name))
+  .render()
+})
+let built = @quote
+  .expr("Point::{ $rows* }")
+  .splice("rows", rows)
+  .render()
+assert_eq(built.to_string(), "Point::{ x: \"x\", y: \"y\" }")
+```
+
 ## Ship it as a binary
 
 The `main` of a generator binary is one call: `@cli.run(Getters::{ }, @env.args()[1:])`
@@ -124,7 +159,15 @@ turned them into CRLF does not fail.
 ## Rules that catch people out
 
 - A hole's case is grammar, not style: `$T` where a type or a constructor goes,
-  `$name` where a value or a binder goes.
+  `$name` where a value or a binder goes. That is why a constructor with arguments
+  takes `$Case(v0)` and not `$case(v0)`: a pattern written lower case is a binder.
+- A case is never written without a body, so the hole a case list goes in is
+  written as one case, `$arms* => ()`, and the `()` goes with it.
+- A hole that stands alone between braces reads as a record, `{ $x* }`, because a
+  lone name in a record is a punned field. A statement list needs a statement
+  beside it, or a function body, which is a block already.
+- Hand `bind` the file so its refusal names it:
+  `.bind(annotation, file=decl.file())`. The message is `file:line:column: what`.
 - The annotation grammar has strings, `true`/`false`, names and nested calls. No
   arrays, no numbers; a generic type is written as a string, `response="Array[User]"`,
   and a keyword cannot be a label. A list is a repeated key, `tags="a", tags="b"`,
