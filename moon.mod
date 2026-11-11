@@ -34,7 +34,7 @@ keywords = [
 description = "Code generation for MoonBit from annotated declarations."
 
 import {
-  "moonbitlang/parser@0.4.7",
+  "moonbitlang/parser@0.4.8",
   "moonbitlang/async@0.22.5",
 }
 

@@ -101,13 +101,10 @@ test "an unknown, a mistyped or a repeated argument is refused" {
 }
 
 ///|
-/// Arrays, numbers, qualified names, and keywords used as labels (`method`,
-/// `type`) are outside the annotation grammar of moonbitlang/parser.
+/// Numbers, and keywords used as labels (`method`, `type`), are outside the
+/// annotation grammar of moonbitlang/parser.
 test "a payload outside the annotation grammar is refused as malformed" {
-  for
-    source in [
-      "#app.get(tags=[\"a\"])", "#app.get(\"/a\", method=get)", "#app.get(\"/a\", style=@pkg.Plain)",
-    ] {
+  for source in ["#app.get(page=1)", "#app.get(\"/a\", method=get)"] {
     let attrs = attrs_of(source + "\nfn f() -> Unit { () }")
     guard attrs is More(attr, ..) else { fail("no annotation") }
     guard refusal(() => get.bind(attr)) is Some(Malformed(..)) else {
@@ -260,4 +257,45 @@ test "the file an annotation was bound from is on its arguments" {
   guard attrs is More(attr, ..) else { fail("no annotation") }
   assert_eq(get.bind(attr, file="routes.mbt").file, "routes.mbt")
   assert_eq(get.bind(attr).file, "")
+}
+
+///|
+test "an array is the list a repeated key writes, written once" {
+  let source =
+    #|#app.get("/a", tags=["a", "b"], summary="one")
+    #|fn f() -> Unit { () }
+  guard attrs_of(source) is More(attr, ..) else { fail("no annotation") }
+  let args = get.bind(attr)
+  assert_eq(args.str("path"), Some("/a"))
+  assert_eq(args.strs("tags"), ["a", "b"])
+  assert_eq(args.str("summary"), Some("one"))
+}
+
+///|
+test "an array of two where one value goes is a repetition" {
+  let source = "#app.get(\"/a\", summary=[\"x\", \"y\"])\nfn f() -> Unit { () }"
+  guard attrs_of(source) is More(attr, ..) else { fail("no annotation") }
+  guard refusal(() => get.bind(attr)) is Some(Repeated(key="summary", ..)) else {
+    fail("two summaries bind")
+  }
+}
+
+///|
+test "the elements of an array are read in the kind its parameter takes" {
+  let source = "#demo.bind(contract=[registry.create, other.make])\nfn f() -> Unit { () }"
+  guard attrs_of(source) is More(attr, ..) else { fail("no annotation") }
+  let spec = @attr.Spec::new("demo.bind").many("contract", Path)
+  assert_eq(spec.bind(attr).strs("contract"), ["registry.create", "other.make"])
+  let wrong = @attr.Spec::new("demo.bind").many("contract", Bool)
+  guard refusal(() => wrong.bind(attr)) is Some(Mistyped(key="contract", ..)) else {
+    fail("a name binds as a boolean")
+  }
+}
+
+///|
+test "a qualified payload reads as its qualifier and name" {
+  let source = "#demo.bind(contract=@pkg.create)\nfn f() -> Unit { () }"
+  guard attrs_of(source) is More(attr, ..) else { fail("no annotation") }
+  let spec = @attr.Spec::new("demo.bind").required("contract", Path)
+  assert_eq(spec.bind(attr).str("contract"), Some("pkg.create"))
 }

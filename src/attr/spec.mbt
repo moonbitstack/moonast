@@ -9,7 +9,9 @@ pub(all) enum Kind {
   /// A bare name: `style=plain`, `model=User`.
   Ident
   /// A name with one qualifier, `contract=Registry.users`, which is how a value
-  /// in another namespace is written: the annotation grammar has no `@pkg.name`.
+  /// in another namespace is written. The parser also takes `@pkg.name`, but what
+  /// it gives back keeps the qualifier alone, so `@pkg.name` and `pkg.name` read
+  /// alike, as `pkg.name`; a name whose `@` matters is passed as a string.
   Path
   /// A string holding a MoonBit type: `response="Array[User]"`. A generic or a
   /// qualified type is outside the annotation grammar, so it comes as a string.
@@ -80,10 +82,10 @@ pub fn Spec::optional(self : Spec, key : String, kind : Kind) -> Spec {
 }
 
 ///|
-/// A parameter that may be given any number of times, `tags="a", tags="b"`,
-/// which is how a list is written where the grammar has no arrays. With
-/// `positional`, the list is written as bare arguments, `#serde.derive(Serialize,
-/// Deserialize)`, and it takes every one of them from where it starts.
+/// A parameter that may be given any number of times, `tags="a", tags="b"`, or
+/// `tags=["a", "b"]`, whose elements count the same way. With `positional`, the list
+/// is written as bare arguments, `#serde.derive(Serialize, Deserialize)`, and it
+/// takes every one of them from where it starts.
 pub fn Spec::many(
   self : Spec,
   key : String,
@@ -179,12 +181,22 @@ pub fn Spec::bind(
         (taken, expr)
       }
     }
-    let value = read(param, expr, line, column, file)
-    let seen = values.get_or_init(param.key, () => [])
-    if seen.length() > 0 && !param.many {
-      raise Repeated(key=param.key, line~, column~, file~)
+    // An array is the list a repeated key writes, written once: `tags=["a", "b"]`
+    // says what `tags="a", tags="b"` says, element by element read the same way.
+    // Repeating stays the spec's to allow, so a second value for a parameter that
+    // takes one is still a repetition, whether it came from an array or a key.
+    let exprs = match expr {
+      Array(elems) => elems
+      _ => @list.singleton(expr)
     }
-    seen.push(value)
+    for one in exprs {
+      let value = read(param, one, line, column, file)
+      let seen = values.get_or_init(param.key, () => [])
+      if seen.length() > 0 && !param.many {
+        raise Repeated(key=param.key, line~, column~, file~)
+      }
+      seen.push(value)
+    }
   }
   for param in self.params {
     if param.required && !values.contains(param.key) {
