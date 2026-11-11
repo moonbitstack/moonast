@@ -522,3 +522,39 @@ test "a case hole written without the unit after the arrow is refused" {
   }
   assert_true(e.to_string().contains("$cases* => ()"))
 }
+
+///|
+test "a byte array is an expression and a pattern" {
+  inspect(@quote.byte_array("na"), content="[0x6e, 0x61]")
+  inspect(
+    @quote.byte_array("坐标"),
+    content="[0xe5, 0x9d, 0x90, 0xe6, 0xa0, 0x87]",
+  )
+  inspect(@quote.byte_array(""), content="[]")
+  let cases = ["na", "id"].map(name => {
+    @quote.cases("$bytes => $text")
+    .set("bytes", @quote.byte_array(name))
+    .set("text", @quote.string(name))
+    .render()
+  })
+  let matched = @quote.expr("match key {\n  $cases* => ()\n}")
+    .splice("cases", cases)
+    .render()
+  assert_eq(
+    matched.to_string(),
+    "match key {\n  [0x6e, 0x61] => \"na\"\n  [0x69, 0x64] => \"id\"\n}",
+  )
+}
+
+///|
+test "a pattern hole takes an array of literals and nothing else" {
+  guard refusal(() => {
+      @quote.expr("match key {\n  $pattern => 1\n}")
+      .set("pattern", @quote.expr("[x, 1]").render())
+      .render()
+    })
+    is Some(e) else {
+    fail("a pattern with a binder in it fills a pattern hole")
+  }
+  assert_true(e.to_string().contains("$pattern takes a name"))
+}

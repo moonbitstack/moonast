@@ -172,34 +172,6 @@ fn member_case(entry : Entry) -> String {
 }
 
 ///|
-/// The bytes of `text` as a match pattern: `[0x6e, 0x61]`. The field identifier
-/// fallback matches the key's bytes without going through a string.
-fn byte_pattern(text : String) -> String {
-  let out = StringBuilder()
-  out.write_char('[')
-  for i, byte in @utf8.encode(text) {
-    if i > 0 {
-      out.write_string(", ")
-    }
-    let n = byte.to_int()
-    out.write_string("0x")
-    out.write_char(hex_digit(n >> 4))
-    out.write_char(hex_digit(n & 0x0F))
-  }
-  out.write_char(']')
-  out.to_string()
-}
-
-///|
-fn hex_digit(n : Int32) -> Char {
-  if n < 10 {
-    ('0'.to_int() + n).unsafe_to_char()
-  } else {
-    ('a'.to_int() + n - 10).unsafe_to_char()
-  }
-}
-
-///|
 fn serialize_of(target : Target) -> @quote.Code raise {
   let self = if reads_self(target) { "self" } else { "_self" }
   decls(
@@ -431,7 +403,8 @@ fn field_by_bytes(members : Array[Entry]) -> @quote.Code raise {
   let byte_cases = []
   for entry in members {
     byte_cases.push(
-      arm("\{byte_pattern(entry.name)} => $case", ones=[
+      arm("$pattern => $case", ones=[
+        ("pattern", @quote.byte_array(entry.name)),
         ("case", @quote.ident(member_case(entry))),
       ]),
     )

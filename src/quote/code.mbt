@@ -103,6 +103,40 @@ fn hex_digit(n : Int32) -> Char {
 }
 
 ///|
+/// The bytes of `text` as an array literal of hex, `[0x6e, 0x61]`: one byte each,
+/// lowercase, separated by `, `. It is an expression like any array, and a
+/// pattern wherever a value of bytes is matched, so a generator that compares a
+/// key byte by byte needs neither a string nor an escape. `bytes` writes the same
+/// bytes as a `b"..."` literal.
+///
+/// ```mbt check
+/// test {
+///   inspect(@quote.byte_array("na").to_string(), content="[0x6e, 0x61]")
+///   inspect(
+///     @quote.byte_array("坐标").to_string(),
+///     content="[0xe5, 0x9d, 0x90, 0xe6, 0xa0, 0x87]",
+///   )
+/// }
+/// ```
+pub fn byte_array(text : StringView) -> Code {
+  let out = StringBuilder()
+  out.write_char('[')
+  for i, byte in @utf8.encode(text.to_owned()) {
+    if i > 0 {
+      out.write_string(", ")
+    }
+    let n = byte.to_int()
+    out.write_string("0x")
+    out.write_char(hex_digit(n >> 4))
+    out.write_char(hex_digit(n & 0x0F))
+  }
+  out.write_char(']')
+  { body: Expr(parse_expr(out.to_string())), } catch {
+    _ => abort("an array literal always parses")
+  }
+}
+
+///|
 /// An integer literal.
 ///
 /// ```mbt check

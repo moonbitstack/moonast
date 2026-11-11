@@ -204,9 +204,26 @@ fn Splicer::rename(self : Splicer, name : String) -> String? {
 }
 
 ///|
+/// A fill for a pattern hole that is an array of literals, `[0x6e, 0x61]`: the
+/// array literal an expression position takes is the array pattern a pattern
+/// position takes, element for element. A byte array is how a key is matched
+/// without a string, and it is the only array a pattern hole takes; a pattern
+/// with a binder or a spread in it is not a constant, so it is not this.
+fn constant_array(expr : @syntax.Expr) -> @syntax.Pattern? {
+  guard expr is Array(exprs~, is_iter=false, ..) else { return None }
+  let pats = []
+  for one in exprs {
+    guard one is Constant(c~, ..) else { return None }
+    pats.push(@syntax.ArrayPattern::Pattern(Constant(c~, loc=one.loc())))
+  }
+  Some(@syntax.Pattern::Array(pats=Closed(@list.List(pats)), loc=expr.loc()))
+}
+
+///|
 /// A hole where a pattern stands takes a name or a string: `$case => ...` with a
-/// name stands for a constructor, a binding or another pattern, and with a string
-/// it matches that text. A match the generator writes arm by arm needs both.
+/// name stands for a constructor, a binding or another pattern, with a string it
+/// matches that text, and with an array of literals it matches the elements. A
+/// match the generator writes arm by arm needs all three.
 impl @syntax.MapVisitor for Splicer with fn visit_Pattern_Var(self, binder) {
   if self.ones.get(binder.name) is Some((hole, body)) {
     match body {
@@ -215,9 +232,19 @@ impl @syntax.MapVisitor for Splicer with fn visit_Pattern_Var(self, binder) {
       Expr(w) =>
         match expr_of(w) {
           Constant(c~, ..) => return Constant(c~, loc=binder.loc)
-          _ => self.misfit(hole, "a name, a string, or a literal in a pattern")
+          array =>
+            match constant_array(array) {
+              Some(pattern) => return pattern
+              None =>
+                self.misfit(
+                  hole, "a name, a string, a literal, or an array of literals in a pattern",
+                )
+            }
         }
-      _ => self.misfit(hole, "a name, a string, or a literal in a pattern")
+      _ =>
+        self.misfit(
+          hole, "a name, a string, a literal, or an array of literals in a pattern",
+        )
     }
   }
   Var(@syntax.MapVisitor::visit_Binder(self, binder))

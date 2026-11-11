@@ -15,7 +15,6 @@ import {
   "moonbitstack/moonast/cli",
   "moonbitlang/async",
   "moonbitlang/core/env",
-  "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/list",
   "moonbitlang/parser/attribute",
 }
@@ -23,5 +22,4 @@ import {
 import {
   "moonbitlang/async",
   "moonbitlang/async/fs",
-  "moonbitlang/core/encoding/utf8",
 } for "wbtest"
