@@ -158,6 +158,7 @@ fn answer() -&gt; Int {
             <tr><td><code>$name*</code></td><td>a list, spliced where a match's cases or a record's fields go</td><td><code>match x { $arms* =&gt; () }</code></td><td>every arm</td></tr>
             <tr><td><code>$Case</code></td><td>a constructor, with arguments after it</td><td><code>$Case(v0) =&gt; 0</code></td><td><code>Circle(v0) =&gt; 0</code></td></tr>
             <tr><td><code>$name</code> in a string</td><td>a name or a string, as text</td><td><code>"field $key"</code></td><td><code>"field first name"</code></td></tr>
+            <tr><td><code>$name</code> in a pattern</td><td>a name, a string, a literal, or an array of literals</td><td><code>$pattern =&gt; 1</code></td><td><code>[0x6e, 0x61] =&gt; 1</code></td></tr>
             <tr><td><code>$$</code></td><td>a literal dollar sign</td><td><code>"$$5"</code></td><td><code>"$5"</code></td></tr>
           </tbody>
         </table></div>
@@ -257,6 +258,29 @@ println(@quote.expr("\"$$5\"").render())</code></pre>
 "$5"</code></pre>
         </div>
 
+        <p>A key is often matched byte by byte, without building a string.
+          <code>byte_array</code> writes the same bytes <code>bytes</code> does, as an array of
+          hex: an expression, and a pattern where a pattern goes.</p>
+
+        <div class="code-block">
+          <pre data-lang="moonbit"><code>let cases = ["na", "id"].map(name =&gt; {
+  @quote.cases("$bytes =&gt; $text")
+  .set("bytes", @quote.byte_array(name))
+  .set("text", @quote.string(name))
+  .render()
+})
+println(
+  @quote.expr("match key {\n  $cases* =&gt; ()\n}")
+  .splice("cases", cases)
+  .render(),
+)</code></pre>
+          <div class="status"><span class="dot gen"></span><span>output</span></div>
+          <pre data-lang="moonbit"><code>match key {
+  [0x6e, 0x61] =&gt; "na"
+  [0x69, 0x64] =&gt; "id"
+}</code></pre>
+        </div>
+
         <p>Text goes through the official escaping, so a string with Chinese in it comes out as a
           correct MoonBit literal:</p>
 
@@ -271,6 +295,24 @@ println(@quote.expr("\"$$5\"").render())</code></pre>
 fn label() -&gt; String {
   "坐标：x 与 y"
 }</code></pre>
+        </div>
+
+        <p>A hole does not stand everywhere a name does. An annotation's payload and a comment
+          are kept as they were written, so there is no node in them to replace:
+          <code>render</code> refuses such a template instead of leaving the placeholder in the
+          file it writes.</p>
+
+        <div class="code-block">
+          <pre data-lang="moonbit"><code>println(try {
+  @quote.items("#app.get(\"$path\")\nfn f() -&gt; Unit { () }")
+  .set("path", @quote.string("/users"))
+  .render()
+  .to_string()
+} catch {
+  e =&gt; e.to_string()
+})</code></pre>
+          <div class="status"><span class="dot gen"></span><span>output</span></div>
+          <pre data-raw="1"><code>hole $path stands where a fill cannot go: an annotation's payload and a comment are kept as written</code></pre>
         </div>
       </section>
 
@@ -434,9 +476,10 @@ false</code></pre>
           </tbody>
         </table></div>
 
-        <p>A kind is <code>Str</code>, <code>Bool</code>, <code>Ident</code> or
-          <code>Type</code>. <code>Type</code> is a string holding a MoonBit type, checked by
-          parsing it, because a generic or a qualified type is outside the annotation
+        <p>A kind is <code>Str</code>, <code>Bool</code>, <code>Ident</code>, <code>Path</code>
+          or <code>Type</code>. <code>Path</code> is a name after a qualifier,
+          <code>contract=registry.create</code>; <code>Type</code> is a string holding a MoonBit
+          type, checked by parsing it, because a generic type is outside the annotation
           grammar.</p>
 
         <p>Read the values back with <code>str</code>, <code>strs</code>, <code>bool</code>,
@@ -449,6 +492,37 @@ false</code></pre>
 1:1: path takes true or false      // the spec asks for path as a Bool
 1:1: tags is given more than once  // the spec lets tags be given once
 1:1: method is required            // the spec requires a method</code></pre>
+        </div>
+
+        <p>One at a time is what an editor wants. A tool that reports a whole file at once passes
+          <code>all=true</code> and gets one refusal holding every problem, in the order the
+          arguments stand; printing it gives one line each.</p>
+
+        <div class="code-block">
+          <pre data-lang="moonbit"><code>let wrong =
+  #|#app.get(path=true, page="1", page="2", extra="y")
+  #|fn list_users() -&gt; Array[String] {
+  #|  []
+  #|}
+guard @gen.read("routes.mbt", wrong) is [Func(attrs~, ..)] else {
+  abort("one function")
+}
+guard @attr.find(attrs, "app.get") is Some(a) else { abort("annotated") }
+println(try {
+  let _ = @attr.Spec::new("app.get")
+    .positional("path", Str)
+    .optional("page", Str)
+    .required("tag", Str)
+    .bind(a, all=true)
+  "bound"
+} catch {
+  e =&gt; e.to_string()
+})</code></pre>
+          <div class="status"><span class="dot gen"></span><span>output</span></div>
+          <pre data-raw="1"><code>1:1: path takes a string
+1:1: page is given more than once
+1:1: there is no extra
+1:1: tag is required</code></pre>
         </div>
       </section>
 
@@ -749,10 +823,18 @@ fn register_create_user(router : Router) -&gt; Unit {
       <section id="limits">
         <span class="step-n">Reference</span>
         <h2>What the annotation grammar allows</h2>
-        <p>The parser reads strings, <code>true</code>/<code>false</code>, names and nested calls
-          as annotation arguments. There are no arrays and no numbers, a generic or qualified
-          type has to be written as a string, and a keyword (<code>method</code>,
-          <code>type</code>) cannot be a label. A list is written as a repeated key.</p>
+        <p>The parser reads strings, <code>true</code>/<code>false</code>, names, nested calls
+          and arrays as annotation arguments. There are no numbers, a generic type has to be
+          written as a string, and a keyword (<code>method</code>, <code>type</code>) cannot be a
+          label. A list is written three ways: a repeated key, <code>tags="a", tags="b"</code>;
+          an array, <code>tags=["a", "b"]</code>; or bare arguments,
+          <code>#demo.derive(A, B)</code>, which <code>positional=true</code> takes.</p>
+
+        <p>The elements of an array are read one by one in the kind the parameter takes, so
+          <code>many</code> is still what allows a second value: an array of two for a parameter
+          that takes one is a repetition. A payload written <code>@pkg.name</code> reads as
+          <code>pkg.name</code> — what the parser gives back keeps the qualifier alone — so a name
+          whose <code>@</code> matters is passed as a string.</p>
 
         <p>When a payload is outside that grammar, the annotation has no name as far as moonast
           is concerned, so <code>find</code> does not see it:</p>
@@ -777,9 +859,10 @@ inspect(@attr.find(attrs, "app.get") is Some(_), content="false")</code></pre>
             <tr><td><code>quote</code></td><td><code>the template is not MoonBit at 1:7: …</code></td></tr>
             <tr><td><code>quote</code></td><td><code>hole $name was given nothing</code></td></tr>
             <tr><td><code>quote</code></td><td><code>the template has no hole $x</code></td></tr>
+            <tr><td><code>quote</code></td><td><code>hole $path stands where a fill cannot go: an annotation's payload and a comment are kept as written</code></td></tr>
             <tr><td><code>quote</code></td><td><code>a-b is not an identifier</code>, <code>expected declarations</code></td></tr>
             <tr><td><code>attr</code></td><td><code>models.mbt:1:1: cannot read the arguments of #app.get("/users", 1)</code>, and the same place without the file when <code>bind</code> was given none</td></tr>
-            <tr><td><code>attr</code></td><td>missing, unknown, mistyped, repeated — each with a line and column</td></tr>
+            <tr><td><code>attr</code></td><td>missing, unknown, mistyped, repeated — each with a line and column, and all of them at once as <code>Several</code> when <code>bind</code> was given <code>all=true</code></td></tr>
             <tr><td><code>gen</code></td><td><code>models.mbt:3:5: …</code> when an input is not MoonBit</td></tr>
             <tr><td><code>cli</code></td><td>a usage message, or <code>… is out of date with its inputs</code></td></tr>
           </tbody>

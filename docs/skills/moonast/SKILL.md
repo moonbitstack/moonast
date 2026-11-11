@@ -139,6 +139,33 @@ let built = @quote
 assert_eq(built.to_string(), "Point::{ x: \"x\", y: \"y\" }")
 ```
 
+## Match bytes, and refuse a hole you cannot fill
+
+`byte_array` writes bytes as an array of hex, which is a pattern where a pattern goes — a key
+matched byte by byte needs no string:
+
+```mbt
+let arms = ["na", "id"].map(name => {
+  @quote.cases("$bytes => $text")
+  .set("bytes", @quote.byte_array(name))
+  .set("text", @quote.string(name))
+  .render()
+})
+let matched = @quote
+  .expr("match key {\n  $arms* => ()}")
+  .splice("arms", arms)
+  .render()
+assert_eq(
+  matched.to_string(),
+  "match key {\n  [0x6e, 0x61] => \"na\"\n  [0x69, 0x64] => \"id\"\n}",
+)
+```
+
+An annotation's payload and a comment are kept as written, so a hole written in one cannot be
+filled; `render` refuses with `hole $path stands where a fill cannot go` instead of writing the
+placeholder into the generated file. Build such a payload by writing the text yourself — a
+template cannot put a `Code` inside `#lib.name(...)`.
+
 ## Ship it as a binary
 
 The `main` of a generator binary is one call: `@cli.run(Getters::{ }, @env.args()[1:])`
@@ -168,10 +195,16 @@ turned them into CRLF does not fail.
   beside it, or a function body, which is a block already.
 - Hand `bind` the file so its refusal names it:
   `.bind(annotation, file=decl.file())`. The message is `file:line:column: what`.
-- The annotation grammar has strings, `true`/`false`, names and nested calls. No
-  arrays, no numbers; a generic type is written as a string, `response="Array[User]"`,
-  and a keyword cannot be a label. A list is a repeated key, `tags="a", tags="b"`,
-  or bare arguments, `#demo.derive(A, B)`, which needs `positional=true`.
+- `bind` stops at the first bad argument. For a tool that reports a whole file at once, pass
+  `all=true`: the refusal is then a `Several` whose `errors` are every problem in order, one line
+  each when printed.
+- The annotation grammar has strings, `true`/`false`, names, nested calls and arrays.
+  No numbers; a generic type is written as a string, `response="Array[User]"`, and a
+  keyword cannot be a label. A list is a repeated key, `tags="a", tags="b"`, an array,
+  `tags=["a", "b"]`, whose elements are read in the parameter's kind, or bare arguments,
+  `#demo.derive(A, B)`, which needs `positional=true`.
+- A payload written `@pkg.name` reads as `pkg.name`: what the parser gives back keeps the
+  qualifier alone, so pass a name whose `@` matters as a string.
 - An annotation whose payload the parser cannot read has no name, so `find` passes
   over it. Ask `@attr.malformed(attrs, "demo")` first and report what it finds.
 - `Decl` keeps a type as the source text that wrote it, which is what a template

@@ -40,6 +40,7 @@
 <div class="group"><h4>quote</h4>
 <a class="pkg-link" href="#pkg-quote">Plate I</a>
 <a class="sub" href="#quote.bool">bool</a>
+<a class="sub" href="#quote.byte_array">byte_array</a>
 <a class="sub" href="#quote.bytes">bytes</a>
 <a class="sub" href="#quote.cases">cases</a>
 <a class="sub" href="#quote.expr">expr</a>
@@ -105,6 +106,15 @@
 <div class="sig">pub fn bool(Bool) -&gt; Code <a class="anchor" href="#quote.bool" aria-label="Link to bool">#</a></div>
 <div class="desc"><p>A boolean literal.</p>
 <pre data-lang="moonbit"><code>inspect(@quote.bool(true).to_string(), content=&quot;true&quot;)</code></pre></div>
+</div>
+<div class="entry kind-value" id="quote.byte_array">
+<div class="sig">pub fn byte_array(StringView) -&gt; Code <a class="anchor" href="#quote.byte_array" aria-label="Link to byte_array">#</a></div>
+<div class="desc"><p>The bytes of <code>text</code> as an array literal of hex, <code>[0x6e, 0x61]</code>: one byte each, lowercase, separated by <code>, </code>. It is an expression like any array, and a pattern wherever a value of bytes is matched, so a generator that compares a key byte by byte needs neither a string nor an escape. <code>bytes</code> writes the same bytes as a <code>b&quot;...&quot;</code> literal.</p>
+<pre data-lang="moonbit"><code>inspect(@quote.byte_array(&quot;na&quot;).to_string(), content=&quot;[0x6e, 0x61]&quot;)
+inspect(
+@quote.byte_array(&quot;坐标&quot;).to_string(),
+content=&quot;[0xe5, 0x9d, 0x90, 0xe6, 0xa0, 0x87]&quot;,
+)</code></pre></div>
 </div>
 <div class="entry kind-value" id="quote.bytes">
 <div class="sig">pub fn bytes(StringView) -&gt; Code <a class="anchor" href="#quote.bytes" aria-label="Link to bytes">#</a></div>
@@ -209,7 +219,7 @@ inspect(code.items() is Some(_), content=&quot;true&quot;)</code></pre></div>
 <p>A hole is <code>$name</code>; write it in the case the position wants, <code>$T</code> where a type or constructor goes and <code>$name</code> where a value or a name goes. <code>$name*</code> takes a list and expands among statements, array elements, positional arguments, a match&#x27;s cases and a record&#x27;s fields. <code>$$</code> is a literal dollar sign.</p></div>
 <div class="entry kind-value nested" id="quote.Template.render">
 <div class="sig">pub fn Template::render(Self) -&gt; Code raise Refused <a class="anchor" href="#quote.Template.render" aria-label="Link to Template::render">#</a></div>
-<div class="desc"><p>Parse the template with its holes standing as placeholders, put each fill where its placeholder stands, and give back the result. Refused when a hole is left empty, a fill names no hole, a fill does not fit where it stands, or the template is not MoonBit.</p>
+<div class="desc"><p>Parse the template with its holes standing as placeholders, put each fill where its placeholder stands, and give back the result. Refused when a hole is left empty, a fill names no hole, a fill does not fit where it stands, the template is not MoonBit, or a hole stands where nothing can be put in its place — the payload of an annotation, a comment — and so would be left in the result as its placeholder.</p>
 <pre data-lang="moonbit"><code>let text = @quote.items(&quot;fn $name() -&gt; Unit { () }&quot;).render().to_string() catch {
 e =&gt; e.to_string()
 }
@@ -246,6 +256,7 @@ inspect(code.to_string(), content=&quot;[1, 2, 3]&quot;)</code></pre></div>
 <li><span class="pname">Unfilled(hole~ : String)</span> — A hole in the template was given nothing.</li>
 <li><span class="pname">Unused(hole~ : String)</span> — Something was given for a hole the template does not have.</li>
 <li><span class="pname">Misfit(hole~ : String, expected~ : String)</span> — A hole was given a code of the wrong kind for where it stands.</li>
+<li><span class="pname">Leftover(hole~ : String)</span> — A hole was filled, but its placeholder is still in the result: it stands where no node can be replaced, such as the payload of an annotation or a comment, both of which are kept as they were written.</li>
 <li><span class="pname">Name(name~ : String)</span> — <code>ident</code> was given something that is not an identifier.</li>
 <li><span class="pname">Kind(expected~ : String)</span> — <code>join</code> was given a code that is not declarations.</li>
 </ul>
@@ -437,7 +448,7 @@ inspect(args.strs(&quot;tag&quot;).join(&quot;, &quot;), content=&quot;users&quo
 <div class="desc"><p>The parameters one annotation takes. Built by chaining:</p>
 <pre data-lang="moonbit"><code>Spec::new(&quot;app.get&quot;).positional(&quot;path&quot;, Str).optional(&quot;summary&quot;, Str).many(&quot;tags&quot;, Str)</code></pre></div>
 <div class="entry kind-value nested" id="attr.Spec.bind">
-<div class="sig">pub fn Spec::bind(Self, @attribute.Attribute, file? : String) -&gt; Args raise Refused <a class="anchor" href="#attr.Spec.bind" aria-label="Link to Spec::bind">#</a></div>
+<div class="sig">pub fn Spec::bind(Self, @attribute.Attribute, file? : String, all? : Bool) -&gt; Args raise Refused <a class="anchor" href="#attr.Spec.bind" aria-label="Link to Spec::bind">#</a></div>
 <div class="desc"><p>The annotation&#x27;s arguments, checked against the spec.</p>
 <pre data-lang="moonbit"><code>let source = &quot;#app.get(\&quot;/users\&quot;, tag=\&quot;users\&quot;)\nfn list_users() -&gt; Unit {}&quot;
 let impls = @parser.parse_string(source).0
@@ -470,11 +481,31 @@ let _ = @attr.Spec::new(&quot;app.get&quot;)
 } catch {
 e =&gt; e.to_string()
 }
-inspect(refused, content=&quot;models.mbt:1:1: path is required&quot;)</code></pre></div>
+inspect(refused, content=&quot;models.mbt:1:1: path is required&quot;)</code></pre>
+<p>By default <code>bind</code> stops at the first problem, which is what a generator wants in an editor. A tool that reports a whole file at once passes <code>all=true</code> and gets every problem in one refusal, in the order the arguments stand:</p>
+<pre data-lang="moonbit"><code>let source =
+#|#app.get(path=true, extra=&quot;y&quot;)
+#|fn list_users() -&gt; Unit {}
+let impls = @parser.parse_string(source).0
+guard impls is @list.More(impl_, tail=@list.Empty) else {
+abort(&quot;one declaration&quot;)
+}
+guard impl_ is @syntax.TopFuncDef(fun_decl={ attrs, .. }, ..) else {
+abort(&quot;a function&quot;)
+}
+guard @attr.find(attrs, &quot;app.get&quot;) is Some(a) else { abort(&quot;annotated&quot;) }
+let spec = @attr.Spec::new(&quot;app.get&quot;).positional(&quot;path&quot;, Str)
+let refused = try {
+let _ = spec.bind(a, all=true)
+&quot;bound&quot;
+} catch {
+e =&gt; e.to_string()
+}
+inspect(refused, content=&quot;1:1: path takes a string\n1:1: there is no extra&quot;)</code></pre></div>
 </div>
 <div class="entry kind-value nested" id="attr.Spec.many">
 <div class="sig">pub fn Spec::many(Self, String, Kind, positional? : Bool) -&gt; Self <a class="anchor" href="#attr.Spec.many" aria-label="Link to Spec::many">#</a></div>
-<div class="desc"><p>A parameter that may be given any number of times, <code>tags=&quot;a&quot;, tags=&quot;b&quot;</code>, which is how a list is written where the grammar has no arrays. With <code>positional</code>, the list is written as bare arguments, <code>#serde.derive(Serialize, Deserialize)</code>, and it takes every one of them from where it starts.</p></div>
+<div class="desc"><p>A parameter that may be given any number of times, <code>tags=&quot;a&quot;, tags=&quot;b&quot;</code>, or <code>tags=[&quot;a&quot;, &quot;b&quot;]</code>, whose elements count the same way. With <code>positional</code>, the list is written as bare arguments, <code>#serde.derive(Serialize, Deserialize)</code>, and it takes every one of them from where it starts.</p></div>
 </div>
 <div class="entry kind-value nested" id="attr.Spec.new">
 <div class="sig">pub fn Spec::new(StringView) -&gt; Self <a class="anchor" href="#attr.Spec.new" aria-label="Link to Spec::new">#</a></div>
@@ -525,6 +556,7 @@ inspect(refused, content=&quot;models.mbt:1:1: path is required&quot;)</code></p
 <li><span class="pname">Unknown(key~ : String, line~ : Int32, column~ : Int32, file~ : String)</span> — A parameter the spec does not have.</li>
 <li><span class="pname">Mistyped(key~ : String, expected~ : String, line~ : Int32, column~ : Int32, file~ : String)</span> — A parameter of the wrong kind.</li>
 <li><span class="pname">Repeated(key~ : String, line~ : Int32, column~ : Int32, file~ : String)</span> — A parameter given twice that may only be given once.</li>
+<li><span class="pname">Several(errors~ : Array[Refused])</span> — Every problem found, in the order they stand, raised instead of the first when <code>bind</code> was asked for all of them. Each one is a <code>Refused</code> of its own, so a caller that prints the message gets one line per problem.</li>
 </ul>
 <div class="entry kind-value nested" id="attr.Refused.output">
 <div class="sig">pub fn Refused::output(Self, &amp;Logger) -&gt; Unit <a class="anchor" href="#attr.Refused.output" aria-label="Link to Refused::output">#</a></div>

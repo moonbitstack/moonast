@@ -299,14 +299,14 @@ impl @gen.Generator for Describe with fn generate(_, decls) {
           <tr><td><code>style=plain</code></td><td>a bare name</td><td><code>Ident</code></td></tr>
           <tr><td><code>response="Array[User]"</code></td><td>text that must parse as a type</td><td><code>Type</code></td></tr>
           <tr><td><code>tags="a", tags="b"</code></td><td>a list, written as a repeated key</td><td><code>many("tags", Str)</code></td></tr>
+          <tr><td><code>tags=["a", "b"]</code></td><td>the same list, written once</td><td><code>many("tags", Str)</code></td></tr>
         </tbody>
       </table>
     </div>
 
-    <p class="small measure">There are no arrays and no numbers in an annotation
-      payload, a generic or qualified type is written as a string, and a keyword cannot be a
-      label. A payload outside that grammar leaves the annotation without a name, so
-      <code>find</code> does not see it at all.</p>
+    <p class="small measure">There are no numbers in an annotation payload, a generic type is
+      written as a string, and a keyword cannot be a label. A payload outside that grammar leaves
+      the annotation without a name, so <code>find</code> does not see it at all.</p>
   </div>
 </section>
 

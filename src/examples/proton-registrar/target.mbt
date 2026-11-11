@@ -56,8 +56,8 @@ fn refuse(place : Place, msg : String) -> Refused {
 
 ///|
 /// `#proton.command(contract=list_users_command)`: the value the command is bound
-/// to. It is a name, or a name after a qualifier, because the annotation grammar
-/// has no `@pkg.name`.
+/// to. It is a name, or a name after a qualifier; `@pkg.name` reads the same way,
+/// without its `@`.
 fn command_spec() -> @attr.Spec {
   @attr.Spec::new("proton.command").required("contract", Path)
 }

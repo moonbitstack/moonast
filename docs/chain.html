@@ -286,7 +286,7 @@ pub struct Point {
           <thead><tr><th>Stage</th><th>Sees</th><th>Gives</th><th>Refuses when</th></tr></thead>
           <tbody>
             <tr><td><code>gen.read</code></td><td>a file name and its text</td><td><code>Array[Decl]</code></td><td>the text is not MoonBit</td></tr>
-            <tr><td><code>attr.bind</code></td><td>an annotation and a spec</td><td><code>Args</code></td><td>a key is missing, unknown, mistyped or repeated</td></tr>
+            <tr><td><code>attr.bind</code></td><td>an annotation and a spec</td><td><code>Args</code></td><td>a key is missing, unknown, mistyped or repeated; with <code>all=true</code>, all of them at once</td></tr>
             <tr><td><code>quote.render</code></td><td>a template and its fills</td><td><code>Code</code></td><td>a hole is empty or unfilled, or the result is not MoonBit</td></tr>
             <tr><td><code>gen.render</code></td><td>a generator and its inputs</td><td>the file's text</td><td>any of the above</td></tr>
             <tr><td><code>cli.run</code></td><td>a command line</td><td>a file on disk</td><td>the line is wrong, or <code>--check</code> finds the file stale</td></tr>

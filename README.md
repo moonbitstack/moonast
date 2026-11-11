@@ -331,6 +331,7 @@ assert_eq(record.to_string(), "Point::{ x: \"x\", y: \"y\" }")
 | `ident(name)` | a name, or `@pkg.name` | a `Code`, or `Refused` |
 | `string(text)` | any text | a `Code` |
 | `bytes(text)` | any text, as UTF-8 | a `b"…"` `Code` whose bytes outside ASCII are `\xNN` |
+| `byte_array(text)` | any text, as UTF-8 | a `[0x6e, 0x61]` `Code`: an array, and a pattern for bytes |
 | `int(value)`, `bool(value)` | a literal | a `Code` |
 | `join(codes)` | declaration codes | one `Code`, or `Refused` |
 | `Code::items()` | — | the official syntax tree, when it is declarations |
@@ -350,12 +351,40 @@ assert_eq(record.to_string(), "Point::{ x: \"x\", y: \"y\" }")
 | `Spec::required(key, kind)` | required, by name | the spec |
 | `Spec::optional(key, kind)` | may be left out | the spec |
 | `Spec::many(key, kind, positional?)` | may be given again, by name or as bare arguments | the spec |
-| `Spec::bind(attr, file?)` | an annotation, the file it stands in | its arguments, or `Refused` |
+| `Spec::bind(attr, file?, all?)` | an annotation, the file it stands in, whether to report every problem | its arguments, or `Refused` |
 | `Args::get`, `str`, `strs`, `bool`, `has` | a parameter's key | what was given for it |
 
 `Kind` is `Str`, `Bool`, `Ident`, `Path` or `Type`; each `Args` reader answers in the kind its
 spec asked for. `Path` is a name after a qualifier, `contract=registry.create`, which is how a
-value in another namespace is written: the annotation grammar has no `@pkg.name`.
+value in another namespace is written; a payload written `@pkg.name` reads the same way, as
+`pkg.name`, because the parsed payload keeps the qualifier alone.
+
+By default `bind` raises the first problem it finds. A tool that reports a whole file at once
+passes `all=true` and gets a `Refused::Several` whose `errors` are every problem, in the order
+the arguments stand, one line each when printed:
+
+```moonbit
+let routes =
+  #|#app.get(path=true, page="1", page="2")
+  #|fn list_users() -> Unit { () }
+guard @gen.read("routes.mbt", routes) is [decl] else { abort("one declaration") }
+guard @attr.find(decl.attrs(), "app.get") is Some(annotation) else {
+  abort("the function is annotated")
+}
+let reported = try {
+  let _ = @attr.Spec::new("app.get")
+    .positional("path", Str)
+    .optional("page", Str)
+    .bind(annotation, all=true)
+  "bound"
+} catch {
+  e => e.to_string()
+}
+assert_eq(
+  reported,
+  "1:1: path takes a string\n1:1: page is given more than once",
+)
+```
 
 ### `moonast/cli`
 
@@ -374,7 +403,7 @@ value in another namespace is written: the annotation grammar has no `@pkg.name`
 | `$name*` where a case list goes | cases, from `cases` | `match x { $cases* => () }` | every arm |
 | `$name*` where a field list goes | fields, from `fields` | `P::{ $fields* }` | `P::{ x: 1 }` |
 | `$name` in a string | a name or a string, as text | `"field $key"` | `"field first name"` |
-| `$name` in a pattern | a name, a string, or a literal | `$case => 1` | `Empty => 1` |
+| `$name` in a pattern | a name, a string, a literal, or an array of literals | `$pattern => 1` | `[0x6e, 0x61] => 1` |
 | `$Case` where a constructor goes | a constructor name | `$Case(v0) => 0` | `Circle(v0) => 0` |
 | `$$` | a literal dollar sign | `"$$5"` | `"$5"` |
 
@@ -387,13 +416,41 @@ case list goes is written as one case and the `()` after its arrow goes with it.
 punned one, `{ $fields* }`, which is what a lone name in a record reads as; the same code fills
 the arguments of a constructor, where a labelled argument is written `name=v0`.
 
+`byte_array` writes bytes as an array of hex, which is an expression and, where a pattern goes, a
+pattern — so a key is matched byte by byte without building a string:
+
+```moonbit
+let byte_cases = ["na", "id"].map(name => {
+  @quote.cases("$bytes => $text")
+  .set("bytes", @quote.byte_array(name))
+  .set("text", @quote.string(name))
+  .render()
+})
+let by_bytes = @quote
+  .expr("match key {\n  $cases* => ()\n}")
+  .splice("cases", byte_cases)
+  .render()
+assert_eq(
+  by_bytes.to_string(),
+  "match key {\n  [0x6e, 0x61] => \"na\"\n  [0x69, 0x64] => \"id\"\n}",
+)
+```
+
+A hole cannot stand everywhere a name can. An annotation's payload and a comment are kept as they
+were written, so no node in them can be replaced: `render` refuses such a template with `hole
+$path stands where a fill cannot go` rather than leaving the placeholder in the generated file.
+
 ## Annotation arguments
 
-The parser reads strings, `true`/`false`, names and nested calls as annotation arguments. There
-are no arrays and no numbers, a generic type has to be written as a string, and a keyword cannot
-be a label. A list is written as a repeated key, `tags="a", tags="b"`, which `Spec::many`
-accepts, or as bare arguments, `#demo.derive(A, B)`, which `Spec::many` accepts with
-`positional=true`.
+The parser reads strings, `true`/`false`, names, nested calls and arrays as annotation arguments.
+There are no numbers, a generic type has to be written as a string, and a keyword cannot be a
+label. A list is written three ways: as a repeated key, `tags="a", tags="b"`, which `Spec::many`
+accepts; as an array, `tags=["a", "b"]`, whose elements are read one by one in the kind the
+parameter takes, so `many` is still what allows a second one; or as bare arguments,
+`#demo.derive(A, B)`, which `Spec::many` accepts with `positional=true`.
+
+A payload written `@pkg.name` reads as `pkg.name`: what the parser gives back keeps the
+qualifier alone, so a name whose `@` matters is passed as a string.
 
 When a payload is outside that grammar, the annotation has no name as far as moonast is
 concerned, so `find` does not see it. `malformed` does: a generator asks it first and reports
@@ -408,8 +465,8 @@ passes the declaration's own.
 
 | From | Refused when |
 |:--|:--|
-| `quote` | the template is not MoonBit, a hole is left empty, a fill names no hole, or a fill does not fit where it stands |
-| `attr` | the payload cannot be read, a required parameter is missing, one is unknown, mistyped, or given twice |
+| `quote` | the template is not MoonBit, a hole is left empty, a fill names no hole, a fill does not fit where it stands, or a hole stands where nothing can be put in its place |
+| `attr` | the payload cannot be read, a required parameter is missing, one is unknown, mistyped, or given twice; `all=true` raises every one of those at once, as `Several` |
 | `gen` | an input file is not MoonBit |
 | `cli` | the command line is wrong, `--check` found the output out of date, or the generator refused, in which case `Generator` carries its sentence |
 
