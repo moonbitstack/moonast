@@ -148,8 +148,10 @@ pub fn Template::splice(
 ///|
 /// Parse the template with its holes standing as placeholders, put each fill
 /// where its placeholder stands, and give back the result. Refused when a hole
-/// is left empty, a fill names no hole, a fill does not fit where it stands, or
-/// the template is not MoonBit.
+/// is left empty, a fill names no hole, a fill does not fit where it stands, the
+/// template is not MoonBit, or a hole stands where nothing can be put in its
+/// place — the payload of an annotation, a comment — and so would be left in the
+/// result as its placeholder.
 ///
 /// ```mbt check
 /// test {
@@ -200,5 +202,22 @@ pub fn Template::render(self : Template) -> Code raise Refused {
   if splicer.misfits.get(0) is Some(first) {
     raise first
   }
-  { body, }
+  let code : Code = { body, }
+  leftover(code, holes)
+  code
+}
+
+///|
+/// Refuse a result that still has a hole in it. Every hole was given something, and
+/// every placeholder the fill can stand at was replaced; one that stands in an
+/// annotation's payload or in a comment survives, because those are kept as text
+/// and no node there can be swapped. Handing the code back would put the
+/// placeholder itself in the generated file, where it compiles as an unknown name
+/// or, worse, as a name that happens to exist.
+fn leftover(code : Code, holes : Array[Hole]) -> Unit raise Refused {
+  let text = print(code.body)
+  for hole in holes {
+    guard text.contains(placeholder(hole)) else { continue }
+    raise Leftover(hole=hole.name)
+  }
 }

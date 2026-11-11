@@ -558,3 +558,33 @@ test "a pattern hole takes an array of literals and nothing else" {
   }
   assert_true(e.to_string().contains("$pattern takes a name"))
 }
+
+///|
+test "a hole that stands in an annotation's payload is refused, not left in" {
+  let annotated = @quote.items(
+      "#demo.get(\"$path\", summary=$summary)\nfn f() -> Unit { () }",
+    )
+    .set("path", @quote.string("/users"))
+    .set("summary", @quote.string("one"))
+  guard refusal(() => annotated.render()) is Some(e) else {
+    fail("a hole in an annotation's payload renders")
+  }
+  assert_eq(
+    e.to_string(),
+    "hole $path stands where a fill cannot go: an annotation's payload and a comment are kept as written",
+  )
+  guard e is Leftover(hole="path") else { fail("the refusal names the hole") }
+}
+
+///|
+test "a hole that stands in a comment is refused" {
+  guard refusal(() => {
+      @quote.items("/// $what\nfn f() -> Unit { () }")
+      .set("what", @quote.string("a function"))
+      .render()
+    })
+    is Some(e) else {
+    fail("a hole in a comment renders")
+  }
+  assert_eq(e.to_string().contains("$what stands where a fill cannot go"), true)
+}

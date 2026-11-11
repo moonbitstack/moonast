@@ -39,6 +39,7 @@ pub(all) suberror Refused {
   Unfilled(hole~ : String)
   Unused(hole~ : String)
   Misfit(hole~ : String, expected~ : String)
+  Leftover(hole~ : String)
   Name(name~ : String)
   Kind(expected~ : String)
 }

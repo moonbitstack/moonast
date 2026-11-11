@@ -11,6 +11,10 @@ pub(all) suberror Refused {
   Unused(hole~ : String)
   /// A hole was given a code of the wrong kind for where it stands.
   Misfit(hole~ : String, expected~ : String)
+  /// A hole was filled, but its placeholder is still in the result: it stands
+  /// where no node can be replaced, such as the payload of an annotation or a
+  /// comment, both of which are kept as they were written.
+  Leftover(hole~ : String)
   /// `ident` was given something that is not an identifier.
   Name(name~ : String)
   /// `join` was given a code that is not declarations.
@@ -28,6 +32,8 @@ pub impl Show for Refused with fn output(self, logger) {
     Unfilled(hole~) => "hole $\{hole} was given nothing"
     Unused(hole~) => "the template has no hole $\{hole}"
     Misfit(hole~, expected~) => "hole $\{hole} takes \{expected}"
+    Leftover(hole~) =>
+      "hole $\{hole} stands where a fill cannot go: an annotation's payload and a comment are kept as written"
     Name(name~) => "\{name} is not an identifier"
     Kind(expected~) => "expected \{expected}"
   }
