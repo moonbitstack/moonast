@@ -26,6 +26,7 @@ pub(all) suberror Refused {
   Unknown(key~ : String, line~ : Int32, column~ : Int32, file~ : String)
   Mistyped(key~ : String, expected~ : String, line~ : Int32, column~ : Int32, file~ : String)
   Repeated(key~ : String, line~ : Int32, column~ : Int32, file~ : String)
+  Several(errors~ : Array[Refused])
 }
 pub fn Refused::output(Self, &Logger) -> Unit
 pub fn Refused::to_repr(Self) -> @debug.Repr
@@ -61,7 +62,7 @@ pub fn Kind::to_repr(Self) -> @debug.Repr
 pub struct Spec {
   // private fields
 }
-pub fn Spec::bind(Self, @attribute.Attribute, file? : String) -> Args raise Refused
+pub fn Spec::bind(Self, @attribute.Attribute, file? : String, all? : Bool) -> Args raise Refused
 pub fn Spec::many(Self, String, Kind, positional? : Bool) -> Self
 pub fn Spec::new(StringView) -> Self
 pub fn Spec::optional(Self, String, Kind) -> Self

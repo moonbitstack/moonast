@@ -260,6 +260,68 @@ test "the file an annotation was bound from is on its arguments" {
 }
 
 ///|
+test "every problem is reported when the caller asks for all of them" {
+  let source =
+    #|#app.get(path=true, style=plain, page="1", page="2", extra="y")
+    #|fn f() -> Unit { () }
+  guard attrs_of(source) is More(attr, ..) else { fail("no annotation") }
+  let spec = @attr.Spec::new("app.get")
+    .positional("path", Str)
+    .optional("style", Bool)
+    .optional("page", Str)
+  guard refusal(() => spec.bind(attr, all=true)) is Some(e) else {
+    fail("four problems bind")
+  }
+  guard e is Several(errors~) else { fail("the refusal carries every problem") }
+  assert_eq(errors.length(), 4)
+  assert_eq(
+    e.to_string(),
+    "1:1: path takes a string\n1:1: style takes true or false\n1:1: page is given more than once\n1:1: there is no extra",
+  )
+}
+
+///|
+test "the first problem is the one raised by default" {
+  let source = "#app.get(path=true, extra=\"y\")\nfn f() -> Unit { () }"
+  guard attrs_of(source) is More(attr, ..) else { fail("no annotation") }
+  let spec = @attr.Spec::new("app.get").positional("path", Str)
+  guard refusal(() => spec.bind(attr)) is Some(e) else {
+    fail("a mistyped path binds")
+  }
+  guard e is Mistyped(key="path", ..) else {
+    fail("the first problem is the one raised")
+  }
+  assert_eq(e.to_string(), "1:1: path takes a string")
+}
+
+///|
+test "an argument given but not read is not reported missing as well" {
+  let source = "#app.get(path=true)\nfn f() -> Unit { () }"
+  guard attrs_of(source) is More(attr, ..) else { fail("no annotation") }
+  let spec = @attr.Spec::new("app.get").positional("path", Str)
+  guard refusal(() => spec.bind(attr, all=true)) is Some(e) else {
+    fail("a boolean path binds")
+  }
+  guard e is Several(errors~) else { fail("the refusal carries every problem") }
+  assert_eq(errors.length(), 1)
+  assert_eq(e.to_string(), "1:1: path takes a string")
+}
+
+///|
+test "all and the file are given together" {
+  let source = "#app.get(1)\nfn f() -> Unit { () }"
+  guard attrs_of(source) is More(attr, ..) else { fail("no annotation") }
+  let spec = @attr.Spec::new("app.get").positional("path", Str)
+  guard refusal(() => spec.bind(attr, file="models.mbt", all=true)) is Some(e) else {
+    fail("a malformed payload binds")
+  }
+  assert_eq(
+    e.to_string(),
+    "models.mbt:1:1: cannot read the arguments of #app.get(1)",
+  )
+}
+
+///|
 test "an array is the list a repeated key writes, written once" {
   let source =
     #|#app.get("/a", tags=["a", "b"], summary="one")

@@ -141,10 +141,39 @@ pub fn Spec::many(
 ///   inspect(refused, content="models.mbt:1:1: path is required")
 /// }
 /// ```
+///
+/// By default `bind` stops at the first problem, which is what a generator wants in
+/// an editor. A tool that reports a whole file at once passes `all=true` and gets
+/// every problem in one refusal, in the order the arguments stand:
+///
+/// ```mbt check
+/// test {
+///   let source =
+///     #|#app.get(path=true, extra="y")
+///     #|fn list_users() -> Unit {}
+///   let impls = @parser.parse_string(source).0
+///   guard impls is @list.More(impl_, tail=@list.Empty) else {
+///     abort("one declaration")
+///   }
+///   guard impl_ is @syntax.TopFuncDef(fun_decl={ attrs, .. }, ..) else {
+///     abort("a function")
+///   }
+///   guard @attr.find(attrs, "app.get") is Some(a) else { abort("annotated") }
+///   let spec = @attr.Spec::new("app.get").positional("path", Str)
+///   let refused = try {
+///     let _ = spec.bind(a, all=true)
+///     "bound"
+///   } catch {
+///     e => e.to_string()
+///   }
+///   inspect(refused, content="1:1: path takes a string\n1:1: there is no extra")
+/// }
+/// ```
 pub fn Spec::bind(
   self : Spec,
   attr : @attribute.Attribute,
   file~ : String = "",
+  all~ : Bool = false,
 ) -> Args raise Refused {
   let line = attr.loc.start.lnum
   let column = attr.loc.start.column()
@@ -154,33 +183,46 @@ pub fn Spec::bind(
     _ => raise Malformed(raw=attr.raw, line~, column~, file~)
   }
   let values : Map[String, Array[Value]] = Map([])
+  let given : Set[String] = Set([])
+  let errors : Array[Refused] = []
   let positionals = self.params.filter(p => p.positional)
   let mut next = 0
   for prop in props {
     let (param, expr) = match prop {
       Labeled(key, expr) =>
         match self.params.search_by(p => p.key == key) {
-          Some(i) => (self.params[i], expr)
-          None => raise Unknown(key~, line~, column~, file~)
+          Some(i) => (Some(self.params[i]), expr)
+          None => {
+            errors.push(Unknown(key~, line~, column~, file~))
+            (None, expr)
+          }
         }
       Expr(expr) => {
         // A positional that may repeat keeps taking arguments; the ones before
         // it are used up one at a time.
         let taken = if next < positionals.length() {
-          positionals[next]
+          Some(positionals[next])
         } else {
           match positionals.search_by(p => p.many) {
-            Some(i) => positionals[i]
-            None =>
-              raise Unknown(key="argument \{next + 1}", line~, column~, file~)
+            Some(i) => Some(positionals[i])
+            None => {
+              errors.push(
+                Unknown(key="argument \{next + 1}", line~, column~, file~),
+              )
+              None
+            }
           }
         }
-        if !taken.many {
+        if taken is Some(taken) && !taken.many {
           next = next + 1
         }
         (taken, expr)
       }
     }
+    guard param is Some(param) else { continue }
+    // An argument that was given and did not fit is not a missing one: reporting
+    // both would send the reader looking for an argument that is right there.
+    given.add(param.key)
     // An array is the list a repeated key writes, written once: `tags=["a", "b"]`
     // says what `tags="a", tags="b"` says, element by element read the same way.
     // Repeating stays the spec's to allow, so a second value for a parameter that
@@ -190,18 +232,27 @@ pub fn Spec::bind(
       _ => @list.singleton(expr)
     }
     for one in exprs {
-      let value = read(param, one, line, column, file)
-      let seen = values.get_or_init(param.key, () => [])
-      if seen.length() > 0 && !param.many {
-        raise Repeated(key=param.key, line~, column~, file~)
+      let value = Ok(read(param, one, line, column, file)) catch { e => Err(e) }
+      match value {
+        Ok(value) => {
+          let seen = values.get_or_init(param.key, () => [])
+          if seen.length() > 0 && !param.many {
+            errors.push(Repeated(key=param.key, line~, column~, file~))
+          }
+          seen.push(value)
+        }
+        Err(e) => errors.push(e)
       }
-      seen.push(value)
     }
   }
   for param in self.params {
-    if param.required && !values.contains(param.key) {
-      raise Missing(key=param.key, line~, column~, file~)
+    if param.required && !given.contains(param.key) {
+      errors.push(Missing(key=param.key, line~, column~, file~))
     }
+  }
+  guard errors.is_empty() else {
+    guard all else { raise errors[0] }
+    raise Several(errors~)
   }
   { name: self.name, values, line, column, file, }
 }

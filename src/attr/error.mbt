@@ -21,6 +21,10 @@ pub(all) suberror Refused {
   )
   /// A parameter given twice that may only be given once.
   Repeated(key~ : String, line~ : Int32, column~ : Int32, file~ : String)
+  /// Every problem found, in the order they stand, raised instead of the first
+  /// when `bind` was asked for all of them. Each one is a `Refused` of its own, so
+  /// a caller that prints the message gets one line per problem.
+  Several(errors~ : Array[Refused])
 }
 
 ///|
@@ -28,24 +32,37 @@ pub extend Refused with Debug::{to_repr}
 
 ///|
 pub impl Show for Refused with fn output(self, logger) {
-  let (file, line, column, text) = match self {
+  logger.write_string(Refused::sentence(self))
+}
+
+///|
+/// One line per problem: where it stands, then what is wrong. `Several` is the
+/// problems one `bind` found, one per line, in the order they stand.
+fn Refused::sentence(self : Refused) -> String {
+  match self {
     Malformed(raw~, line~, column~, file~) =>
-      (file, line, column, "cannot read the arguments of \{raw}")
+      at(file, line, column) + ": cannot read the arguments of " + raw
     Missing(key~, line~, column~, file~) =>
-      (file, line, column, "\{key} is required")
+      at(file, line, column) + ": " + key + " is required"
     Unknown(key~, line~, column~, file~) =>
-      (file, line, column, "there is no \{key}")
+      at(file, line, column) + ": there is no " + key
     Mistyped(key~, expected~, line~, column~, file~) =>
-      (file, line, column, "\{key} takes \{expected}")
+      at(file, line, column) + ": " + key + " takes " + expected
     Repeated(key~, line~, column~, file~) =>
-      (file, line, column, "\{key} is given more than once")
+      at(file, line, column) + ": " + key + " is given more than once"
+    Several(errors~) => errors.map(e => Refused::sentence(e)).join("\n")
   }
-  let at = if file == "" {
+}
+
+///|
+/// The place a refusal points at, as `line:column`, or `file:line:column` when the
+/// caller said which file it read.
+fn at(file : String, line : Int32, column : Int32) -> String {
+  if file == "" {
     "\{line}:\{column}"
   } else {
     "\{file}:\{line}:\{column}"
   }
-  logger.write_string("\{at}: \{text}")
 }
 
 ///|
