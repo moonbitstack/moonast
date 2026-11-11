@@ -1,6 +1,6 @@
 name = "moonbitstack/moonast"
 
-version = "0.2.7"
+version = "0.2.8"
 
 readme = "README.md"
 
