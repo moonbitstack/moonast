@@ -70,8 +70,12 @@
 </div>
 <div class="group"><h4>gen</h4>
 <a class="pkg-link" href="#pkg-gen">Plate III</a>
+<a class="sub" href="#gen.is_optional">is_optional</a>
+<a class="sub" href="#gen.json_schema">json_schema</a>
+<a class="sub" href="#gen.object_schema">object_schema</a>
 <a class="sub" href="#gen.read">read</a>
 <a class="sub" href="#gen.render">render</a>
+<a class="sub" href="#gen.type_args">type_args</a>
 <a class="sub" href="#gen.Case">Case</a>
 <a class="sub" href="#gen.Decl">Decl</a>
 <a class="sub" href="#gen.Field">Field</a>
@@ -577,6 +581,18 @@ inspect(refused, content=&quot;1:1: path takes a string\n1:1: there is no extra&
 <h2>gen<span class="path">moonbitstack/moonast/gen</span></h2>
 <p class="about">Declarations read from source into plain views, the <code>Generator</code> trait, and <code>render</code>, which gives the file a generator writes. No file access here.</p>
 <h3 class="group-head" id="gen-values">Values</h3>
+<div class="entry kind-value" id="gen.is_optional">
+<div class="sig">pub fn is_optional(StringView) -&gt; Bool <a class="anchor" href="#gen.is_optional" aria-label="Link to is_optional">#</a></div>
+<div class="desc"><p>Whether a value of type <code>ty</code> may be absent: <code>T?</code> or <code>Option[T]</code>.</p></div>
+</div>
+<div class="entry kind-value" id="gen.json_schema">
+<div class="sig">pub fn json_schema(StringView) -&gt; String <a class="anchor" href="#gen.json_schema" aria-label="Link to json_schema">#</a></div>
+<div class="desc"><p>The JSON Schema a value of type <code>ty</code> takes, as a MoonBit expression of type <code>Json</code> a generator pastes into what it renders. Strings, the integer and floating types, <code>Bool</code> and <code>Unit</code> map to their JSON types; <code>T?</code> and <code>Option[T]</code> add <code>null</code>; <code>Array</code>, <code>FixedArray</code> and <code>ReadOnlyArray</code> are arrays of their element; <code>Map[K, V]</code> is an object of <code>V</code>. A type this does not know, a record of the program&#x27;s own, accepts any value and is left to its <code>FromJson</code>.</p></div>
+</div>
+<div class="entry kind-value" id="gen.object_schema">
+<div class="sig">pub fn object_schema(Array[Param], String) -&gt; String raise <a class="anchor" href="#gen.object_schema" aria-label="Link to object_schema">#</a></div>
+<div class="desc"><p>The JSON Schema of the object a call of a function with <code>params</code> takes, as a MoonBit expression of type <code>Json</code>: each parameter a property typed by <code>json_schema</code>, the ones <code>Param::required</code> names listed as required. Every parameter needs a name and a type; a parameter without one fails, naming <code>where_</code>.</p></div>
+</div>
 <div class="entry kind-value" id="gen.read">
 <div class="sig">pub fn read(String, String) -&gt; Array[Decl] raise Refused <a class="anchor" href="#gen.read" aria-label="Link to read">#</a></div>
 <div class="desc"><p>The declarations of one file, in source order. Refused when the file is not MoonBit, with the first problem&#x27;s position.</p>
@@ -590,6 +606,10 @@ inspect(fields.map(f =&gt; f.name).join(&quot;, &quot;), content=&quot;x, y&quot
 <div class="entry kind-value" id="gen.render">
 <div class="sig">pub fn render(&amp;Generator, Array[(String, String)]) -&gt; String raise <a class="anchor" href="#gen.render" aria-label="Link to render">#</a></div>
 <div class="desc"><p>The file a generator writes for <code>inputs</code>: a one-line header naming the generator and the inputs, then the code. The same inputs give the same bytes, so a check can compare them.</p></div>
+</div>
+<div class="entry kind-value" id="gen.type_args">
+<div class="sig">pub fn type_args(StringView) -&gt; (String, Array[String])? <a class="anchor" href="#gen.type_args" aria-label="Link to type_args">#</a></div>
+<div class="desc"><p><code>Name[A, B]</code> as its name and its arguments; a comma inside nested brackets stays with its argument. <code>None</code> for a type without arguments.</p></div>
 </div>
 <h3 class="group-head" id="gen-types">Types</h3>
 <div class="entry kind-type" id="gen.Case">
@@ -721,6 +741,10 @@ content=&quot;a, b~, c?&quot;,
 <div class="entry kind-value nested" id="gen.Param.passed">
 <div class="sig">pub fn Param::passed(Self) -&gt; String? <a class="anchor" href="#gen.Param.passed" aria-label="Link to Param::passed">#</a></div>
 <div class="desc"><p>A parameter as a wrapper passes it on: <code>a</code>, <code>a~</code>, <code>a?</code>. <code>None</code> when it has no name.</p></div>
+</div>
+<div class="entry kind-value nested" id="gen.Param.required">
+<div class="sig">pub fn Param::required(Self) -&gt; Bool <a class="anchor" href="#gen.Param.required" aria-label="Link to Param::required">#</a></div>
+<div class="desc"><p>Whether a caller has to give this parameter: one that is passed by position or by label and is not of an optional type. An optional parameter and one with a default can be left out.</p></div>
 </div>
 </div>
 <div class="entry kind-type" id="gen.Pass">
