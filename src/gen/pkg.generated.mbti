@@ -10,9 +10,17 @@ import {
 }
 
 // Values
+pub fn is_optional(StringView) -> Bool
+
+pub fn json_schema(StringView) -> String
+
+pub fn object_schema(Array[Param], String) -> String raise
+
 pub fn read(String, String) -> Array[Decl] raise Refused
 
 pub fn render(&Generator, Array[(String, String)]) -> String raise
+
+pub fn type_args(StringView) -> (String, Array[String])?
 
 // Errors
 #derive(@debug.Debug)
@@ -65,6 +73,7 @@ pub(all) struct Param {
 }
 pub fn Param::declared(Self) -> String?
 pub fn Param::passed(Self) -> String?
+pub fn Param::required(Self) -> Bool
 
 #derive(Eq, @debug.Debug)
 pub(all) enum Pass {
