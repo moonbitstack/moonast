@@ -17,7 +17,7 @@ pub(all) suberror Refused {
     expected~ : String,
     line~ : Int32,
     column~ : Int32,
-    file~ : String
+    file~ : String,
   )
   /// A parameter given twice that may only be given once.
   Repeated(key~ : String, line~ : Int32, column~ : Int32, file~ : String)

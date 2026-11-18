@@ -114,7 +114,7 @@ pub(all) enum Decl {
     attrs~ : @list.List[@attribute.Attribute],
     public~ : Bool,
     file~ : String,
-    raw~ : @syntax.Impl
+    raw~ : @syntax.Impl,
   )
   Enum(
     name~ : String,
@@ -123,7 +123,7 @@ pub(all) enum Decl {
     attrs~ : @list.List[@attribute.Attribute],
     public~ : Bool,
     file~ : String,
-    raw~ : @syntax.Impl
+    raw~ : @syntax.Impl,
   )
   Func(
     owner~ : String?,
@@ -134,14 +134,14 @@ pub(all) enum Decl {
     attrs~ : @list.List[@attribute.Attribute],
     public~ : Bool,
     file~ : String,
-    raw~ : @syntax.Impl
+    raw~ : @syntax.Impl,
   )
   /// Anything else, with the annotations on it: a tuple struct is here, since
   /// `Struct` covers the record case only, and so is an `impl` or a `trait`.
   Other(
     file~ : String,
     attrs~ : @list.List[@attribute.Attribute],
-    raw~ : @syntax.Impl
+    raw~ : @syntax.Impl,
   )
 }
 

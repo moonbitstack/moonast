@@ -137,7 +137,7 @@ test "a positional parameter marked optional can be left out, and a required one
     guard impls
       is @list.More(
         @syntax.TopFuncDef(fun_decl={ attrs, .. }, ..),
-        tail=@list.Empty
+        tail=@list.Empty,
       ) else {
       abort("one function")
     }
